@@ -1,0 +1,124 @@
+import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/lib/auth";
+import { db } from "@/lib/db";
+import { 
+  marriageApplications,
+  requiredDocuments,
+  stageHistory,
+  notifications,
+  coupleProfiles
+} from "@/lib/db/schema";
+import { eq } from "drizzle-orm";
+import { nanoid } from "nanoid";
+import { headers } from "next/headers";
+
+const STAGE_NAMES = [
+  "Pengisian Profil",
+  "KPP",
+  "Pemberkasan Dokumen",
+  "Kanonik",
+  "Selesai (Menunggu Pemberkatan)"
+];
+
+export async function POST(req: NextRequest) {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session || session.user.role !== "ADMIN") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const adminId = session.user.id;
+    const body = await req.json();
+    const { action, applicationId } = body;
+
+    if (!applicationId) return NextResponse.json({ error: "Missing applicationId" }, { status: 400 });
+
+    const now = new Date();
+
+    // Fetch app to get profileId to get userId
+    const apps = await db.select().from(marriageApplications).where(eq(marriageApplications.id, applicationId)).limit(1);
+    if (apps.length === 0) return NextResponse.json({ error: "Application not found" }, { status: 404 });
+    const app = apps[0];
+
+    const profiles = await db.select().from(coupleProfiles).where(eq(coupleProfiles.id, app.coupleProfileId)).limit(1);
+    const coupleUserId = profiles[0]?.userId;
+
+    if (action === "TOGGLE_DOC") {
+      const { docId, isReceived } = body;
+      await db.update(requiredDocuments)
+        .set({ isReceived, receivedAt: isReceived ? now : null })
+        .where(eq(requiredDocuments.id, docId));
+      return NextResponse.json({ success: true });
+    }
+
+    if (action === "ADVANCE_STAGE") {
+      const newStage = (app.currentStage || 1) + 1;
+      if (newStage > 5) return NextResponse.json({ error: "Already at max stage" }, { status: 400 });
+
+      await db.update(marriageApplications)
+        .set({ currentStage: newStage, updatedAt: now })
+        .where(eq(marriageApplications.id, applicationId));
+
+      const note = `Pendaftaran Anda telah dinaikkan ke Tahap ${newStage}: ${STAGE_NAMES[newStage - 1]}.`;
+
+      // Log history
+      await db.insert(stageHistory).values({
+        id: nanoid(),
+        applicationId,
+        stageNumber: newStage,
+        note,
+        changedBy: adminId,
+        changedAt: now
+      });
+
+      // Notify user
+      if (coupleUserId) {
+        await db.insert(notifications).values({
+          id: nanoid(),
+          userId: coupleUserId,
+          message: note,
+          isRead: false,
+          createdAt: now
+        });
+      }
+
+      return NextResponse.json({ success: true, newStage });
+    }
+
+    if (action === "SEND_NOTE") {
+      const { note } = body;
+      
+      // Log history without changing stage
+      await db.insert(stageHistory).values({
+        id: nanoid(),
+        applicationId,
+        stageNumber: app.currentStage,
+        note,
+        changedBy: adminId,
+        changedAt: now
+      });
+
+      // Notify user
+      if (coupleUserId) {
+        await db.insert(notifications).values({
+          id: nanoid(),
+          userId: coupleUserId,
+          message: `Pesan baru dari sekretariat: "${note}"`,
+          isRead: false,
+          createdAt: now
+        });
+      }
+
+      return NextResponse.json({ success: true });
+    }
+
+    return NextResponse.json({ error: "Invalid action" }, { status: 400 });
+
+  } catch (error) {
+    console.error("Admin API Error:", error);
+    return NextResponse.json({ error: "Server error" }, { status: 500 });
+  }
+}

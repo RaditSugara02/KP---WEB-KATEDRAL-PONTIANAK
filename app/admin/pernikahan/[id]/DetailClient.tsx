@@ -1,0 +1,191 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Check, X, Send, ArrowUpCircle } from "lucide-react";
+
+export default function DetailClient({ 
+  application, 
+  docs, 
+  history 
+}: { 
+  application: Record<string, string | number | null | undefined>;
+  docs: Array<{ id: string, documentName: string | null, isReceived: boolean | null, receivedAt: Date | null }>;
+  history: Array<{ stageNumber: number | null, note: string | null, changedAt: Date | null }>;
+}) {
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [note, setNote] = useState("");
+
+  const handleToggleDoc = async (docId: string, currentStatus: boolean) => {
+    setLoading(true);
+    await fetch("/api/admin/pernikahan", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "TOGGLE_DOC", applicationId: application.id, docId, isReceived: !currentStatus })
+    });
+    router.refresh();
+    setLoading(false);
+  };
+
+  const handleAdvanceStage = async () => {
+    if (!confirm("Yakin ingin menaikkan tahap? Pasangan akan menerima notifikasi.")) return;
+    setLoading(true);
+    await fetch("/api/admin/pernikahan", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "ADVANCE_STAGE", applicationId: application.id })
+    });
+    router.refresh();
+    setLoading(false);
+  };
+
+  const handleSendNote = async () => {
+    if (!note.trim()) return;
+    setLoading(true);
+    await fetch("/api/admin/pernikahan", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "SEND_NOTE", applicationId: application.id, note })
+    });
+    setNote("");
+    router.refresh();
+    setLoading(false);
+  };
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      
+      {/* Kolom Kiri: Profil & Dokumen */}
+      <div className="lg:col-span-2 space-y-6">
+        
+        {/* Kartu Data Pasangan */}
+        <div className="bg-white rounded-xl border border-[#DDD8D0] shadow-sm overflow-hidden">
+          <div className="bg-[#FAF7F2] px-6 py-4 border-b border-[#EDE8DF]">
+            <h3 className="font-bold text-[#3D2B1F] uppercase tracking-wide text-sm">Data Mempelai</h3>
+          </div>
+          <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div>
+              <h4 className="font-bold text-[#B8960C] mb-4 border-b border-[#EDE8DF] pb-2">Mempelai Pria</h4>
+              <div className="space-y-3 text-sm">
+                <div><span className="block text-xs text-[#A89880] uppercase">Nama</span> <span className="font-medium text-[#3D2B1F]">{application.groomName}</span></div>
+                <div><span className="block text-xs text-[#A89880] uppercase">Tgl Lahir</span> <span className="font-medium text-[#3D2B1F]">{application.groomBirthdate || "—"}</span></div>
+                <div><span className="block text-xs text-[#A89880] uppercase">Telepon</span> <span className="font-medium text-[#3D2B1F]">{application.groomPhone || "—"}</span></div>
+                <div><span className="block text-xs text-[#A89880] uppercase">Paroki Asal</span> <span className="font-medium text-[#3D2B1F]">{application.groomBaptismChurch || "—"}</span></div>
+              </div>
+            </div>
+            <div>
+              <h4 className="font-bold text-[#B8960C] mb-4 border-b border-[#EDE8DF] pb-2">Mempelai Wanita</h4>
+              <div className="space-y-3 text-sm">
+                <div><span className="block text-xs text-[#A89880] uppercase">Nama</span> <span className="font-medium text-[#3D2B1F]">{application.brideName}</span></div>
+                <div><span className="block text-xs text-[#A89880] uppercase">Tgl Lahir</span> <span className="font-medium text-[#3D2B1F]">{application.brideBirthdate || "—"}</span></div>
+                <div><span className="block text-xs text-[#A89880] uppercase">Telepon</span> <span className="font-medium text-[#3D2B1F]">{application.bridePhone || "—"}</span></div>
+                <div><span className="block text-xs text-[#A89880] uppercase">Paroki Asal</span> <span className="font-medium text-[#3D2B1F]">{application.brideBaptismChurch || "—"}</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Kartu Dokumen */}
+        <div className="bg-white rounded-xl border border-[#DDD8D0] shadow-sm overflow-hidden">
+          <div className="bg-[#FAF7F2] px-6 py-4 border-b border-[#EDE8DF] flex justify-between items-center">
+            <h3 className="font-bold text-[#3D2B1F] uppercase tracking-wide text-sm">Dokumen Persyaratan</h3>
+            <span className="text-xs font-bold text-[#2D6A4F] bg-[#D8F3DC] px-2 py-1 rounded">
+              {docs.filter(d => d.isReceived).length} / {docs.length} Diterima
+            </span>
+          </div>
+          <div className="p-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {docs.map((doc) => (
+                <button 
+                  key={doc.id}
+                  disabled={loading}
+                  onClick={() => handleToggleDoc(doc.id, doc.isReceived ?? false)}
+                  className={`flex items-center justify-between p-3 rounded border transition-colors text-left disabled:opacity-50 ${
+                    doc.isReceived 
+                      ? "bg-[#D8F3DC]/30 border-[#2D6A4F]/30 hover:bg-[#D8F3DC]/50" 
+                      : "bg-[#F5F0E8] border-[#DDD8D0] hover:bg-[#EDE8DF]"
+                  }`}
+                >
+                  <span className={`text-sm font-medium ${doc.isReceived ? "text-[#2D6A4F]" : "text-[#6B6560]"}`}>
+                    {doc.documentName}
+                  </span>
+                  {doc.isReceived ? (
+                    <Check size={18} className="text-[#2D6A4F]" />
+                  ) : (
+                    <X size={18} className="text-[#A89880]" />
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      {/* Kolom Kanan: Aksi & Riwayat */}
+      <div className="lg:col-span-1 space-y-6">
+        
+        {/* Naikkan Tahap */}
+        <div className="bg-white rounded-xl border border-[#DDD8D0] shadow-sm overflow-hidden p-6 text-center">
+          <h3 className="text-xs font-bold text-[#6B6560] uppercase tracking-wider mb-2">Manajemen Tahap</h3>
+          <p className="text-[#3D2B1F] text-sm mb-6">Tahap saat ini: <strong>Tahap {application.currentStage}</strong></p>
+          
+          <button 
+            disabled={loading || application.currentStage >= 5}
+            onClick={handleAdvanceStage}
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#B8960C] text-white font-bold rounded-md hover:bg-[#9A7A00] transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <ArrowUpCircle size={18} />
+            Naikkan ke Tahap {Math.min(5, application.currentStage + 1)}
+          </button>
+        </div>
+
+        {/* Kirim Catatan */}
+        <div className="bg-white rounded-xl border border-[#DDD8D0] shadow-sm overflow-hidden p-6">
+          <h3 className="text-xs font-bold text-[#6B6560] uppercase tracking-wider mb-4">Kirim Catatan ke Dasbor Pasangan</h3>
+          <textarea 
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            disabled={loading}
+            placeholder="Ketik pesan..."
+            className="w-full h-24 p-3 border border-[#DDD8D0] rounded-md text-sm mb-3 focus:border-[#B8960C] focus:ring-1 focus:ring-[#B8960C] outline-none resize-none"
+          />
+          <button 
+            disabled={loading || !note.trim()}
+            onClick={handleSendNote}
+            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-white border-2 border-[#B8960C] text-[#B8960C] font-bold rounded-md hover:bg-[#FFF8E1] transition-colors disabled:opacity-50"
+          >
+            <Send size={16} />
+            Kirim Catatan
+          </button>
+        </div>
+
+        {/* Riwayat */}
+        <div className="bg-white rounded-xl border border-[#DDD8D0] shadow-sm overflow-hidden">
+          <div className="bg-[#FAF7F2] px-5 py-3 border-b border-[#EDE8DF]">
+            <h3 className="font-bold text-[#3D2B1F] uppercase tracking-wide text-xs">Riwayat Pendaftaran</h3>
+          </div>
+          <div className="p-5 max-h-[300px] overflow-y-auto">
+            <div className="space-y-4">
+              {history.map((h, i) => (
+                <div key={i} className="pb-4 border-b border-[#EDE8DF] last:border-0 last:pb-0">
+                  <div className="flex justify-between items-start mb-1">
+                    <span className="text-[10px] font-bold text-[#B8960C] uppercase tracking-wider">
+                      Tahap {h.stageNumber}
+                    </span>
+                    <span className="text-[10px] text-[#A89880]">
+                      {new Date(h.changedAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}
+                    </span>
+                  </div>
+                  <p className="text-xs text-[#3D2B1F]">{h.note}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  );
+}
