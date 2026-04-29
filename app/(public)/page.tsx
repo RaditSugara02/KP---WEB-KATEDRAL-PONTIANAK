@@ -37,7 +37,7 @@ export default async function LandingPage() {
           
           <ScrollReveal direction="up" delay={300} duration={1200}>
             <h1
-              className="text-6xl md:text-8xl leading-[1.1] text-white mb-8 font-bold drop-shadow-lg"
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl leading-[1.1] text-white mb-6 md:mb-8 font-bold drop-shadow-lg"
               style={{ fontFamily: "var(--font-cormorant)" }}
             >
               Selamat Datang di<br className="hidden md:block" /> Katedral Santo Yosef<br className="hidden md:block" /> Martapura
@@ -45,23 +45,23 @@ export default async function LandingPage() {
           </ScrollReveal>
 
           <ScrollReveal direction="up" delay={500} duration={1000}>
-            <p className="font-light text-lg md:text-2xl text-white/90 max-w-3xl mb-12 leading-relaxed drop-shadow">
+            <p className="font-light text-base sm:text-lg md:text-2xl text-white/90 max-w-3xl mb-10 md:mb-12 leading-relaxed drop-shadow">
               Sebuah tempat perlindungan spiritual dan sejarah, mengundang Anda untuk merasakan kedamaian dan kebersamaan dalam iman.
             </p>
           </ScrollReveal>
 
           <ScrollReveal direction="up" delay={700} duration={1000}>
-            <div className="flex flex-col sm:flex-row gap-6">
+            <div className="flex flex-col sm:flex-row gap-4 md:gap-6 w-full sm:w-auto px-4 sm:px-0">
               <Link
                 href="/jadwal-misa"
-                className="group relative inline-flex items-center justify-center bg-[#B8960C] text-white px-10 py-4 rounded-sm font-sans text-sm tracking-wide font-semibold hover:bg-[#9A7A00] transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-1"
+                className="group relative w-full sm:w-auto inline-flex items-center justify-center bg-[#B8960C] text-white px-8 md:px-10 py-3.5 md:py-4 rounded-sm font-sans text-sm tracking-wide font-semibold hover:bg-[#9A7A00] transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-1"
               >
                 Lihat Jadwal Misa
                 <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
               </Link>
               <Link
                 href="/sakramen-perkawinan"
-                className="group inline-flex items-center justify-center bg-transparent border border-white/50 text-white px-10 py-4 rounded-sm font-sans text-sm tracking-wide font-semibold hover:bg-white hover:text-[#3D2B1F] transition-all duration-300"
+                className="group w-full sm:w-auto inline-flex items-center justify-center bg-transparent border border-white/50 text-white px-8 md:px-10 py-3.5 md:py-4 rounded-sm font-sans text-sm tracking-wide font-semibold hover:bg-white hover:text-[#3D2B1F] transition-all duration-300"
               >
                 Sakramen Perkawinan
               </Link>
@@ -71,11 +71,11 @@ export default async function LandingPage() {
       </section>
 
       {/* ═══════════════════ QUICK INFORMATION CARDS ═══════════════════ */}
-      <section className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto -mt-24 md:-mt-32 relative z-20 w-full mb-24">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
+      <section className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto -mt-16 sm:-mt-24 md:-mt-32 relative z-20 w-full mb-16 md:mb-24">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-12">
           {/* Card 1 */}
           <ScrollReveal delay={100} className="h-full">
-            <div className="bg-white p-10 rounded-2xl shadow-elegant border border-white/60 flex flex-col h-full group hover:-translate-y-2 transition-all duration-500 backdrop-blur-sm">
+            <div className="bg-white p-8 md:p-10 rounded-2xl shadow-elegant border border-white/60 flex flex-col h-full group hover:-translate-y-2 transition-all duration-500 backdrop-blur-sm">
               <div className="w-14 h-14 bg-[#FAF7F2] rounded-full flex items-center justify-center mb-6 group-hover:bg-[#B8960C] transition-colors duration-500">
                 <Calendar className="text-[#B8960C] h-6 w-6 group-hover:text-white transition-colors duration-500" />
               </div>
@@ -93,7 +93,7 @@ export default async function LandingPage() {
           
           {/* Card 2 */}
           <ScrollReveal delay={200} className="h-full">
-            <div className="bg-white p-10 rounded-2xl shadow-elegant border border-white/60 flex flex-col h-full group hover:-translate-y-2 transition-all duration-500 backdrop-blur-sm">
+            <div className="bg-white p-8 md:p-10 rounded-2xl shadow-elegant border border-white/60 flex flex-col h-full group hover:-translate-y-2 transition-all duration-500 backdrop-blur-sm">
               <div className="w-14 h-14 bg-[#FAF7F2] rounded-full flex items-center justify-center mb-6 group-hover:bg-[#B8960C] transition-colors duration-500">
                 <Newspaper className="text-[#B8960C] h-6 w-6 group-hover:text-white transition-colors duration-500" />
               </div>
@@ -111,7 +111,7 @@ export default async function LandingPage() {
 
           {/* Card 3 */}
           <ScrollReveal delay={300} className="h-full">
-            <div className="bg-white p-10 rounded-2xl shadow-elegant border border-white/60 flex flex-col h-full group hover:-translate-y-2 transition-all duration-500 backdrop-blur-sm">
+            <div className="bg-white p-8 md:p-10 rounded-2xl shadow-elegant border border-white/60 flex flex-col h-full group hover:-translate-y-2 transition-all duration-500 backdrop-blur-sm">
               <div className="w-14 h-14 bg-[#FAF7F2] rounded-full flex items-center justify-center mb-6 group-hover:bg-[#B8960C] transition-colors duration-500">
                 <BookOpen className="text-[#B8960C] h-6 w-6 group-hover:text-white transition-colors duration-500" />
               </div>
@@ -130,15 +130,15 @@ export default async function LandingPage() {
       </section>
 
       {/* ═══════════════════ JADWAL MISA PREVIEW ═══════════════════ */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8 bg-[#FAF7F2]">
+      <section className="py-16 md:py-24 px-4 sm:px-6 lg:px-8 bg-[#FAF7F2]">
         <div className="max-w-7xl mx-auto">
           <ScrollReveal>
-            <div className="text-center mb-16 flex flex-col items-center">
+            <div className="text-center mb-10 md:mb-16 flex flex-col items-center">
               <div className="h-12 w-px bg-[#B8960C]/50 mb-6" />
               <span className="font-sans text-xs tracking-[0.25em] text-[#B8960C] uppercase font-bold mb-4">
                 Peribadatan
               </span>
-              <h2 className="text-5xl text-[#3D2B1F] font-bold" style={{ fontFamily: "var(--font-cormorant)" }}>
+              <h2 className="text-4xl md:text-5xl text-[#3D2B1F] font-bold text-center" style={{ fontFamily: "var(--font-cormorant)" }}>
                 Jadwal Misa Katedral
               </h2>
             </div>
@@ -147,41 +147,41 @@ export default async function LandingPage() {
           <ScrollReveal delay={200}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-0 max-w-5xl mx-auto bg-white rounded-2xl shadow-elegant overflow-hidden">
               {/* Misa Harian */}
-              <div className="p-12 border-b md:border-b-0 md:border-r border-[#EDE8DF] relative">
+              <div className="p-8 md:p-12 border-b md:border-b-0 md:border-r border-[#EDE8DF] relative">
                 <div className="absolute top-0 left-0 w-1 h-full bg-[#B8960C]/20" />
-                <h3 className="text-3xl text-[#3D2B1F] mb-8 font-bold" style={{ fontFamily: "var(--font-cormorant)" }}>
+                <h3 className="text-2xl md:text-3xl text-[#3D2B1F] mb-6 md:mb-8 font-bold" style={{ fontFamily: "var(--font-cormorant)" }}>
                   Misa Harian
                 </h3>
-                <ul className="space-y-6">
-                  <li className="flex justify-between items-center group">
+                <ul className="space-y-4 md:space-y-6">
+                  <li className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 group">
                     <span className="font-medium text-[#6B6560] group-hover:text-[#3D2B1F] transition-colors">Senin - Jumat</span>
-                    <span className="font-semibold text-[#B8960C] bg-[#FFF8E1] px-4 py-1.5 rounded-full text-sm">05.30 WIB</span>
+                    <span className="font-semibold text-[#B8960C] bg-[#FFF8E1] px-4 py-1.5 rounded-full text-sm w-fit">05.30 WIB</span>
                   </li>
-                  <li className="flex justify-between items-center group">
+                  <li className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 group">
                     <span className="font-medium text-[#6B6560] group-hover:text-[#3D2B1F] transition-colors">Jumat Pertama</span>
-                    <span className="font-semibold text-[#B8960C] bg-[#FFF8E1] px-4 py-1.5 rounded-full text-sm">18.00 WIB</span>
+                    <span className="font-semibold text-[#B8960C] bg-[#FFF8E1] px-4 py-1.5 rounded-full text-sm w-fit">18.00 WIB</span>
                   </li>
                 </ul>
               </div>
               
               {/* Misa Mingguan */}
-              <div className="p-12 relative">
+              <div className="p-8 md:p-12 relative">
                 <div className="absolute top-0 right-0 w-1 h-full bg-[#B8960C]" />
-                <h3 className="text-3xl text-[#3D2B1F] mb-8 font-bold" style={{ fontFamily: "var(--font-cormorant)" }}>
+                <h3 className="text-2xl md:text-3xl text-[#3D2B1F] mb-6 md:mb-8 font-bold" style={{ fontFamily: "var(--font-cormorant)" }}>
                   Misa Mingguan
                 </h3>
-                <ul className="space-y-6">
-                  <li className="flex justify-between items-center group">
+                <ul className="space-y-4 md:space-y-6">
+                  <li className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 group">
                     <span className="font-medium text-[#6B6560] group-hover:text-[#3D2B1F] transition-colors">Sabtu</span>
-                    <span className="font-semibold text-[#B8960C] bg-[#FFF8E1] px-4 py-1.5 rounded-full text-sm">18.00 WIB</span>
+                    <span className="font-semibold text-[#B8960C] bg-[#FFF8E1] px-4 py-1.5 rounded-full text-sm w-fit">18.00 WIB</span>
                   </li>
-                  <li className="flex justify-between items-center group">
+                  <li className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 group">
                     <span className="font-medium text-[#6B6560] group-hover:text-[#3D2B1F] transition-colors">Minggu Pagi</span>
-                    <span className="font-semibold text-[#B8960C] bg-[#FFF8E1] px-4 py-1.5 rounded-full text-sm">06.00 &amp; 08.30 WIB</span>
+                    <span className="font-semibold text-[#B8960C] bg-[#FFF8E1] px-4 py-1.5 rounded-full text-sm w-fit">06.00 &amp; 08.30 WIB</span>
                   </li>
-                  <li className="flex justify-between items-center group">
+                  <li className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 group">
                     <span className="font-medium text-[#6B6560] group-hover:text-[#3D2B1F] transition-colors">Minggu Sore</span>
-                    <span className="font-semibold text-[#B8960C] bg-[#FFF8E1] px-4 py-1.5 rounded-full text-sm">16.00 &amp; 18.00 WIB</span>
+                    <span className="font-semibold text-[#B8960C] bg-[#FFF8E1] px-4 py-1.5 rounded-full text-sm w-fit">16.00 &amp; 18.00 WIB</span>
                   </li>
                 </ul>
               </div>
@@ -199,20 +199,20 @@ export default async function LandingPage() {
       </section>
 
       {/* ═══════════════════ BERITA TERBARU ═══════════════════ */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8 bg-white relative">
+      <section className="py-16 md:py-24 px-4 sm:px-6 lg:px-8 bg-white relative">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-screen h-px bg-gradient-to-r from-transparent via-[#DDD8D0] to-transparent max-w-7xl" />
         <div className="max-w-7xl mx-auto">
           <ScrollReveal>
-            <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 md:mb-16 gap-6">
               <div>
                 <span className="font-sans text-xs tracking-[0.25em] text-[#B8960C] uppercase font-bold mb-4 block">
                   Informasi Paroki
                 </span>
-                <h2 className="text-5xl text-[#3D2B1F] font-bold" style={{ fontFamily: "var(--font-cormorant)" }}>
+                <h2 className="text-4xl md:text-5xl text-[#3D2B1F] font-bold" style={{ fontFamily: "var(--font-cormorant)" }}>
                   Berita Terbaru
                 </h2>
               </div>
-              <Link href="/berita" className="text-[#3D2B1F] font-medium hover:text-[#B8960C] transition-colors flex items-center gap-2 pb-2 border-b border-[#3D2B1F] hover:border-[#B8960C]">
+              <Link href="/berita" className="text-[#3D2B1F] font-medium hover:text-[#B8960C] transition-colors flex items-center gap-2 pb-2 border-b border-[#3D2B1F] hover:border-[#B8960C] w-fit">
                 Semua Berita <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
@@ -297,15 +297,15 @@ export default async function LandingPage() {
       </section>
 
       {/* ═══════════════════ AGENDA UMAT ═══════════════════ */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8 bg-[#F5F0E8]">
+      <section className="py-16 md:py-24 px-4 sm:px-6 lg:px-8 bg-[#F5F0E8]">
         <div className="max-w-7xl mx-auto">
           <ScrollReveal>
-            <div className="text-center mb-16 flex flex-col items-center">
+            <div className="text-center mb-10 md:mb-16 flex flex-col items-center">
               <div className="h-12 w-px bg-[#B8960C]/50 mb-6" />
               <span className="font-sans text-xs tracking-[0.25em] text-[#B8960C] uppercase font-bold mb-4">
                 Kegiatan Mendatang
               </span>
-              <h2 className="text-5xl text-[#3D2B1F] font-bold" style={{ fontFamily: "var(--font-cormorant)" }}>
+              <h2 className="text-4xl md:text-5xl text-[#3D2B1F] font-bold" style={{ fontFamily: "var(--font-cormorant)" }}>
                 Agenda Umat
               </h2>
             </div>
@@ -342,11 +342,11 @@ export default async function LandingPage() {
       </section>
 
       {/* ═══════════════════ PENGUMUMAN PERKAWINAN ═══════════════════ */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8 bg-white">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+      <section className="py-16 md:py-24 px-4 sm:px-6 lg:px-8 bg-white">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-16 items-center">
           {/* Image Column */}
           <ScrollReveal direction="right" duration={1000} className="w-full order-2 lg:order-1">
-            <div className="relative h-[500px] lg:h-[650px] w-full rounded-2xl overflow-hidden shadow-elegant group">
+            <div className="relative h-[300px] md:h-[400px] lg:h-[650px] w-full rounded-2xl overflow-hidden shadow-elegant group">
               <img
                 alt="Pernikahan di Katedral"
                 className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
@@ -361,10 +361,10 @@ export default async function LandingPage() {
             <span className="font-sans text-xs tracking-[0.25em] text-[#B8960C] uppercase font-bold mb-4">
               Sakramen Perkawinan
             </span>
-            <h2 className="text-5xl lg:text-6xl text-[#3D2B1F] mb-6 font-bold" style={{ fontFamily: "var(--font-cormorant)" }}>
+            <h2 className="text-4xl md:text-5xl lg:text-6xl text-[#3D2B1F] mb-4 md:mb-6 font-bold" style={{ fontFamily: "var(--font-cormorant)" }}>
               Pengumuman Perkawinan
             </h2>
-            <p className="text-[#6B6560] text-lg font-light leading-relaxed mb-4">
+            <p className="text-[#6B6560] text-base md:text-lg font-light leading-relaxed mb-4">
               Pemberitahuan kepada umat mengenai rencana sakramen perkawinan dari calon mempelai. 
             </p>
             <p className="italic text-[#B8960C] mb-10 text-base" style={{ fontFamily: "var(--font-cormorant)" }}>
@@ -397,7 +397,7 @@ export default async function LandingPage() {
       </section>
 
       {/* ═══════════════════ DONASI SECTION ═══════════════════ */}
-      <section className="relative py-32 px-4 sm:px-6 lg:px-8 flex items-center justify-center overflow-hidden">
+      <section className="relative py-24 md:py-32 px-4 sm:px-6 lg:px-8 flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0">
           <img
             alt="Katedral eksterior malam"
@@ -415,13 +415,13 @@ export default async function LandingPage() {
           </ScrollReveal>
           
           <ScrollReveal direction="up" delay={200}>
-            <h2 className="text-5xl md:text-7xl text-white mb-8 font-bold drop-shadow-md" style={{ fontFamily: "var(--font-cormorant)" }}>
+            <h2 className="text-4xl md:text-5xl lg:text-7xl text-white mb-6 md:mb-8 font-bold drop-shadow-md text-center" style={{ fontFamily: "var(--font-cormorant)" }}>
               Persembahan Kasih
             </h2>
           </ScrollReveal>
           
           <ScrollReveal direction="up" delay={300}>
-            <p className="font-light text-lg md:text-xl text-[#EDE8DF] leading-relaxed mb-12 drop-shadow">
+            <p className="font-light text-base md:text-xl text-[#EDE8DF] leading-relaxed mb-10 md:mb-12 drop-shadow text-center">
               Setiap persembahan kasih yang Anda berikan akan menjadi saluran berkat yang menopang seluruh karya dan pelayanan gereja. Dukungan tulus dari Anda akan digunakan untuk kegiatan pastoral, pengembangan iman umat, serta pelayanan diakonia bagi mereka yang membutuhkan.
             </p>
           </ScrollReveal>

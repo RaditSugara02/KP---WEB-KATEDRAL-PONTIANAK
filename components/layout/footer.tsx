@@ -3,7 +3,7 @@ import { Church, MapPin, Phone, Mail } from "lucide-react";
 
 export function Footer() {
   return (
-    <footer className="bg-[#3D2B1F] text-[#FAF7F2] pt-24 pb-12 border-t border-[#B8960C]/30 relative overflow-hidden">
+    <footer className="bg-[#3D2B1F] text-[#FAF7F2] pt-16 md:pt-24 pb-10 md:pb-12 border-t border-[#B8960C]/30 relative overflow-hidden">
       {/* Decorative background element */}
       <div className="absolute top-0 right-0 w-64 h-64 bg-[#B8960C]/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4 pointer-events-none" />
       
