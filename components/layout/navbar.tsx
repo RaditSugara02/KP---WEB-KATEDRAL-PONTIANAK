@@ -3,11 +3,28 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Church, Menu, X } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { cn } from "@/lib/utils";
 
 export function Navbar() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  // Check if we are on the landing page where the transparent navbar makes sense
+  const isLandingPage = pathname === "/";
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 50);
+    };
+    
+    // Initial check
+    handleScroll();
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const navLinks = [
     { name: "Beranda", href: "/" },
@@ -16,46 +33,85 @@ export function Navbar() {
     { name: "Sakramen Perkawinan", href: "/sakramen-perkawinan" },
   ];
 
+  // Determine navbar styles based on scroll and page
+  const isTransparent = isLandingPage && !scrolled && !mobileMenuOpen;
+  
   return (
-    <nav className="sticky top-0 z-50 w-full bg-[#FAF7F2] border-b border-[#DDD8D0]">
+    <nav 
+      className={cn(
+        "fixed top-0 z-50 w-full transition-all duration-500",
+        isTransparent 
+          ? "bg-transparent py-4 border-b border-transparent" 
+          : "bg-[#FAF7F2] py-0 border-b border-[#DDD8D0] shadow-sm"
+      )}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20">
+        <div className="flex justify-between items-center h-20 transition-all duration-500">
           
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-full bg-[#B8960C] text-white flex items-center justify-center group-hover:bg-[#9A7A00] transition-colors shadow-sm">
+            <div className={cn(
+              "w-10 h-10 rounded-full flex items-center justify-center transition-colors shadow-sm",
+              isTransparent ? "bg-white/20 backdrop-blur-sm text-white group-hover:bg-white/30" : "bg-[#B8960C] text-white group-hover:bg-[#9A7A00]"
+            )}>
               <Church size={20} />
             </div>
             <div className="flex flex-col">
-              <span className="font-bold text-xl text-[#3D2B1F] leading-none" style={{ fontFamily: "var(--font-cormorant)" }}>
+              <span 
+                className={cn(
+                  "font-bold text-xl leading-none transition-colors duration-500",
+                  isTransparent ? "text-white" : "text-[#3D2B1F]"
+                )} 
+                style={{ fontFamily: "var(--font-cormorant)" }}
+              >
                 Katedral Santo Yosef
               </span>
-              <span className="text-[10px] uppercase tracking-widest text-[#B8960C] font-bold mt-1">Martapura</span>
+              <span 
+                className={cn(
+                  "text-[10px] uppercase tracking-widest font-bold mt-1 transition-colors duration-500",
+                  isTransparent ? "text-white/80" : "text-[#B8960C]"
+                )}
+              >
+                Martapura
+              </span>
             </div>
           </Link>
 
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center gap-8">
-            {navLinks.map((link) => (
-              <Link 
-                key={link.href} 
-                href={link.href}
-                className={`text-sm font-semibold tracking-wide hover:text-[#B8960C] transition-colors ${
-                  pathname === link.href ? "text-[#B8960C]" : "text-[#3D2B1F]"
-                }`}
-              >
-                {link.name}
-              </Link>
-            ))}
+            {navLinks.map((link) => {
+              const isActive = pathname === link.href;
+              return (
+                <Link 
+                  key={link.href} 
+                  href={link.href}
+                  className={cn(
+                    "text-sm font-medium tracking-wide transition-colors relative group",
+                    isTransparent 
+                      ? "text-white/90 hover:text-white" 
+                      : isActive ? "text-[#B8960C]" : "text-[#3D2B1F] hover:text-[#B8960C]"
+                  )}
+                >
+                  {link.name}
+                  {/* Elegant underline effect on hover */}
+                  <span className={cn(
+                    "absolute -bottom-1 left-0 w-0 h-0.5 transition-all duration-300 group-hover:w-full",
+                    isTransparent ? "bg-white" : "bg-[#B8960C]",
+                    isActive && !isTransparent && "w-full"
+                  )}></span>
+                </Link>
+              );
+            })}
           </div>
-
-
 
           {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center">
             <button 
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="text-[#3D2B1F] hover:text-[#B8960C] p-2"
+              className={cn(
+                "p-2 transition-colors",
+                isTransparent ? "text-white hover:text-white/80" : "text-[#3D2B1F] hover:text-[#B8960C]"
+              )}
             >
               {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
@@ -65,25 +121,29 @@ export function Navbar() {
       </div>
 
       {/* Mobile Menu Dropdown */}
-      {mobileMenuOpen && (
-        <div className="md:hidden bg-[#FAF7F2] border-b border-[#DDD8D0]">
-          <div className="px-4 pt-2 pb-6 space-y-1">
-            {navLinks.map((link) => (
+      <div className={cn(
+        "md:hidden overflow-hidden transition-all duration-300 ease-in-out bg-[#FAF7F2] border-t border-[#DDD8D0]",
+        mobileMenuOpen ? "max-h-64 opacity-100" : "max-h-0 opacity-0 border-transparent"
+      )}>
+        <div className="px-4 pt-4 pb-6 space-y-2">
+          {navLinks.map((link) => {
+            const isActive = pathname === link.href;
+            return (
               <Link
                 key={link.href}
                 href={link.href}
                 onClick={() => setMobileMenuOpen(false)}
-                className={`block px-3 py-3 rounded-md text-base font-semibold ${
-                  pathname === link.href ? "bg-[#FFF8E1] text-[#B8960C]" : "text-[#3D2B1F] hover:bg-[#EDE8DF]"
-                }`}
+                className={cn(
+                  "block px-4 py-3 rounded-md text-base font-medium transition-colors",
+                  isActive ? "bg-[#FFF8E1] text-[#B8960C]" : "text-[#3D2B1F] hover:bg-[#EDE8DF]"
+                )}
               >
                 {link.name}
               </Link>
-            ))}
-
-          </div>
+            );
+          })}
         </div>
-      )}
+      </div>
     </nav>
   );
 }
