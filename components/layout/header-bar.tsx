@@ -103,9 +103,9 @@ export function HeaderBar({ title }: HeaderBarProps) {
                           <Icon size={18} color={isActive ? "#B8960C" : "#6B6560"} />
                           {item.label}
                         </div>
-                        {item.badge ? (
+                        {(item as any).badge ? (
                           <span className="flex items-center justify-center rounded-full text-white font-bold w-[18px] h-[18px] text-[10px] bg-red-500">
-                            {item.badge}
+                            {(item as any).badge}
                           </span>
                         ) : null}
                       </Link>
