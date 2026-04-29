@@ -155,7 +155,7 @@ export default function DetailClient({
           </p>
           
           <button 
-            disabled={loading || (application.currentStage ?? 0) >= 5 || isCanceled}
+            disabled={loading || Number(application.currentStage ?? 0) >= 5 || isCanceled}
             onClick={handleAdvanceStage}
             className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#B8960C] text-white font-bold rounded-md hover:bg-[#9A7A00] transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed mb-3"
           >
