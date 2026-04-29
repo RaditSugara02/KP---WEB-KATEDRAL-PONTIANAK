@@ -47,7 +47,7 @@ export function SidebarUser() {
     >
       <div>
         {/* [A] Header */}
-        <div className="p-6 pb-6 text-center border-b border-[#EDE8DF] mb-4">
+        <Link href="/" className="block p-6 pb-6 text-center border-b border-[#EDE8DF] mb-4 hover:bg-[#FDFBF7] transition-colors">
           <div className="flex justify-center mb-2">
             <svg
               width="32"
@@ -85,7 +85,7 @@ export function SidebarUser() {
           >
             Portal Pengantin
           </p>
-        </div>
+        </Link>
 
         {/* [B] Menu Navigasi */}
         <nav className="flex flex-col px-2 gap-1">

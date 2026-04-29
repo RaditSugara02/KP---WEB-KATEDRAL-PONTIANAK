@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Check, X, Send, ArrowUpCircle } from "lucide-react";
+import { Check, X, Send, ArrowUpCircle, Trash2 } from "lucide-react";
 
 export default function DetailClient({ 
   application, 
@@ -16,6 +16,10 @@ export default function DetailClient({
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [note, setNote] = useState("");
+  
+  // Cancel Modal State
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [cancelReason, setCancelReason] = useState("");
 
   const handleToggleDoc = async (docId: string, currentStatus: boolean) => {
     setLoading(true);
@@ -52,6 +56,23 @@ export default function DetailClient({
     router.refresh();
     setLoading(false);
   };
+
+  const handleCancelApplication = async () => {
+    if (!cancelReason.trim()) return;
+    
+    setLoading(true);
+    await fetch("/api/admin/pernikahan", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "CANCEL_APPLICATION", applicationId: application.id, note: cancelReason })
+    });
+    setShowCancelModal(false);
+    setCancelReason("");
+    router.refresh();
+    setLoading(false);
+  };
+
+  const isCanceled = application.currentStage === 99;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -129,15 +150,26 @@ export default function DetailClient({
         {/* Naikkan Tahap */}
         <div className="bg-white rounded-xl border border-[#DDD8D0] shadow-sm overflow-hidden p-6 text-center">
           <h3 className="text-xs font-bold text-[#6B6560] uppercase tracking-wider mb-2">Manajemen Tahap</h3>
-          <p className="text-[#3D2B1F] text-sm mb-6">Tahap saat ini: <strong>Tahap {application.currentStage}</strong></p>
+          <p className="text-[#3D2B1F] text-sm mb-6">
+            Tahap saat ini: <strong>{isCanceled ? <span className="text-red-600">DIBATALKAN</span> : `Tahap ${application.currentStage}`}</strong>
+          </p>
           
           <button 
-            disabled={loading || application.currentStage >= 5}
+            disabled={loading || application.currentStage >= 5 || isCanceled}
             onClick={handleAdvanceStage}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#B8960C] text-white font-bold rounded-md hover:bg-[#9A7A00] transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#B8960C] text-white font-bold rounded-md hover:bg-[#9A7A00] transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed mb-3"
           >
             <ArrowUpCircle size={18} />
-            Naikkan ke Tahap {Math.min(5, application.currentStage + 1)}
+            Naikkan ke Tahap {Math.min(5, (application.currentStage as number) + 1)}
+          </button>
+
+          <button 
+            disabled={loading || isCanceled}
+            onClick={() => setShowCancelModal(true)}
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white border border-[#C0392B] text-[#C0392B] font-bold rounded-md hover:bg-[#FDECEA] transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Trash2 size={18} />
+            Batalkan Pendaftaran
           </button>
         </div>
 
@@ -186,6 +218,50 @@ export default function DetailClient({
         </div>
 
       </div>
+
+      {/* Cancel Modal */}
+      {showCancelModal && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="bg-[#FDECEA] px-6 py-4 border-b border-[#C0392B]/20 flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-[#C0392B]/10 flex items-center justify-center">
+                <Trash2 size={16} className="text-[#C0392B]" />
+              </div>
+              <h3 className="font-bold text-[#C0392B]">Konfirmasi Pembatalan</h3>
+            </div>
+            <div className="p-6">
+              <p className="text-[#3D2B1F] text-sm mb-4">
+                Tindakan ini akan menghentikan proses pendaftaran pernikahan pasangan ini secara permanen. Pengantin akan menerima notifikasi di dasbor mereka.
+              </p>
+              <label className="block mb-2 text-xs font-bold text-[#6B6560] uppercase tracking-wider">Alasan Pembatalan (Wajib)</label>
+              <textarea 
+                value={cancelReason}
+                onChange={(e) => setCancelReason(e.target.value)}
+                placeholder="Misal: Mempelai mengundurkan diri secara sepihak..."
+                className="w-full h-24 p-3 border border-[#DDD8D0] rounded-md text-sm mb-6 focus:border-[#C0392B] focus:ring-1 focus:ring-[#C0392B] outline-none resize-none"
+                autoFocus
+              />
+              <div className="flex gap-3 justify-end">
+                <button 
+                  onClick={() => setShowCancelModal(false)}
+                  disabled={loading}
+                  className="px-4 py-2 bg-white border border-[#DDD8D0] text-[#6B6560] font-bold rounded-md hover:bg-[#FAF7F2] transition-colors"
+                >
+                  Kembali
+                </button>
+                <button 
+                  onClick={handleCancelApplication}
+                  disabled={loading || !cancelReason.trim()}
+                  className="px-4 py-2 bg-[#C0392B] text-white font-bold rounded-md hover:bg-[#A93226] transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loading ? "Memproses..." : "Ya, Batalkan Pendaftaran"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

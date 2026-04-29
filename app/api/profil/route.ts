@@ -1,16 +1,15 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 import { db } from "@/lib/db";
-import { 
-  coupleProfiles, 
-  marriageApplications, 
-  stageHistory, 
-  requiredDocuments, 
-  notifications 
+import {
+  coupleProfiles,
+  marriageApplications,
+  stageHistory,
+  requiredDocuments,
+  notifications,
 } from "@/lib/db/schema";
 import { nanoid } from "nanoid";
-import { headers } from "next/headers";
-import { eq } from "drizzle-orm";
 
 const DEFAULT_DOCUMENTS = [
   "Surat Baptis Pria",
@@ -26,16 +25,7 @@ const DEFAULT_DOCUMENTS = [
   "Surat Izin Orang Tua",
 ];
 
-// Helper to generate Registration Number: KP-YYYY-XXXX
-async function generateRegistrationNumber() {
-  const year = new Date().getFullYear();
-  // In a real app, you'd count existing records for the year. 
-  // For simplicity here, we'll use a random 4 digit string.
-  const random4 = Math.floor(1000 + Math.random() * 9000); 
-  return `KP-${year}-${random4}`;
-}
-
-export async function POST(req: NextRequest) {
+export async function POST(req: Request) {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
@@ -45,83 +35,93 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const userId = session.user.id;
     const body = await req.json();
+    const {
+      groomName,
+      groomBirthdate,
+      groomPhone,
+      groomBaptismChurch,
+      brideName,
+      brideBirthdate,
+      bridePhone,
+      brideBaptismChurch,
+      plannedWeddingDate,
+    } = body;
 
-    // Check if profile already exists
-    const existing = await db.select().from(coupleProfiles).where(eq(coupleProfiles.userId, userId)).limit(1);
-    
-    if (existing.length > 0) {
-      return NextResponse.json({ error: "Profil sudah ada. Hubungi admin untuk perubahan." }, { status: 400 });
+    // Validate minimal fields
+    if (!groomName || !brideName) {
+      return NextResponse.json(
+        { error: "Data tidak lengkap" },
+        { status: 400 }
+      );
     }
 
-    const regNumber = await generateRegistrationNumber();
-    const profileId = nanoid();
-    const appId = nanoid();
-    const now = new Date();
+    // Generate random reg number (e.g., KP-2026-4F8A)
+    const year = new Date().getFullYear();
+    const randomHex = Math.floor(Math.random() * 65535).toString(16).toUpperCase().padStart(4, '0');
+    const registrationNumber = `KP-${year}-${randomHex}`;
 
-    // Insert Couple Profile
-    await db.insert(coupleProfiles).values({
-      id: profileId,
-      userId,
-      registrationNumber: regNumber,
-      groomName: body.groomName,
-      groomBirthdate: body.groomBirthdate,
-      groomPhone: body.groomPhone,
-      groomBaptismChurch: body.groomBaptismChurch,
-      brideName: body.brideName,
-      brideBirthdate: body.brideBirthdate,
-      bridePhone: body.bridePhone,
-      brideBaptismChurch: body.brideBaptismChurch,
-      plannedWeddingDate: body.plannedWeddingDate,
-      createdAt: now,
+    // Execute in transaction
+    await db.transaction(async (tx) => {
+      // 1. Insert Profile
+      const profileId = nanoid();
+      await tx.insert(coupleProfiles).values({
+        id: profileId,
+        userId: session.user.id,
+        registrationNumber,
+        groomName,
+        groomBirthdate,
+        groomPhone,
+        groomBaptismChurch,
+        brideName,
+        brideBirthdate,
+        bridePhone,
+        brideBaptismChurch,
+        plannedWeddingDate,
+      });
+
+      // 2. Create Application
+      const applicationId = nanoid();
+      await tx.insert(marriageApplications).values({
+        id: applicationId,
+        coupleProfileId: profileId,
+        currentStage: 1,
+        weddingDate: plannedWeddingDate,
+      });
+
+      // 3. Create initial stage history
+      await tx.insert(stageHistory).values({
+        id: nanoid(),
+        applicationId,
+        stageNumber: 1,
+        note: "Pendaftaran baru diterima melalui sistem.",
+        changedBy: session.user.id, // Set by the user themselves for the initial state
+      });
+
+      // 4. Create required documents checklist
+      const docsToInsert = DEFAULT_DOCUMENTS.map((docName) => ({
+        id: nanoid(),
+        applicationId,
+        documentName: docName,
+        isReceived: false,
+      }));
+      await tx.insert(requiredDocuments).values(docsToInsert);
+
+      // 5. Send notification
+      await tx.insert(notifications).values({
+        id: nanoid(),
+        userId: session.user.id,
+        message: `Selamat! Pendaftaran awal Anda telah berhasil dengan nomor registrasi ${registrationNumber}. Harap tunggu instruksi selanjutnya.`,
+        isRead: false,
+      });
     });
 
-    // Insert Marriage Application
-    await db.insert(marriageApplications).values({
-      id: appId,
-      coupleProfileId: profileId,
-      currentStage: 1,
-      createdAt: now,
-      updatedAt: now,
-    });
-
-    // Insert Stage History
-    await db.insert(stageHistory).values({
-      id: nanoid(),
-      applicationId: appId,
-      stageNumber: 1,
-      note: "Pendaftaran awal berhasil. Menunggu pengecekan sekretariat.",
-      changedBy: userId, // System/User initiated
-      changedAt: now,
-    });
-
-    // Insert Required Documents
-    const docs = DEFAULT_DOCUMENTS.map((doc) => ({
-      id: nanoid(),
-      applicationId: appId,
-      documentName: doc,
-      isReceived: false,
-      receivedAt: null,
-    }));
-    await db.insert(requiredDocuments).values(docs);
-
-    // Insert Notification
-    await db.insert(notifications).values({
-      id: nanoid(),
-      userId,
-      message: `Selamat! Pendaftaran awal Anda telah diterima. Nomor Registrasi: ${regNumber}`,
-      isRead: false,
-      createdAt: now,
-    });
-
-    return NextResponse.json({ 
-      success: true, 
-      registrationNumber: regNumber 
-    });
-
+    return NextResponse.json({ success: true, registrationNumber }, { status: 201 });
   } catch (error) {
-    console.error("Profile Creation Error:", error);
-    return NextResponse.json({ error: "Terjadi kesalahan sistem." }, { status: 500 });
+    console.error("API Profil Error:", error);
+    return NextResponse.json(
+      { error: "Terjadi kesalahan internal server" },
+      { status: 500 }
+    );
   }
 }

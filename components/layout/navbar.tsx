@@ -13,6 +13,7 @@ export function Navbar() {
     { name: "Beranda", href: "/" },
     { name: "Berita", href: "/berita" },
     { name: "Jadwal Misa", href: "/jadwal-misa" },
+    { name: "Sakramen Perkawinan", href: "/sakramen-perkawinan" },
   ];
 
   return (
@@ -48,21 +49,7 @@ export function Navbar() {
             ))}
           </div>
 
-          {/* Action Buttons */}
-          <div className="hidden md:flex items-center gap-4">
-            <Link 
-              href="/masuk"
-              className="text-sm font-bold text-[#B8960C] hover:text-[#9A7A00] transition-colors"
-            >
-              Masuk
-            </Link>
-            <Link 
-              href="/daftar"
-              className="px-5 py-2.5 bg-[#B8960C] text-white text-sm font-bold rounded hover:bg-[#9A7A00] transition-colors shadow-sm"
-            >
-              Daftar Pernikahan
-            </Link>
-          </div>
+
 
           {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center">
@@ -93,22 +80,7 @@ export function Navbar() {
                 {link.name}
               </Link>
             ))}
-            <div className="pt-4 mt-2 border-t border-[#DDD8D0] flex flex-col gap-3">
-              <Link 
-                href="/masuk"
-                onClick={() => setMobileMenuOpen(false)}
-                className="w-full text-center py-3 text-[#B8960C] font-bold border border-[#B8960C] rounded-md"
-              >
-                Masuk ke Akun
-              </Link>
-              <Link 
-                href="/daftar"
-                onClick={() => setMobileMenuOpen(false)}
-                className="w-full text-center py-3 bg-[#B8960C] text-white font-bold rounded-md shadow-sm"
-              >
-                Daftar Pernikahan
-              </Link>
-            </div>
+
           </div>
         </div>
       )}

@@ -115,6 +115,38 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true });
     }
 
+    if (action === "CANCEL_APPLICATION") {
+      const { note } = body;
+      const cancelNote = `Pendaftaran dibatalkan: ${note}`;
+      
+      await db.update(marriageApplications)
+        .set({ currentStage: 99, updatedAt: now })
+        .where(eq(marriageApplications.id, applicationId));
+
+      // Log history
+      await db.insert(stageHistory).values({
+        id: nanoid(),
+        applicationId,
+        stageNumber: 99,
+        note: cancelNote,
+        changedBy: adminId,
+        changedAt: now
+      });
+
+      // Notify user
+      if (coupleUserId) {
+        await db.insert(notifications).values({
+          id: nanoid(),
+          userId: coupleUserId,
+          message: cancelNote,
+          isRead: false,
+          createdAt: now
+        });
+      }
+
+      return NextResponse.json({ success: true });
+    }
+
     return NextResponse.json({ error: "Invalid action" }, { status: 400 });
 
   } catch (error) {

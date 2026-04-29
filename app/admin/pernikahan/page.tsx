@@ -107,9 +107,15 @@ export default async function AdminPernikahanPage() {
                       <p className="text-[#3D2B1F] font-medium mt-1">{app.groom} & {app.bride}</p>
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`inline-flex px-2.5 py-1 text-[10px] font-bold uppercase rounded-full ${STAGE_COLORS[stageNum - 1]}`}>
-                        Tahap {stageNum}: {STAGE_NAMES[stageNum - 1]}
-                      </span>
+                      {stageNum === 99 ? (
+                        <span className="inline-flex px-2.5 py-1 text-[10px] font-bold uppercase rounded-full bg-[#FDECEA] text-[#C0392B] border border-[#C0392B]/20">
+                          Dibatalkan
+                        </span>
+                      ) : (
+                        <span className={`inline-flex px-2.5 py-1 text-[10px] font-bold uppercase rounded-full ${STAGE_COLORS[stageNum - 1]}`}>
+                          Tahap {stageNum}: {STAGE_NAMES[stageNum - 1]}
+                        </span>
+                      )}
                     </td>
                     <td className="px-6 py-4 text-[#6B6560]">
                       {app.weddingDate ? new Date(app.weddingDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : "Belum ditentukan"}

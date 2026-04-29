@@ -49,8 +49,9 @@ export default async function AdminRingkasanPage() {
   .orderBy(desc(marriageApplications.createdAt));
 
   // KPIs
-  const totalAktif = allApps.length;
-  const menungguTindakan = allApps.filter(a => a.currentStage === 1).length;
+  const activeApps = allApps.filter(a => a.currentStage !== 99);
+  const totalAktif = activeApps.length;
+  const menungguTindakan = activeApps.filter(a => a.currentStage === 1).length;
   
   const currentMonth = new Date().getMonth();
   const currentYear = new Date().getFullYear();
@@ -162,9 +163,15 @@ export default async function AdminRingkasanPage() {
                         <p className="text-[#3D2B1F] font-medium mt-0.5">{app.groom?.split(" ")[0]} & {app.bride?.split(" ")[0]}</p>
                       </td>
                       <td className="px-5 py-3">
-                        <span className={`inline-flex px-2 py-1 text-[10px] font-bold uppercase rounded-full ${STAGE_COLORS[(app.currentStage || 1) - 1]}`}>
-                          Tahap {app.currentStage}: {STAGE_NAMES[(app.currentStage || 1) - 1]}
-                        </span>
+                        {app.currentStage === 99 ? (
+                          <span className="inline-flex px-2 py-1 text-[10px] font-bold uppercase rounded-full bg-[#FDECEA] text-[#C0392B] border border-[#C0392B]/20">
+                            Dibatalkan
+                          </span>
+                        ) : (
+                          <span className={`inline-flex px-2 py-1 text-[10px] font-bold uppercase rounded-full ${STAGE_COLORS[(app.currentStage || 1) - 1]}`}>
+                            Tahap {app.currentStage}: {STAGE_NAMES[(app.currentStage || 1) - 1]}
+                          </span>
+                        )}
                       </td>
                       <td className="px-5 py-3">
                         <Link 

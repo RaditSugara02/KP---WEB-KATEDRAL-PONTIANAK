@@ -11,6 +11,10 @@
  * - 6 Jadwal misa Minggu
  */
 
+import { loadEnvConfig } from "@next/env";
+const projectDir = process.cwd();
+loadEnvConfig(projectDir);
+
 import { db } from "./index";
 import { auth } from "../auth";
 import {
@@ -67,7 +71,7 @@ async function seed() {
   const couple3Id = nanoid();
 
   // Insert users
-  db.insert(users).values([
+  await db.insert(users).values([
     {
       id: adminId,
       name: "Administrator Katedral",
@@ -122,14 +126,14 @@ async function seed() {
       createdAt: now,
       updatedAt: now,
     },
-  ]).run();
+  ]);
 
   // ============================================
   // 2. SEED ACCOUNTS (credential accounts for password login)
   // ============================================
   console.log("🔑 Membuat akun kredensial...");
 
-  db.insert(accounts).values([
+  await db.insert(accounts).values([
     {
       id: nanoid(),
       userId: adminId,
@@ -184,7 +188,7 @@ async function seed() {
       createdAt: now,
       updatedAt: now,
     },
-  ]).run();
+  ]);
 
   // ============================================
   // 3. SEED COUPLE PROFILES
@@ -195,7 +199,7 @@ async function seed() {
   const profile2Id = nanoid();
   const profile3Id = nanoid();
 
-  db.insert(coupleProfiles).values([
+  await db.insert(coupleProfiles).values([
     {
       id: profile1Id,
       userId: couple1Id,
@@ -241,7 +245,7 @@ async function seed() {
       plannedWeddingDate: "2026-10-05",
       createdAt: now,
     },
-  ]).run();
+  ]);
 
   // ============================================
   // 4. SEED MARRIAGE APPLICATIONS
@@ -252,7 +256,7 @@ async function seed() {
   const app2Id = nanoid();
   const app3Id = nanoid();
 
-  db.insert(marriageApplications).values([
+  await db.insert(marriageApplications).values([
     {
       id: app1Id,
       coupleProfileId: profile1Id,
@@ -280,7 +284,7 @@ async function seed() {
       createdAt: now,
       updatedAt: now,
     },
-  ]).run();
+  ]);
 
   // ============================================
   // 5. SEED STAGE HISTORY
@@ -299,7 +303,7 @@ async function seed() {
     { id: nanoid(), applicationId: app3Id, stageNumber: 1, note: "Pendaftaran baru diterima", changedBy: adminId, changedAt: now },
   ];
 
-  db.insert(stageHistory).values(stageHistoryValues).run();
+  await db.insert(stageHistory).values(stageHistoryValues);
 
   // ============================================
   // 6. SEED REQUIRED DOCUMENTS (11 per couple)
@@ -347,14 +351,14 @@ async function seed() {
     });
   });
 
-  db.insert(requiredDocuments).values(docValues).run();
+  await db.insert(requiredDocuments).values(docValues);
 
   // ============================================
   // 7. SEED NOTIFICATIONS
   // ============================================
   console.log("🔔 Membuat notifikasi...");
 
-  db.insert(notifications).values([
+  await db.insert(notifications).values([
     {
       id: nanoid(),
       userId: couple1Id,
@@ -397,7 +401,7 @@ async function seed() {
       isRead: false,
       createdAt: now,
     },
-  ]).run();
+  ]);
 
   // ============================================
   // 8. SEED CONTENTS - 5 Berita
@@ -465,14 +469,14 @@ async function seed() {
       createdAt: new Date("2026-04-20"),
       updatedAt: new Date("2026-04-20"),
     },
-  ]).run();
+  ]);
 
   // ============================================
   // 9. SEED CONTENTS - 6 Jadwal Misa Minggu
   // ============================================
   console.log("⛪ Membuat jadwal misa Minggu...");
 
-  db.insert(contents).values([
+  await db.insert(contents).values([
     {
       id: nanoid(),
       type: "MASS_SCHEDULE",
@@ -551,7 +555,7 @@ async function seed() {
       createdAt: now,
       updatedAt: now,
     },
-  ]).run();
+  ]);
 
   console.log("\n✅ Seeding selesai!");
   console.log("=====================================");

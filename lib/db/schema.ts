@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
+import { pgTable, text, integer, boolean, timestamp, varchar } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 
 // ============================================
@@ -9,45 +9,37 @@ import { sql } from "drizzle-orm";
  * Users table — extends Better Auth core user with custom `role` field.
  * Better Auth expects: id, name, email, emailVerified, image, createdAt, updatedAt
  */
-export const users = sqliteTable("user", {
+export const users = pgTable("user", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
-  emailVerified: integer("emailVerified", { mode: "boolean" }).default(false),
+  emailVerified: boolean("emailVerified").default(false),
   image: text("image"),
-  role: text("role").default("COUPLE").notNull(), // COUPLE | ADMIN | PRIEST
-  createdAt: integer("createdAt", { mode: "timestamp" }).default(
-    sql`(unixepoch())`
-  ),
-  updatedAt: integer("updatedAt", { mode: "timestamp" }).default(
-    sql`(unixepoch())`
-  ),
+  role: varchar("role", { length: 20 }).default("COUPLE").notNull(), // COUPLE | ADMIN | PRIEST
+  createdAt: timestamp("createdAt").defaultNow(),
+  updatedAt: timestamp("updatedAt").defaultNow(),
 });
 
 /**
  * Sessions table — Better Auth session management
  */
-export const sessions = sqliteTable("session", {
+export const sessions = pgTable("session", {
   id: text("id").primaryKey(),
   userId: text("userId")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   token: text("token").notNull().unique(),
-  expiresAt: integer("expiresAt", { mode: "timestamp" }).notNull(),
+  expiresAt: timestamp("expiresAt").notNull(),
   ipAddress: text("ipAddress"),
   userAgent: text("userAgent"),
-  createdAt: integer("createdAt", { mode: "timestamp" }).default(
-    sql`(unixepoch())`
-  ),
-  updatedAt: integer("updatedAt", { mode: "timestamp" }).default(
-    sql`(unixepoch())`
-  ),
+  createdAt: timestamp("createdAt").defaultNow(),
+  updatedAt: timestamp("updatedAt").defaultNow(),
 });
 
 /**
  * Accounts table — Better Auth OAuth/credential accounts
  */
-export const accounts = sqliteTable("account", {
+export const accounts = pgTable("account", {
   id: text("id").primaryKey(),
   userId: text("userId")
     .notNull()
@@ -56,37 +48,25 @@ export const accounts = sqliteTable("account", {
   providerId: text("providerId").notNull(),
   accessToken: text("accessToken"),
   refreshToken: text("refreshToken"),
-  accessTokenExpiresAt: integer("accessTokenExpiresAt", {
-    mode: "timestamp",
-  }),
-  refreshTokenExpiresAt: integer("refreshTokenExpiresAt", {
-    mode: "timestamp",
-  }),
+  accessTokenExpiresAt: timestamp("accessTokenExpiresAt"),
+  refreshTokenExpiresAt: timestamp("refreshTokenExpiresAt"),
   scope: text("scope"),
   idToken: text("idToken"),
   password: text("password"),
-  createdAt: integer("createdAt", { mode: "timestamp" }).default(
-    sql`(unixepoch())`
-  ),
-  updatedAt: integer("updatedAt", { mode: "timestamp" }).default(
-    sql`(unixepoch())`
-  ),
+  createdAt: timestamp("createdAt").defaultNow(),
+  updatedAt: timestamp("updatedAt").defaultNow(),
 });
 
 /**
  * Verifications table — Better Auth email verification tokens
  */
-export const verifications = sqliteTable("verification", {
+export const verifications = pgTable("verification", {
   id: text("id").primaryKey(),
   identifier: text("identifier").notNull(),
   value: text("value").notNull(),
-  expiresAt: integer("expiresAt", { mode: "timestamp" }).notNull(),
-  createdAt: integer("createdAt", { mode: "timestamp" }).default(
-    sql`(unixepoch())`
-  ),
-  updatedAt: integer("updatedAt", { mode: "timestamp" }).default(
-    sql`(unixepoch())`
-  ),
+  expiresAt: timestamp("expiresAt").notNull(),
+  createdAt: timestamp("createdAt").defaultNow(),
+  updatedAt: timestamp("updatedAt").defaultNow(),
 });
 
 // ============================================
@@ -97,31 +77,29 @@ export const verifications = sqliteTable("verification", {
  * Couple Profiles — data mempelai pria & wanita
  * Dibuat setelah COUPLE mendaftar dan mengisi formulir data mempelai
  */
-export const coupleProfiles = sqliteTable("couple_profiles", {
+export const coupleProfiles = pgTable("couple_profiles", {
   id: text("id").primaryKey(),
   userId: text("userId")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
-  registrationNumber: text("registrationNumber").unique(), // KP-2026-0001
+  registrationNumber: varchar("registrationNumber", { length: 50 }).unique(), // KP-2026-0001
   groomName: text("groomName"),
   groomBirthdate: text("groomBirthdate"), // ISO date string
-  groomPhone: text("groomPhone"),
+  groomPhone: varchar("groomPhone", { length: 20 }),
   groomBaptismChurch: text("groomBaptismChurch"),
   brideName: text("brideName"),
   brideBirthdate: text("brideBirthdate"), // ISO date string
-  bridePhone: text("bridePhone"),
+  bridePhone: varchar("bridePhone", { length: 20 }),
   brideBaptismChurch: text("brideBaptismChurch"),
   plannedWeddingDate: text("plannedWeddingDate"), // ISO date string
-  createdAt: integer("createdAt", { mode: "timestamp" }).default(
-    sql`(unixepoch())`
-  ),
+  createdAt: timestamp("createdAt").defaultNow(),
 });
 
 /**
  * Marriage Applications — pengajuan pernikahan
  * Melacak progres pernikahan melalui 5 tahap
  */
-export const marriageApplications = sqliteTable("marriage_applications", {
+export const marriageApplications = pgTable("marriage_applications", {
   id: text("id").primaryKey(),
   coupleProfileId: text("coupleProfileId")
     .notNull()
@@ -129,18 +107,14 @@ export const marriageApplications = sqliteTable("marriage_applications", {
   priestId: text("priestId").references(() => users.id), // Romo yang ditugaskan
   currentStage: integer("currentStage").default(1).notNull(), // 1-5
   weddingDate: text("weddingDate"), // ISO datetime string
-  createdAt: integer("createdAt", { mode: "timestamp" }).default(
-    sql`(unixepoch())`
-  ),
-  updatedAt: integer("updatedAt", { mode: "timestamp" }).default(
-    sql`(unixepoch())`
-  ),
+  createdAt: timestamp("createdAt").defaultNow(),
+  updatedAt: timestamp("updatedAt").defaultNow(),
 });
 
 /**
  * Stage History — riwayat perubahan tahap pernikahan
  */
-export const stageHistory = sqliteTable("stage_history", {
+export const stageHistory = pgTable("stage_history", {
   id: text("id").primaryKey(),
   applicationId: text("applicationId")
     .notNull()
@@ -149,46 +123,42 @@ export const stageHistory = sqliteTable("stage_history", {
   note: text("note"),
   changedBy: text("changedBy")
     .notNull()
-    .references(() => users.id),
-  changedAt: integer("changedAt", { mode: "timestamp" }).default(
-    sql`(unixepoch())`
-  ),
+    .references(() => users.id, { onDelete: "cascade" }),
+  changedAt: timestamp("changedAt").defaultNow(),
 });
 
 /**
  * Required Documents — checklist 11 dokumen persyaratan pernikahan
  */
-export const requiredDocuments = sqliteTable("required_documents", {
+export const requiredDocuments = pgTable("required_documents", {
   id: text("id").primaryKey(),
   applicationId: text("applicationId")
     .notNull()
     .references(() => marriageApplications.id, { onDelete: "cascade" }),
   documentName: text("documentName").notNull(),
-  isReceived: integer("isReceived", { mode: "boolean" }).default(false),
-  receivedAt: integer("receivedAt", { mode: "timestamp" }),
+  isReceived: boolean("isReceived").default(false),
+  receivedAt: timestamp("receivedAt"),
 });
 
 /**
  * Notifications — notifikasi in-app untuk pengguna
  */
-export const notifications = sqliteTable("notifications", {
+export const notifications = pgTable("notifications", {
   id: text("id").primaryKey(),
   userId: text("userId")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   message: text("message").notNull(),
-  isRead: integer("isRead", { mode: "boolean" }).default(false),
-  createdAt: integer("createdAt", { mode: "timestamp" }).default(
-    sql`(unixepoch())`
-  ),
+  isRead: boolean("isRead").default(false),
+  createdAt: timestamp("createdAt").defaultNow(),
 });
 
 /**
  * Contents — konten berita, jadwal misa, dan agenda
  */
-export const contents = sqliteTable("contents", {
+export const contents = pgTable("contents", {
   id: text("id").primaryKey(),
-  type: text("type").notNull(), // NEWS | MASS_SCHEDULE | AGENDA
+  type: varchar("type", { length: 50 }).notNull(), // NEWS | MASS_SCHEDULE | AGENDA
   title: text("title").notNull(),
   slug: text("slug").unique(),
   body: text("body"),
@@ -196,12 +166,8 @@ export const contents = sqliteTable("contents", {
   location: text("location"),
   eventDate: text("eventDate"), // ISO datetime string
   eventEndDate: text("eventEndDate"), // ISO datetime string
-  isPublished: integer("isPublished", { mode: "boolean" }).default(false),
+  isPublished: boolean("isPublished").default(false),
   createdBy: text("createdBy").references(() => users.id),
-  createdAt: integer("createdAt", { mode: "timestamp" }).default(
-    sql`(unixepoch())`
-  ),
-  updatedAt: integer("updatedAt", { mode: "timestamp" }).default(
-    sql`(unixepoch())`
-  ),
+  createdAt: timestamp("createdAt").defaultNow(),
+  updatedAt: timestamp("updatedAt").defaultNow(),
 });

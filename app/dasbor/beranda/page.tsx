@@ -113,6 +113,8 @@ export default async function BerandaDasborPage() {
   const receivedDocs = docs.filter(d => d.isReceived).length;
   const totalDocs = docs.length;
 
+  const isCanceled = application.currentStage === 99;
+
   return (
     <div className="max-w-5xl mx-auto space-y-6">
       
@@ -171,7 +173,22 @@ export default async function BerandaDasborPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {isCanceled && (
+        <div className="bg-[#FDECEA] p-6 rounded-xl border border-[#C0392B]/30 mb-6 flex flex-col md:flex-row items-center gap-6">
+          <div className="w-16 h-16 bg-[#C0392B]/10 rounded-full flex items-center justify-center flex-shrink-0">
+            <AlertCircle size={32} className="text-[#C0392B]" />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold text-[#C0392B] mb-2 uppercase tracking-wide">Pendaftaran Dibatalkan</h2>
+            <p className="text-[#3D2B1F]">
+              Proses pendaftaran pernikahan Anda telah dihentikan/dibatalkan oleh Sekretariat. 
+              Pesan terakhir: <strong>&quot;{adminMessage}&quot;</strong>
+            </p>
+          </div>
+        </div>
+      )}
+
+      <div className={`grid grid-cols-1 lg:grid-cols-3 gap-6 ${isCanceled ? 'opacity-60 pointer-events-none' : ''}`}>
         
         {/* Kolom Kiri: Status & Pesan */}
         <div className="lg:col-span-1 space-y-6">
@@ -183,14 +200,15 @@ export default async function BerandaDasborPage() {
             </div>
             <div className="p-5">
               <h4 className="text-xl font-bold text-[#B8960C] mb-2" style={{ fontFamily: "var(--font-cormorant)" }}>
-                Tahap {application.currentStage}: {STAGE_NAMES[application.currentStage - 1]}
+                {isCanceled ? "DIBATALKAN" : `Tahap ${application.currentStage}: ${STAGE_NAMES[application.currentStage - 1]}`}
               </h4>
               <p className="text-sm text-[#6B6560]">
-                {application.currentStage === 1 && "Profil Anda telah tersimpan. Silakan tunggu informasi jadwal KPP dari sekretariat."}
-                {application.currentStage === 2 && "Anda berada di tahap Kursus Persiapan Pernikahan. Pastikan Anda menghadiri kursus sesuai jadwal."}
-                {application.currentStage === 3 && "Silakan kumpulkan dokumen fisik ke sekretariat paroki."}
-                {application.currentStage === 4 && "Penyelidikan Kanonik sedang dijadwalkan bersama Romo."}
-                {application.currentStage === 5 && "Semua persiapan selesai! Menunggu hari pemberkatan."}
+                {isCanceled && "Status pendaftaran ini sudah tidak aktif."}
+                {!isCanceled && application.currentStage === 1 && "Profil Anda telah tersimpan. Silakan tunggu informasi jadwal KPP dari sekretariat."}
+                {!isCanceled && application.currentStage === 2 && "Anda berada di tahap Kursus Persiapan Pernikahan. Pastikan Anda menghadiri kursus sesuai jadwal."}
+                {!isCanceled && application.currentStage === 3 && "Silakan kumpulkan dokumen fisik ke sekretariat paroki."}
+                {!isCanceled && application.currentStage === 4 && "Penyelidikan Kanonik sedang dijadwalkan bersama Romo."}
+                {!isCanceled && application.currentStage === 5 && "Semua persiapan selesai! Menunggu hari pemberkatan."}
               </p>
             </div>
           </div>

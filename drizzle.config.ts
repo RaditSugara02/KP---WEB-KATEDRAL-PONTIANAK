@@ -1,10 +1,14 @@
 import { defineConfig } from "drizzle-kit";
+import { loadEnvConfig } from "@next/env";
+
+const projectDir = process.cwd();
+loadEnvConfig(projectDir);
 
 export default defineConfig({
-  dialect: "sqlite",
+  dialect: "postgresql",
   schema: "./lib/db/schema.ts",
   out: "./drizzle",
   dbCredentials: {
-    url: "./db/katedral.db",
+    url: process.env.DATABASE_URL!,
   },
 });

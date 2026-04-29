@@ -1,19 +1,9 @@
-import Database from "better-sqlite3";
-import { drizzle } from "drizzle-orm/better-sqlite3";
+import { drizzle } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
 import * as schema from "./schema";
-import path from "path";
-import fs from "fs";
 
-// Ensure db directory exists
-const dbDir = path.join(process.cwd(), "db");
-if (!fs.existsSync(dbDir)) {
-  fs.mkdirSync(dbDir, { recursive: true });
-}
+const connectionString = process.env.DATABASE_URL!;
 
-const dbPath = path.join(dbDir, "katedral.db");
-const sqlite = new Database(dbPath);
-
-// Enable WAL mode for better performance
-sqlite.pragma("journal_mode = WAL");
-
-export const db = drizzle(sqlite, { schema });
+// Disable prefetch as it is not supported for "Transaction" pool mode
+export const client = postgres(connectionString, { prepare: false });
+export const db = drizzle(client, { schema });
