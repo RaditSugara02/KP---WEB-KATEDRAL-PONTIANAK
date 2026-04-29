@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
     eventDate: eventDate || null,
     location: location || null,
     imageUrl: imageUrl || null,
-    authorId: session.user.id,
+    createdBy: session.user.id,
     createdAt: now,
     updatedAt: now,
   }).returning();

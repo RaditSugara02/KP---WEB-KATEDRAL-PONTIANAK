@@ -55,7 +55,8 @@ export default function MasukPage() {
       }
 
       toast.success("Berhasil masuk!");
-      if (data?.user?.role === "ADMIN") {
+      const user = data?.user as any;
+      if (user?.role === "ADMIN") {
         router.push("/admin/ringkasan");
       } else {
         router.push("/dasbor/beranda");
