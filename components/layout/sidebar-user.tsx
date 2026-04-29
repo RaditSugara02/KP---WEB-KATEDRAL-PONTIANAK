@@ -38,7 +38,7 @@ export function SidebarUser() {
 
   return (
     <aside
-      className="h-screen flex-shrink-0 flex flex-col justify-between"
+      className="hidden md:flex h-screen flex-shrink-0 flex-col justify-between"
       style={{
         width: "240px",
         background: "#FFFFFF",
