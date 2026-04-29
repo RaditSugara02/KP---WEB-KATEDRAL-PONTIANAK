@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, HelpCircle, Menu, Home, FileText, User, LogOut } from "lucide-react";
+import { Bell, HelpCircle, Menu, Home, FileText, User, LogOut, LayoutDashboard, BookOpen, Settings } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -28,12 +28,24 @@ export function HeaderBar({ title }: HeaderBarProps) {
     router.push("/masuk");
   };
 
-  const navItems = [
+  const isAdmin = pathname.startsWith("/admin");
+
+  const adminNavItems = [
+    { icon: LayoutDashboard, label: "Ringkasan", href: "/admin/ringkasan" },
+    { icon: FileText, label: "Data Pernikahan", href: "/admin/pernikahan" },
+    { icon: BookOpen, label: "Kelola Konten", href: "/admin/konten" },
+    { icon: Settings, label: "Pengaturan", href: "/admin/pengaturan" },
+  ];
+
+  const coupleNavItems = [
     { icon: Home, label: "Beranda", href: "/dasbor/beranda" },
     { icon: FileText, label: "Dokumen", href: "/dasbor/dokumen" },
     { icon: Bell, label: "Notifikasi", href: "/dasbor/notifikasi", badge: notifCount },
     { icon: User, label: "Profil Saya", href: "/dasbor/profil" },
   ];
+
+  const activeNavItems = isAdmin ? adminNavItems : coupleNavItems;
+  const subtitle = isAdmin ? "Panel Administrasi" : "Portal Pengantin";
 
   return (
     <header
@@ -65,11 +77,11 @@ export function HeaderBar({ title }: HeaderBarProps) {
                     </svg>
                   </div>
                   <h2 className="font-bold font-serif text-[#B8960C]">Katedral Santo Yosef</h2>
-                  <p className="text-xs text-[#6B6560]">Portal Pengantin</p>
+                  <p className="text-xs text-[#6B6560]">{subtitle}</p>
                 </div>
                 
                 <nav className="flex flex-col px-2 gap-1">
-                  {navItems.map((item) => {
+                  {activeNavItems.map((item) => {
                     const isActive = pathname.startsWith(item.href);
                     const Icon = item.icon;
                     return (
