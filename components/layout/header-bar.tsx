@@ -49,10 +49,8 @@ export function HeaderBar({ title }: HeaderBarProps) {
         {/* Mobile Menu Trigger */}
         <div className="md:hidden">
           <Sheet open={open} onOpenChange={setOpen}>
-            <SheetTrigger asChild>
-              <button className="text-[#3D2B1F] p-1 -ml-2 rounded-md hover:bg-gray-100">
-                <Menu size={24} />
-              </button>
+            <SheetTrigger className="text-[#3D2B1F] p-1 -ml-2 rounded-md hover:bg-gray-100">
+              <Menu size={24} />
             </SheetTrigger>
             <SheetContent side="left" className="w-[280px] p-0 bg-white border-r-[#DDD8D0] flex flex-col justify-between">
               <div>
