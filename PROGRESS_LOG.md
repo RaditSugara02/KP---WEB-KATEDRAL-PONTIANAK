@@ -237,11 +237,13 @@
 
 ### 🟡 Prioritas Menengah
 
-#### 5. Notifikasi Email Otomatis
-- [ ] Integrasi email provider (Resend atau Nodemailer SMTP)
-- [ ] Trigger email ke pasangan ketika tahap berubah
-- [ ] Trigger email ke pasangan ketika pendaftaran dibatalkan
-- [ ] Template email branded sesuai design system
+#### 5. Notifikasi Email Otomatis ✅ SELESAI
+- [x] Integrasi Resend SDK (`npm install resend`)
+- [x] Template HTML branded untuk 3 jenis email: naik tahap, pembatalan, jadwal pemberkatan
+- [x] Email dikirim saat ADVANCE_STAGE, CANCEL_APPLICATION, SET_WEDDING_DATE
+- [x] Fire-and-forget (tidak memblokir API response) menggunakan `.catch(console.error)`
+- [x] Graceful skip jika `RESEND_API_KEY` tidak dikonfigurasi
+- *Catatan: Tambahkan `RESEND_API_KEY` di Vercel Dashboard untuk mengaktifkan email*
 
 #### 6. Riwayat Tahap di Dasbor Pengantin ✅ SELESAI
 - [x] Timeline riwayat perubahan tahap tampil di `/dasbor/beranda`
@@ -280,16 +282,21 @@
 - [ ] Uji alur Admin: Login → Lihat pendaftar → Naikkan tahap → Kirim notifikasi
 - [ ] Uji di device mobile nyata
 
-#### 12. SEO & Metadata
-- [ ] Tambah Open Graph meta tags di landing page
-- [ ] Tambah `sitemap.xml` dan `robots.txt`
-- [ ] Optimasi gambar dengan `next/image`
+#### 12. SEO & Metadata ✅ SELESAI
+- [x] Open Graph meta tags lengkap di root layout
+- [x] Title template dinamis (`%s | Katedral Santo Yosef`)
+- [x] `sitemap.xml` otomatis via `app/sitemap.ts`
+- [x] `robots.txt` via `app/robots.ts` — blokir `/admin/`, `/dasbor/`, `/api/`
+- [x] keywords, author, creator, twitter card
 
-#### 13. Halaman Kontak & Lokasi (Publik)
-- [ ] Buat halaman baru `/kontak`
-- [ ] Konten: alamat lengkap, nomor telepon, email, jam operasional sekretariat
-- [ ] Embed Google Maps
-- [ ] Tambahkan link ke navbar publik
+#### 13. Halaman Kontak & Lokasi (Publik) ✅ SELESAI
+- [x] Halaman `/kontak` dengan tampilan premium
+- [x] Data diambil dari church settings API secara dinamis (ISR)
+- [x] Kartu: Alamat, Telepon, Email, Jam Operasional, Jadwal Misa
+- [x] Embed Google Maps
+- [x] CTA pendaftaran pernikahan di bagian bawah
+- [x] Link "Kontak" ditambahkan ke navbar publik
+- [x] API publik `/api/public/church-info` (tanpa auth, dengan cache)
 
 #### 14. Galeri Foto Gereja (Publik)
 - [ ] Buat halaman `/galeri` atau section di landing page
@@ -324,6 +331,7 @@
 | 30 Apr 2026 | Implementasi: Penugasan Romo, KPI Perlu Verifikasi, Halaman Pengguna |
 | 30 Apr 2026 | Implementasi: Search/Filter pernikahan, Timeline riwayat tahap, Halaman pengaturan gereja |
 | 30 Apr 2026 | Implementasi: Jadwal pemberkatan (admin+dasbor), Print/PDF bukti pendaftaran |
+| 30 Apr 2026 | Implementasi: Email Resend, SEO metadata+sitemap+robots, Halaman Kontak publik |
 
 ---
 

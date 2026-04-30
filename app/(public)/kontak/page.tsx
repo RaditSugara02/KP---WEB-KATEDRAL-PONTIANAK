@@ -102,7 +102,7 @@ export default async function KontakPage() {
               <h3 className="font-bold text-[#3D2B1F] text-sm uppercase tracking-wider">Jam Sekretariat</h3>
             </div>
             <div className="space-y-1">
-              {operationalLines.map((line, i) => (
+              {operationalLines.map((line: string, i: number) => (
                 <p key={i} className="text-[#6B6560] text-sm">{line}</p>
               ))}
             </div>
@@ -117,7 +117,7 @@ export default async function KontakPage() {
               <h3 className="font-bold text-[#3D2B1F] text-sm uppercase tracking-wider">Jadwal Misa</h3>
             </div>
             <div className="space-y-1">
-              {massLines.map((line, i) => (
+              {massLines.map((line: string, i: number) => (
                 <p key={i} className="text-[#6B6560] text-sm">{line}</p>
               ))}
             </div>
