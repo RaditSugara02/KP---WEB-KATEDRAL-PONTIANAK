@@ -298,11 +298,15 @@
 - [x] Link "Kontak" ditambahkan ke navbar publik
 - [x] API publik `/api/public/church-info` (tanpa auth, dengan cache)
 
-#### 14. Galeri Foto Gereja (Publik)
-- [ ] Buat halaman `/galeri` atau section di landing page
-- [ ] Admin bisa upload/kelola foto via CMS yang sudah ada
-- [ ] Tambahkan type `"GALLERY"` di tabel `contents`
-- [ ] Tampilan: grid masonry foto kegiatan gereja
+#### 14. Galeri Foto Gereja (Publik) ✅ SELESAI
+- [x] Halaman `/galeri` dengan layout masonry 3 kolom (responsif)
+- [x] Admin kelola foto via CMS admin (`Tipe: Foto Galeri`)
+- [x] Tipe `"GALLERY"` di tabel `contents` — tiap entri = 1 foto
+- [x] API publik `/api/public/galeri` dengan ISR cache
+- [x] Hover overlay dengan keterangan foto
+- [x] Empty state bila belum ada foto
+- [x] Link "Galeri" di navbar publik
+- [x] Entri galeri ditambahkan ke `sitemap.xml`
 
 ---
 
