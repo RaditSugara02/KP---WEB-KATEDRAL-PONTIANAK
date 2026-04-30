@@ -147,17 +147,28 @@ export default async function BerandaDasborPage() {
       </div>
 
       {/* Progress Steps UI */}
-      <div className="bg-white p-6 rounded-xl border border-[#DDD8D0] shadow-sm mb-6 overflow-x-auto">
+      <div className={`p-6 rounded-xl border shadow-sm mb-6 overflow-x-auto ${
+        isCanceled
+          ? "bg-[#FFF5F5] border-red-100"
+          : "bg-white border-[#DDD8D0]"
+      }`}>
+        {isCanceled && (
+          <div className="flex items-center justify-center mb-4">
+            <span className="px-4 py-1 bg-red-100 text-red-700 font-bold text-xs uppercase tracking-widest rounded-full border border-red-200">
+              ✕ PENDAFTARAN DIBATALKAN
+            </span>
+          </div>
+        )}
         <div className="flex items-center min-w-max justify-between px-4">
           {STAGE_NAMES.map((name, i) => {
             const stepNumber = i + 1;
-            const isCompleted = stepNumber < application.currentStage;
-            const isCurrent = stepNumber === application.currentStage;
-
+            const isCompleted = !isCanceled && stepNumber < application.currentStage;
+            const isCurrent = !isCanceled && stepNumber === application.currentStage;
             return (
               <div key={i} className="flex items-center">
                 <div className="flex flex-col items-center relative z-10 w-32">
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 mb-2 transition-colors ${
+                    isCanceled ? "bg-[#F5F0E8] border-[#DDD8D0] text-[#C8C0B8] opacity-50" :
                     isCompleted ? "bg-[#D8F3DC] border-[#2D6A4F] text-[#2D6A4F]" :
                     isCurrent ? "bg-[#B8960C] border-[#B8960C] text-white" :
                     "bg-[#F5F0E8] border-[#DDD8D0] text-[#A89880]"
@@ -165,16 +176,15 @@ export default async function BerandaDasborPage() {
                     {isCompleted ? <CheckCircle2 size={20} /> : <span className="font-bold">{stepNumber}</span>}
                   </div>
                   <span className={`text-xs font-semibold text-center uppercase ${
+                    isCanceled ? "text-[#C8C0B8]" :
                     isCompleted ? "text-[#2D6A4F]" :
                     isCurrent ? "text-[#B8960C]" :
                     "text-[#A89880]"
-                  }`}>
-                    {name}
-                  </span>
+                  }`}>{name}</span>
                 </div>
                 {i < STAGE_NAMES.length - 1 && (
                   <div className={`w-16 h-1 -ml-4 -mr-4 rounded-full relative z-0 ${
-                    stepNumber < application.currentStage ? "bg-[#2D6A4F]" : "bg-[#EDE8DF]"
+                    !isCanceled && stepNumber < application.currentStage ? "bg-[#2D6A4F]" : "bg-[#EDE8DF]"
                   }`} />
                 )}
               </div>
@@ -183,17 +193,42 @@ export default async function BerandaDasborPage() {
         </div>
       </div>
 
+      {/* ============ BANNER PEMBATALAN (BESAR) ============ */}
       {isCanceled && (
-        <div className="bg-[#FDECEA] p-6 rounded-xl border border-[#C0392B]/30 mb-6 flex flex-col md:flex-row items-center gap-6">
-          <div className="w-16 h-16 bg-[#C0392B]/10 rounded-full flex items-center justify-center flex-shrink-0">
-            <AlertCircle size={32} className="text-[#C0392B]" />
-          </div>
-          <div>
-            <h2 className="text-xl font-bold text-[#C0392B] mb-2 uppercase tracking-wide">Pendaftaran Dibatalkan</h2>
-            <p className="text-[#3D2B1F]">
-              Proses pendaftaran pernikahan Anda telah dihentikan/dibatalkan oleh Sekretariat. 
-              Pesan terakhir: <strong>&quot;{adminMessage}&quot;</strong>
-            </p>
+        <div className="bg-gradient-to-br from-[#FFF0F0] to-[#FFF5F5] border-2 border-red-200 rounded-2xl p-8 mb-6 shadow-sm">
+          <div className="flex flex-col md:flex-row items-center gap-6">
+            <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0 shadow-inner">
+              <AlertCircle size={40} className="text-[#C0392B]" />
+            </div>
+            <div className="flex-1 text-center md:text-left">
+              <p className="text-[10px] font-bold uppercase tracking-[4px] text-red-400 mb-1">Status Pendaftaran</p>
+              <h2 className="text-2xl md:text-3xl font-bold text-[#C0392B] mb-3" style={{ fontFamily: "var(--font-cormorant)" }}>
+                Pendaftaran Dibatalkan
+              </h2>
+              <div className="bg-white border border-red-100 rounded-lg px-5 py-4 mb-4">
+                <p className="text-xs font-bold text-[#A89880] uppercase tracking-wider mb-1">Alasan Pembatalan dari Sekretariat:</p>
+                <p className="text-[#3D2B1F] font-medium italic">&ldquo;{adminMessage}&rdquo;</p>
+              </div>
+              <p className="text-sm text-[#6B6560] mb-5">
+                Untuk mendaftar ulang atau mendapat informasi lebih lanjut, silakan hubungi Sekretariat Katedral secara langsung.
+              </p>
+              <div className="flex flex-wrap gap-3 justify-center md:justify-start">
+                <a
+                  href="https://wa.me/6251234567"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#25D366] text-white font-bold text-sm rounded-md hover:bg-[#1DA851] transition-colors"
+                >
+                  💬 Hubungi via WhatsApp
+                </a>
+                <a
+                  href="mailto:sekretariat@katedral.id"
+                  className="inline-flex items-center gap-2 px-6 py-2.5 bg-white border-2 border-[#C0392B] text-[#C0392B] font-bold text-sm rounded-md hover:bg-red-50 transition-colors"
+                >
+                  ✉ Kirim Email Sekretariat
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -225,7 +260,42 @@ export default async function BerandaDasborPage() {
         </div>
       )}
 
-      <div className={`grid grid-cols-1 lg:grid-cols-3 gap-6 ${isCanceled ? 'opacity-60 pointer-events-none' : ''}`}>
+      {/* ============ KONTEN BAWAH ============ */}
+      {isCanceled ? (
+        /* Saat dibatalkan: hanya tampilkan kartu kontak sekretariat */
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="bg-white rounded-xl border border-[#DDD8D0] shadow-sm p-6">
+            <h3 className="font-bold text-[#3D2B1F] text-sm uppercase tracking-wide mb-4">📞 Kontak Sekretariat</h3>
+            <div className="space-y-3 text-sm">
+              <div className="flex items-center gap-3">
+                <span className="text-lg">📍</span>
+                <span className="text-[#6B6560]">Jl. Gereja No. 1, Martapura, Kalimantan Selatan</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-lg">📞</span>
+                <a href="tel:0511-1234567" className="text-[#B8960C] font-bold hover:underline">0511-1234567</a>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-lg">✉</span>
+                <a href="mailto:sekretariat@katedral.id" className="text-[#B8960C] font-bold hover:underline">sekretariat@katedral.id</a>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-lg">🕐</span>
+                <span className="text-[#6B6560]">Senin–Jumat: 08.00–16.00 WIB</span>
+              </div>
+            </div>
+          </div>
+          <div className="bg-[#FFF8E1] rounded-xl border border-[#B8960C]/20 shadow-sm p-6">
+            <h3 className="font-bold text-[#3D2B1F] text-sm uppercase tracking-wide mb-3">ℹ Langkah Selanjutnya</h3>
+            <ul className="space-y-2 text-sm text-[#6B6560]">
+              <li className="flex items-start gap-2"><span className="text-[#B8960C] font-bold mt-0.5">1.</span> Hubungi sekretariat untuk klarifikasi alasan pembatalan.</li>
+              <li className="flex items-start gap-2"><span className="text-[#B8960C] font-bold mt-0.5">2.</span> Jika ingin mendaftar ulang, datangi kantor paroki secara langsung.</li>
+              <li className="flex items-start gap-2"><span className="text-[#B8960C] font-bold mt-0.5">3.</span> Siapkan dokumen yang diperlukan untuk proses baru.</li>
+            </ul>
+          </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* Kolom Kiri: Status & Pesan */}
         <div className="lg:col-span-1 space-y-6">
@@ -326,7 +396,8 @@ export default async function BerandaDasborPage() {
           </div>
         </div>
 
-      </div>
+        </div>
+      )}
 
       {/* Riwayat Tahap Timeline */}
       {allHistory.length > 0 && (
