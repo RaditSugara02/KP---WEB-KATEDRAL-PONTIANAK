@@ -4,11 +4,13 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Loader2, Save } from "lucide-react";
+import ImageUpload from "@/components/admin/ImageUpload";
 
 const CONTENT_TYPES = [
   { value: "NEWS", label: "Berita / Artikel" },
   { value: "MASS_SCHEDULE", label: "Jadwal Misa" },
   { value: "ANNOUNCEMENT", label: "Pengumuman" },
+  { value: "GALLERY", label: "📷 Foto Galeri" },
 ];
 
 type ContentItem = {
@@ -65,6 +67,7 @@ export default function EditKontenClient({ content }: { content: ContentItem }) 
   };
 
   const isMassSchedule = form.type === "MASS_SCHEDULE";
+  const isGallery = form.type === "GALLERY";
 
   return (
     <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-[#DDD8D0] shadow-sm p-8 space-y-6">
@@ -115,23 +118,39 @@ export default function EditKontenClient({ content }: { content: ContentItem }) 
         </div>
       )}
 
-      {/* Isi Konten */}
-      <div>
-        <label className="block text-xs font-bold text-[#6B6560] uppercase tracking-wider mb-2">
-          {isMassSchedule ? "Keterangan Tambahan" : "Isi Konten / Artikel"}
-        </label>
-        <textarea name="body" value={form.body} onChange={handleChange} rows={8}
-          className="w-full px-4 py-3 border border-[#DDD8D0] rounded-md text-sm focus:border-[#B8960C] focus:ring-1 focus:ring-[#B8960C] outline-none resize-y" />
-      </div>
-
-      {/* URL Gambar */}
-      {!isMassSchedule && (
+      {/* Isi Konten — hidden for gallery (uses caption instead) */}
+      {!isGallery && (
         <div>
-          <label className="block text-xs font-bold text-[#6B6560] uppercase tracking-wider mb-2">URL Gambar Cover (Opsional)</label>
-          <input type="url" name="imageUrl" value={form.imageUrl} onChange={handleChange}
-            placeholder="https://example.com/gambar.jpg"
-            className="w-full h-11 px-4 border border-[#DDD8D0] rounded-md text-sm focus:border-[#B8960C] focus:ring-1 focus:ring-[#B8960C] outline-none" />
+          <label className="block text-xs font-bold text-[#6B6560] uppercase tracking-wider mb-2">
+            {isMassSchedule ? "Keterangan Tambahan" : "Isi Konten / Artikel"}
+          </label>
+          <textarea name="body" value={form.body} onChange={handleChange} rows={8}
+            className="w-full px-4 py-3 border border-[#DDD8D0] rounded-md text-sm focus:border-[#B8960C] focus:ring-1 focus:ring-[#B8960C] outline-none resize-y" />
         </div>
+      )}
+
+      {/* Gambar — ImageUpload untuk semua tipe kecuali MASS_SCHEDULE */}
+      {isGallery ? (
+        <div className="p-5 bg-[#F5F0E8] rounded-lg border border-[#EDE8DF] space-y-4">
+          <ImageUpload
+            label="Foto Galeri"
+            required
+            value={form.imageUrl}
+            onChange={(url) => setForm(prev => ({ ...prev, imageUrl: url }))}
+          />
+          <div>
+            <label className="block text-xs text-[#6B6560] mb-1">Keterangan Foto (Opsional)</label>
+            <input type="text" name="body" value={form.body} onChange={handleChange}
+              placeholder="cth: Perayaan Misa Natal 2024"
+              className="w-full h-11 px-4 border border-[#DDD8D0] rounded-md text-sm bg-white focus:border-[#B8960C] focus:ring-1 focus:ring-[#B8960C] outline-none" />
+          </div>
+        </div>
+      ) : !isMassSchedule && (
+        <ImageUpload
+          label="Gambar Cover (Opsional)"
+          value={form.imageUrl}
+          onChange={(url) => setForm(prev => ({ ...prev, imageUrl: url }))}
+        />
       )}
 
       {/* Action Buttons */}

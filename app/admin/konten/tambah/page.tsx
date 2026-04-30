@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Loader2, Save } from "lucide-react";
+import ImageUpload from "@/components/admin/ImageUpload";
 
 const CONTENT_TYPES = [
   { value: "NEWS", label: "Berita / Artikel" },
@@ -168,22 +169,16 @@ export default function TambahKontenPage() {
           </div>
         )}
 
-        {/* URL Gambar (News) atau URL Foto (Gallery) */}
+        {/* URL Gambar (News) atau Upload Foto (Gallery) */}
         {isGallery ? (
           <div className="p-5 bg-[#F5F0E8] rounded-lg border border-[#EDE8DF] space-y-4">
-            <p className="text-xs font-bold text-[#6B6560] uppercase tracking-wider">📷 URL Foto</p>
-            <div>
-              <label className="block text-xs text-[#6B6560] mb-1">URL Gambar <span className="text-red-500">*</span></label>
-              <input
-                type="url"
-                name="imageUrl"
-                value={form.imageUrl}
-                onChange={handleChange}
-                required
-                placeholder="https://example.com/foto-gereja.jpg"
-                className="w-full h-11 px-4 border border-[#DDD8D0] rounded-md text-sm bg-white focus:border-[#B8960C] focus:ring-1 focus:ring-[#B8960C] outline-none"
-              />
-            </div>
+            <ImageUpload
+              label="Foto Galeri"
+              required
+              value={form.imageUrl}
+              onChange={(url) => setForm(prev => ({ ...prev, imageUrl: url }))}
+              placeholder="https://example.com/foto-gereja.jpg"
+            />
             <div>
               <label className="block text-xs text-[#6B6560] mb-1">Keterangan Foto (Opsional)</label>
               <input
@@ -195,33 +190,14 @@ export default function TambahKontenPage() {
                 className="w-full h-11 px-4 border border-[#DDD8D0] rounded-md text-sm bg-white focus:border-[#B8960C] focus:ring-1 focus:ring-[#B8960C] outline-none"
               />
             </div>
-            {form.imageUrl && (
-              <div className="mt-2">
-                <p className="text-xs text-[#A89880] mb-1">Preview:</p>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={form.imageUrl}
-                  alt="preview"
-                  className="w-full max-h-48 object-cover rounded-md border border-[#DDD8D0]"
-                  onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
-                />
-              </div>
-            )}
           </div>
         ) : !isMassSchedule && (
-          <div>
-            <label className="block text-xs font-bold text-[#6B6560] uppercase tracking-wider mb-2">
-              URL Gambar Cover (Opsional)
-            </label>
-            <input
-              type="url"
-              name="imageUrl"
-              value={form.imageUrl}
-              onChange={handleChange}
-              placeholder="https://example.com/gambar.jpg"
-              className="w-full h-11 px-4 border border-[#DDD8D0] rounded-md text-sm focus:border-[#B8960C] focus:ring-1 focus:ring-[#B8960C] outline-none"
-            />
-          </div>
+          <ImageUpload
+            label="Gambar Cover (Opsional)"
+            value={form.imageUrl}
+            onChange={(url) => setForm(prev => ({ ...prev, imageUrl: url }))}
+            placeholder="https://example.com/gambar.jpg"
+          />
         )}
 
         {/* Action Buttons */}
