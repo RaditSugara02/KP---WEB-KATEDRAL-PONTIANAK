@@ -4,7 +4,9 @@ import { db } from "./db";
 import * as schema from "./db/schema";
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = process.env.RESEND_API_KEY
+  ? new Resend(process.env.RESEND_API_KEY)
+  : null;
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -22,6 +24,7 @@ export const auth = betterAuth({
     // Skip email verification for local development
     requireEmailVerification: false,
     sendResetPassword: async ({ user, url, token }, request) => {
+      if (!resend) return; // skip if no API key
       try {
         await resend.emails.send({
           from: "Katedral Santo Yosef <onboarding@resend.dev>",
