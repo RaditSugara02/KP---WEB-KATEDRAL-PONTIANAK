@@ -15,7 +15,8 @@ import {
   Clock, 
   AlertCircle, 
   FileText,
-  ChevronRight
+  ChevronRight,
+  Printer
 } from "lucide-react";
 
 const STAGE_NAMES = [
@@ -129,10 +130,19 @@ export default async function BerandaDasborPage() {
           </p>
         </div>
         <div>
+          <div className="flex items-center gap-3 flex-wrap">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#FFF8E1] border border-[#B8960C]/30 rounded-full">
             <span className="text-xs uppercase tracking-wider font-semibold text-[#B8960C]">No. Registrasi:</span>
             <span className="font-bold text-[#3D2B1F]">{profile.registrationNumber}</span>
           </div>
+          <Link
+            href="/dasbor/cetak"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-[#DDD8D0] text-[#3D2B1F] font-semibold text-sm rounded-full hover:bg-[#F5F0E8] transition-colors"
+          >
+            <Printer size={14} className="text-[#A89880]" />
+            Cetak Bukti
+          </Link>
+        </div>
         </div>
       </div>
 
@@ -184,6 +194,33 @@ export default async function BerandaDasborPage() {
               Proses pendaftaran pernikahan Anda telah dihentikan/dibatalkan oleh Sekretariat. 
               Pesan terakhir: <strong>&quot;{adminMessage}&quot;</strong>
             </p>
+          </div>
+        </div>
+      )}
+
+      {/* Jadwal Pemberkatan Banner */}
+      {!isCanceled && application.weddingDate && (
+        <div className="bg-gradient-to-r from-[#2D6A4F] to-[#1D4A35] text-white p-6 rounded-xl shadow-md flex flex-col md:flex-row items-center gap-4">
+          <div className="w-14 h-14 bg-white/10 rounded-full flex items-center justify-center flex-shrink-0 text-3xl">
+            🎊
+          </div>
+          <div className="flex-1 text-center md:text-left">
+            <p className="text-xs font-bold uppercase tracking-wider text-white/70 mb-1">Jadwal Pemberkatan Nikah</p>
+            <h2 className="text-xl font-bold" style={{ fontFamily: "var(--font-cormorant)" }}>
+              {new Date(application.weddingDate).toLocaleDateString("id-ID", {
+                weekday: "long", day: "numeric", month: "long", year: "numeric",
+              })}
+              {application.weddingDate.includes("T") && (
+                <span className="text-white/80 ml-2 text-base font-semibold">
+                  · {application.weddingDate.substring(11, 16)} WIB
+                </span>
+              )}
+            </h2>
+            <p className="text-sm text-white/70 mt-1">Katedral Santo Yosef Martapura</p>
+          </div>
+          <div className="px-4 py-2 bg-white/10 rounded-lg border border-white/20 text-center flex-shrink-0">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-white/70 mb-0.5">No. Registrasi</p>
+            <p className="font-bold">{profile.registrationNumber}</p>
           </div>
         </div>
       )}

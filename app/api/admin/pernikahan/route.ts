@@ -147,6 +147,29 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true });
     }
 
+    if (action === "SET_WEDDING_DATE") {
+      const { weddingDate } = body;
+      await db.update(marriageApplications)
+        .set({ weddingDate: weddingDate || null, updatedAt: now })
+        .where(eq(marriageApplications.id, applicationId));
+
+      // Notify couple
+      if (coupleUserId && weddingDate) {
+        const dateStr = new Date(weddingDate).toLocaleDateString("id-ID", {
+          weekday: "long", day: "numeric", month: "long", year: "numeric",
+        });
+        const timeStr = weddingDate.includes("T") ? ` pukul ${weddingDate.substring(11, 16)} WIB` : "";
+        await db.insert(notifications).values({
+          id: nanoid(),
+          userId: coupleUserId,
+          message: `🎉 Jadwal Pemberkatan Anda telah ditetapkan: ${dateStr}${timeStr}. Selamat!`,
+          isRead: false,
+          createdAt: now,
+        });
+      }
+      return NextResponse.json({ success: true });
+    }
+
     if (action === "ASSIGN_PRIEST") {
       const { priestId } = body;
       await db.update(marriageApplications)

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Check, X, Send, ArrowUpCircle, Trash2, UserCheck } from "lucide-react";
+import { Check, X, Send, ArrowUpCircle, Trash2, UserCheck, CalendarDays } from "lucide-react";
 
 export default function DetailClient({ 
   application, 
@@ -22,6 +22,17 @@ export default function DetailClient({
     (application.priestId as string) || ""
   );
   const [loadingPriest, setLoadingPriest] = useState(false);
+
+  // Ceremony Date/Time State
+  // weddingDate is stored as "YYYY-MM-DDTHH:mm" in the DB
+  const existingDate = (application.weddingDate as string) || "";
+  const [ceremonyDate, setCeremonyDate] = useState(
+    existingDate ? existingDate.substring(0, 10) : ""
+  );
+  const [ceremonyTime, setCeremonyTime] = useState(
+    existingDate && existingDate.includes("T") ? existingDate.substring(11, 16) : ""
+  );
+  const [loadingCeremony, setLoadingCeremony] = useState(false);
   
   // Cancel Modal State
   const [showCancelModal, setShowCancelModal] = useState(false);
@@ -91,6 +102,25 @@ export default function DetailClient({
     });
     router.refresh();
     setLoadingPriest(false);
+  };
+
+  const handleSetCeremony = async () => {
+    if (!ceremonyDate) return;
+    setLoadingCeremony(true);
+    const weddingDate = ceremonyTime
+      ? `${ceremonyDate}T${ceremonyTime}`
+      : ceremonyDate;
+    await fetch("/api/admin/pernikahan", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "SET_WEDDING_DATE",
+        applicationId: application.id,
+        weddingDate,
+      }),
+    });
+    router.refresh();
+    setLoadingCeremony(false);
   };
 
   const isCanceled = application.currentStage === 99;
@@ -226,6 +256,58 @@ export default function DetailClient({
               </button>
             </div>
           )}
+        </div>
+
+        {/* Jadwal Pemberkatan */}
+        <div className="bg-white rounded-xl border border-[#DDD8D0] shadow-sm overflow-hidden p-6">
+          <h3 className="text-xs font-bold text-[#6B6560] uppercase tracking-wider mb-3 flex items-center gap-2">
+            <CalendarDays size={14} /> Jadwal Pemberkatan
+          </h3>
+          {application.weddingDate && (
+            <div className="mb-3 px-3 py-2 bg-[#FFF8E1] rounded-md border border-[#B8960C]/20">
+              <p className="text-[10px] font-bold text-[#A89880] uppercase tracking-wider mb-0.5">Terjadwal</p>
+              <p className="font-bold text-[#3D2B1F] text-sm">
+                {new Date(application.weddingDate as string).toLocaleDateString("id-ID", {
+                  weekday: "long", day: "numeric", month: "long", year: "numeric",
+                })}
+                {(application.weddingDate as string).includes("T") && (
+                  <span className="text-[#B8960C] ml-1">
+                    · {(application.weddingDate as string).substring(11, 16)} WIB
+                  </span>
+                )}
+              </p>
+            </div>
+          )}
+          <div className="space-y-2">
+            <div>
+              <label className="block text-[10px] font-bold text-[#6B6560] uppercase tracking-wider mb-1">Tanggal</label>
+              <input
+                type="date"
+                value={ceremonyDate}
+                onChange={(e) => setCeremonyDate(e.target.value)}
+                disabled={isCanceled}
+                className="w-full h-10 px-3 border border-[#DDD8D0] rounded-md text-sm focus:border-[#B8960C] outline-none disabled:opacity-50 bg-white"
+              />
+            </div>
+            <div>
+              <label className="block text-[10px] font-bold text-[#6B6560] uppercase tracking-wider mb-1">Jam (opsional)</label>
+              <input
+                type="time"
+                value={ceremonyTime}
+                onChange={(e) => setCeremonyTime(e.target.value)}
+                disabled={isCanceled}
+                className="w-full h-10 px-3 border border-[#DDD8D0] rounded-md text-sm focus:border-[#B8960C] outline-none disabled:opacity-50 bg-white"
+              />
+            </div>
+            <button
+              onClick={handleSetCeremony}
+              disabled={loadingCeremony || !ceremonyDate || isCanceled}
+              className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-[#2D6A4F] text-white font-bold text-sm rounded-md hover:bg-[#1D4A35] transition-colors disabled:opacity-50"
+            >
+              <CalendarDays size={15} />
+              {loadingCeremony ? "Menyimpan..." : "Simpan Jadwal"}
+            </button>
+          </div>
         </div>
 
         {/* Kirim Catatan */}

@@ -228,11 +228,12 @@
 - [x] KPI cards: jumlah per role
 - [x] Badge role berwarna dan status verifikasi email
 
-#### 4. Halaman Admin: Pengaturan (`/admin/pengaturan`)
-- [ ] Form edit informasi gereja (nama, alamat, nomor telepon, email)
-- [ ] Pengaturan jam operasional sekretariat
-- [ ] Pengaturan jadwal misa default
-- *Catatan: Folder sudah ada tapi halaman belum diimplementasi*
+#### 4. Halaman Admin: Pengaturan (`/admin/pengaturan`) ✅ SELESAI
+- [x] Form edit informasi gereja (nama, alamat, nomor telepon, email)
+- [x] Pengaturan jam operasional sekretariat
+- [x] Pengaturan jadwal misa default
+- [x] API `GET/POST /api/admin/pengaturan` — simpan ke tabel `contents` (tanpa migrasi DB)
+- [x] Dipisahkan dari pengaturan akun admin secara visual
 
 ### 🟡 Prioritas Menengah
 
@@ -242,10 +243,11 @@
 - [ ] Trigger email ke pasangan ketika pendaftaran dibatalkan
 - [ ] Template email branded sesuai design system
 
-#### 6. Riwayat Tahap di Dasbor Pengantin
-- [ ] Tampilkan timeline perubahan tahap di `/dasbor/beranda`
-- [ ] Data sudah ada di tabel `stage_history` — tinggal di-query dan ditampilkan
-- [ ] Format: tanggal + keterangan perubahan tahap + nama admin yang mengubah
+#### 6. Riwayat Tahap di Dasbor Pengantin ✅ SELESAI
+- [x] Timeline riwayat perubahan tahap tampil di `/dasbor/beranda`
+- [x] Query `stage_history` lengkap (tidak hanya yang terbaru)
+- [x] Format: tanggal + jam + label tahap berwarna + catatan admin
+- [x] Dot berwarna berbeda: terbaru (gold), selesai (hijau), pertama (abu)
 
 #### 7. Jadwal Pemberkatan di Dasbor Pengantin
 - [ ] Setelah semua dokumen selesai, Admin bisa input tanggal & jam pemberkatan
@@ -257,10 +259,12 @@
 - [ ] Generate PDF sederhana berisi: nomor registrasi, nama mempelai, tanggal daftar, status tahap saat ini
 - [ ] Gunakan library `react-pdf` atau `jsPDF`
 
-#### 9. Pencarian & Filter di Tabel Admin Pernikahan
-- [ ] Search by nama mempelai atau nomor registrasi di `/admin/pernikahan`
-- [ ] Filter by status tahap (Tahap 1, 2, 3, 4, 5, Dibatalkan)
-- [ ] Filter by bulan/tahun pemberkatan
+#### 9. Pencarian & Filter di Tabel Admin Pernikahan ✅ SELESAI
+- [x] Search by nama mempelai atau nomor registrasi (live, client-side)
+- [x] Filter by status tahap (Tahap 1–5, Dibatalkan) dengan dropdown
+- [x] Tombol reset filter
+- [x] Counter hasil pencarian di bawah tabel
+- [x] Diimplementasikan sebagai `PernikahanTableClient.tsx` (client component)
 
 ### 🟢 Prioritas Rendah / Enhancement
 
@@ -315,6 +319,7 @@
 | 30 Apr 2026 | Sistem unggah dokumen di-skip; file PROGRESS_LOG.md dibuat |
 | 30 Apr 2026 | Tambah 8 fitur baru ke backlog berdasarkan analisis gap |
 | 30 Apr 2026 | Implementasi: Penugasan Romo, KPI Perlu Verifikasi, Halaman Pengguna |
+| 30 Apr 2026 | Implementasi: Search/Filter pernikahan, Timeline riwayat tahap, Halaman pengaturan gereja |
 
 ---
 
