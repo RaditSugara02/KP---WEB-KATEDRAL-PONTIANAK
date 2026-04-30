@@ -5,9 +5,10 @@ import {
   coupleProfiles, 
   marriageApplications,
   stageHistory,
+  requiredDocuments,
   users
 } from "@/lib/db/schema";
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, and, inArray } from "drizzle-orm";
 import { Users, AlertCircle, CalendarHeart, FileCheck, ArrowRight, ChevronRight } from "lucide-react";
 import Link from "next/link";
 
@@ -60,6 +61,23 @@ export default async function AdminRingkasanPage() {
     const date = new Date(a.weddingDate);
     return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
   }).length;
+
+  // KPI 4: Aplikasi aktif yang masih punya dokumen belum diterima
+  let perluVerifikasi = 0;
+  if (activeApps.length > 0) {
+    const activeIds = activeApps.map(a => a.id);
+    const pendingDocs = await db
+      .select({ applicationId: requiredDocuments.applicationId })
+      .from(requiredDocuments)
+      .where(
+        and(
+          inArray(requiredDocuments.applicationId, activeIds),
+          eq(requiredDocuments.isReceived, false)
+        )
+      );
+    const uniqueAppsWithPending = new Set(pendingDocs.map(d => d.applicationId));
+    perluVerifikasi = uniqueAppsWithPending.size;
+  }
 
   // Recent History
   const recentHistory = await db.select({
@@ -129,7 +147,7 @@ export default async function AdminRingkasanPage() {
           </div>
           <div>
             <p className="text-xs font-bold text-[#6B6560] uppercase tracking-wider mb-1">Perlu Verifikasi</p>
-            <h3 className="text-2xl font-bold text-[#2D6A4F] leading-none">0</h3>
+            <h3 className="text-2xl font-bold text-[#2D6A4F] leading-none">{perluVerifikasi}</h3>
           </div>
         </div>
       </div>

@@ -5,7 +5,8 @@ import {
   coupleProfiles, 
   marriageApplications,
   requiredDocuments,
-  stageHistory
+  stageHistory,
+  users
 } from "@/lib/db/schema";
 import { desc, eq } from "drizzle-orm";
 import { ArrowLeft } from "lucide-react";
@@ -26,6 +27,7 @@ export default async function AdminPernikahanDetailPage({ params }: { params: { 
     id: marriageApplications.id,
     currentStage: marriageApplications.currentStage,
     weddingDate: marriageApplications.weddingDate,
+    priestId: marriageApplications.priestId,
     regNum: coupleProfiles.registrationNumber,
     groomName: coupleProfiles.groomName,
     groomBirthdate: coupleProfiles.groomBirthdate,
@@ -56,6 +58,12 @@ export default async function AdminPernikahanDetailPage({ params }: { params: { 
     .where(eq(stageHistory.applicationId, id))
     .orderBy(desc(stageHistory.changedAt));
 
+  // Fetch priests for assignment dropdown
+  const priests = await db
+    .select({ id: users.id, name: users.name, email: users.email })
+    .from(users)
+    .where(eq(users.role, "PRIEST"));
+
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       
@@ -83,7 +91,7 @@ export default async function AdminPernikahanDetailPage({ params }: { params: { 
       </div>
 
       {/* Interactive Client Component */}
-      <DetailClient application={application} docs={docs} history={history} />
+      <DetailClient application={application} docs={docs} history={history} priests={priests} />
 
     </div>
   );

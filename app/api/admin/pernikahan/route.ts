@@ -147,6 +147,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true });
     }
 
+    if (action === "ASSIGN_PRIEST") {
+      const { priestId } = body;
+      await db.update(marriageApplications)
+        .set({ priestId: priestId || null, updatedAt: now })
+        .where(eq(marriageApplications.id, applicationId));
+      return NextResponse.json({ success: true });
+    }
+
     return NextResponse.json({ error: "Invalid action" }, { status: 400 });
 
   } catch (error) {

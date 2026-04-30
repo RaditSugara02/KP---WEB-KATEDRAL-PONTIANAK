@@ -2,20 +2,26 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Check, X, Send, ArrowUpCircle, Trash2 } from "lucide-react";
+import { Check, X, Send, ArrowUpCircle, Trash2, UserCheck } from "lucide-react";
 
 export default function DetailClient({ 
   application, 
   docs, 
-  history 
+  history,
+  priests,
 }: { 
   application: Record<string, string | number | null | undefined>;
   docs: Array<{ id: string, documentName: string | null, isReceived: boolean | null, receivedAt: Date | null }>;
   history: Array<{ stageNumber: number | null, note: string | null, changedAt: Date | null }>;
+  priests: Array<{ id: string, name: string, email: string }>;
 }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [note, setNote] = useState("");
+  const [selectedPriest, setSelectedPriest] = useState<string>(
+    (application.priestId as string) || ""
+  );
+  const [loadingPriest, setLoadingPriest] = useState(false);
   
   // Cancel Modal State
   const [showCancelModal, setShowCancelModal] = useState(false);
@@ -70,6 +76,21 @@ export default function DetailClient({
     setCancelReason("");
     router.refresh();
     setLoading(false);
+  };
+
+  const handleAssignPriest = async () => {
+    setLoadingPriest(true);
+    await fetch("/api/admin/pernikahan", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "ASSIGN_PRIEST",
+        applicationId: application.id,
+        priestId: selectedPriest || null,
+      }),
+    });
+    router.refresh();
+    setLoadingPriest(false);
   };
 
   const isCanceled = application.currentStage === 99;
@@ -171,6 +192,40 @@ export default function DetailClient({
             <Trash2 size={18} />
             Batalkan Pendaftaran
           </button>
+        </div>
+
+        {/* Penugasan Romo */}
+        <div className="bg-white rounded-xl border border-[#DDD8D0] shadow-sm overflow-hidden p-6">
+          <h3 className="text-xs font-bold text-[#6B6560] uppercase tracking-wider mb-3 flex items-center gap-2">
+            <UserCheck size={14} /> Penugasan Romo
+          </h3>
+          {priests.length === 0 ? (
+            <p className="text-xs text-[#A89880]">Belum ada imam terdaftar di sistem.</p>
+          ) : (
+            <div className="space-y-3">
+              <select
+                value={selectedPriest}
+                onChange={(e) => setSelectedPriest(e.target.value)}
+                disabled={loadingPriest || isCanceled}
+                className="w-full h-10 px-3 border border-[#DDD8D0] rounded-md text-sm focus:border-[#B8960C] outline-none disabled:opacity-50 bg-white"
+              >
+                <option value="">— Belum Ditugaskan —</option>
+                {priests.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}
+                  </option>
+                ))}
+              </select>
+              <button
+                onClick={handleAssignPriest}
+                disabled={loadingPriest || isCanceled}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-[#3D2B1F] text-white font-bold text-sm rounded-md hover:bg-[#2C1F14] transition-colors disabled:opacity-50"
+              >
+                <UserCheck size={15} />
+                {loadingPriest ? "Menyimpan..." : "Simpan Penugasan"}
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Kirim Catatan */}
