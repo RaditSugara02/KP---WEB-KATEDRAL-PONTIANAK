@@ -17,10 +17,42 @@ const dmSans = DM_Sans({
   display: "swap",
 });
 
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://kp-web-katedral-pontianak.vercel.app";
+
 export const metadata: Metadata = {
-  title: "Katedral Santo Yosef Martapura — Sistem Informasi",
+  metadataBase: new URL(APP_URL),
+  title: {
+    default: "Katedral Santo Yosef Martapura — Sistem Informasi Paroki",
+    template: "%s | Katedral Santo Yosef Martapura",
+  },
   description:
-    "Sistem Informasi Layanan Gereja Katedral Santo Yosef Martapura. Portal informasi publik dan pemantauan progres pendaftaran pernikahan.",
+    "Portal resmi Paroki Katedral Santo Yosef Martapura. Layanan informasi publik, jadwal misa, berita paroki, dan sistem pendaftaran pernikahan online.",
+  keywords: [
+    "Katedral Santo Yosef", "Martapura", "Kalimantan Selatan",
+    "paroki", "gereja katolik", "pernikahan katolik",
+    "jadwal misa", "pendaftaran pernikahan", "sakramen perkawinan"
+  ],
+  authors: [{ name: "Paroki Katedral Santo Yosef Martapura" }],
+  creator: "Paroki Katedral Santo Yosef Martapura",
+  openGraph: {
+    type: "website",
+    locale: "id_ID",
+    url: APP_URL,
+    siteName: "Katedral Santo Yosef Martapura",
+    title: "Katedral Santo Yosef Martapura — Sistem Informasi Paroki",
+    description:
+      "Portal resmi Paroki Katedral Santo Yosef Martapura. Informasi jadwal misa, berita paroki, dan pendaftaran pernikahan.",
+  },
+  twitter: {
+    card: "summary",
+    title: "Katedral Santo Yosef Martapura",
+    description: "Portal resmi Paroki Katedral Santo Yosef Martapura.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true },
+  },
 };
 
 export default function RootLayout({

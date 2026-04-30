@@ -249,15 +249,18 @@
 - [x] Format: tanggal + jam + label tahap berwarna + catatan admin
 - [x] Dot berwarna berbeda: terbaru (gold), selesai (hijau), pertama (abu)
 
-#### 7. Jadwal Pemberkatan di Dasbor Pengantin
-- [ ] Setelah semua dokumen selesai, Admin bisa input tanggal & jam pemberkatan
-- [ ] Pasangan dapat melihat jadwal pemberkatan di `/dasbor/beranda`
-- [ ] Field baru di tabel `marriage_applications`: `ceremony_date`, `ceremony_time`
+#### 7. Jadwal Pemberkatan di Dasbor Pengantin ✅ SELESAI
+- [x] Admin bisa input tanggal & jam pemberkatan di halaman detail pernikahan
+- [x] API action `SET_WEDDING_DATE` di `/api/admin/pernikahan`
+- [x] Banner hijau jadwal pemberkatan muncul di `/dasbor/beranda` pasangan
+- [x] Notifikasi otomatis terkirim ke pasangan saat jadwal ditetapkan
 
-#### 8. Print / Download Bukti Pendaftaran
-- [ ] Tombol "Cetak Bukti" di `/dasbor/beranda` atau `/dasbor/profil`
-- [ ] Generate PDF sederhana berisi: nomor registrasi, nama mempelai, tanggal daftar, status tahap saat ini
-- [ ] Gunakan library `react-pdf` atau `jsPDF`
+#### 8. Print / Download Bukti Pendaftaran ✅ SELESAI
+- [x] Halaman `/dasbor/cetak` dengan layout print-optimized
+- [x] Menampilkan: nomor registrasi, data mempelai, status tahap, jadwal pemberkatan, checklist dokumen
+- [x] Tombol "Cetak / Simpan PDF" (menggunakan `window.print()` — tanpa npm tambahan)
+- [x] Tombol "Cetak Bukti" di header dasbor pengantin
+- [x] Garis tanda tangan untuk Sekretariat & Mempelai
 
 #### 9. Pencarian & Filter di Tabel Admin Pernikahan ✅ SELESAI
 - [x] Search by nama mempelai atau nomor registrasi (live, client-side)
@@ -320,6 +323,7 @@
 | 30 Apr 2026 | Tambah 8 fitur baru ke backlog berdasarkan analisis gap |
 | 30 Apr 2026 | Implementasi: Penugasan Romo, KPI Perlu Verifikasi, Halaman Pengguna |
 | 30 Apr 2026 | Implementasi: Search/Filter pernikahan, Timeline riwayat tahap, Halaman pengaturan gereja |
+| 30 Apr 2026 | Implementasi: Jadwal pemberkatan (admin+dasbor), Print/PDF bukti pendaftaran |
 
 ---
 

@@ -31,6 +31,7 @@ export function Navbar() {
     { name: "Berita", href: "/berita" },
     { name: "Jadwal Misa", href: "/jadwal-misa" },
     { name: "Sakramen Perkawinan", href: "/sakramen-perkawinan" },
+    { name: "Kontak", href: "/kontak" },
   ];
 
   // Determine navbar styles based on scroll and page

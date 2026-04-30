@@ -6,11 +6,17 @@ import {
   requiredDocuments,
   stageHistory,
   notifications,
-  coupleProfiles
+  coupleProfiles,
+  users
 } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { headers } from "next/headers";
+import {
+  sendStageAdvanceEmail,
+  sendCancellationEmail,
+  sendCeremonyScheduleEmail,
+} from "@/lib/email";
 
 const STAGE_NAMES = [
   "Pengisian Profil",
@@ -45,6 +51,17 @@ export async function POST(req: NextRequest) {
 
     const profiles = await db.select().from(coupleProfiles).where(eq(coupleProfiles.id, app.coupleProfileId)).limit(1);
     const coupleUserId = profiles[0]?.userId;
+    const coupleProfile = profiles[0];
+
+    // Fetch couple's email for Resend
+    let coupleEmail = "";
+    let coupleName = "";
+    if (coupleUserId) {
+      const userRecord = await db.select({ email: users.email, name: users.name })
+        .from(users).where(eq(users.id, coupleUserId)).limit(1);
+      coupleEmail = userRecord[0]?.email || "";
+      coupleName = userRecord[0]?.name || "";
+    }
 
     if (action === "TOGGLE_DOC") {
       const { docId, isReceived } = body;
@@ -74,7 +91,7 @@ export async function POST(req: NextRequest) {
         changedAt: now
       });
 
-      // Notify user
+      // Notify user (in-app)
       if (coupleUserId) {
         await db.insert(notifications).values({
           id: nanoid(),
@@ -83,6 +100,18 @@ export async function POST(req: NextRequest) {
           isRead: false,
           createdAt: now
         });
+      }
+
+      // Send email
+      if (coupleEmail && coupleProfile) {
+        sendStageAdvanceEmail({
+          to: coupleEmail,
+          name: coupleName,
+          regNum: coupleProfile.registrationNumber || "",
+          newStage,
+          stageName: STAGE_NAMES[newStage - 1],
+          note,
+        }).catch(console.error);
       }
 
       return NextResponse.json({ success: true, newStage });
@@ -133,7 +162,7 @@ export async function POST(req: NextRequest) {
         changedAt: now
       });
 
-      // Notify user
+      // Notify user (in-app)
       if (coupleUserId) {
         await db.insert(notifications).values({
           id: nanoid(),
@@ -142,6 +171,16 @@ export async function POST(req: NextRequest) {
           isRead: false,
           createdAt: now
         });
+      }
+
+      // Send cancellation email
+      if (coupleEmail && coupleProfile) {
+        sendCancellationEmail({
+          to: coupleEmail,
+          name: coupleName,
+          regNum: coupleProfile.registrationNumber || "",
+          reason: note,
+        }).catch(console.error);
       }
 
       return NextResponse.json({ success: true });
@@ -153,7 +192,7 @@ export async function POST(req: NextRequest) {
         .set({ weddingDate: weddingDate || null, updatedAt: now })
         .where(eq(marriageApplications.id, applicationId));
 
-      // Notify couple
+      // Notify couple (in-app)
       if (coupleUserId && weddingDate) {
         const dateStr = new Date(weddingDate).toLocaleDateString("id-ID", {
           weekday: "long", day: "numeric", month: "long", year: "numeric",
@@ -167,6 +206,17 @@ export async function POST(req: NextRequest) {
           createdAt: now,
         });
       }
+
+      // Send ceremony email
+      if (coupleEmail && coupleProfile && weddingDate) {
+        sendCeremonyScheduleEmail({
+          to: coupleEmail,
+          name: coupleName,
+          regNum: coupleProfile.registrationNumber || "",
+          weddingDate,
+        }).catch(console.error);
+      }
+
       return NextResponse.json({ success: true });
     }
 
