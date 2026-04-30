@@ -212,20 +212,21 @@
 
 ### 🔴 Prioritas Tinggi
 
-#### 1. Penugasan Romo (Priest Assignment)
-- [ ] Dropdown di halaman detail pernikahan untuk Admin memilih Romo
-- [ ] Update `priestId` di tabel `marriage_applications`
-- [ ] (Opsional) Dasbor sederhana untuk Romo melihat jadwal yang ditugaskan
+#### 1. Penugasan Romo (Priest Assignment) ✅ SELESAI
+- [x] Dropdown di halaman detail pernikahan untuk Admin memilih Romo
+- [x] Update `priestId` di tabel `marriage_applications`
+- [x] API endpoint `GET /api/admin/romo` untuk daftar imam
+- [x] API action `ASSIGN_PRIEST` di `/api/admin/pernikahan`
 
-#### 2. KPI "Perlu Verifikasi" di Admin
-- [ ] KPI card ke-4 di ringkasan admin masih hardcoded `0`
-- [ ] Perlu logika: hitung dokumen yang belum diverifikasi Admin
+#### 2. KPI "Perlu Verifikasi" di Admin ✅ SELESAI
+- [x] KPI card ke-4 di ringkasan admin sudah dinamis
+- [x] Query menghitung jumlah aplikasi aktif yang masih punya dokumen belum diterima
 
-#### 3. Halaman Admin: Pengguna (`/admin/pengguna`)
-- [ ] Tampilkan daftar semua user terdaftar (COUPLE, ADMIN, PRIEST)
-- [ ] Informasi: nama, email, role, tanggal daftar
-- [ ] Tombol nonaktifkan/aktifkan akun user
-- *Catatan: Folder sudah ada tapi halaman belum diimplementasi*
+#### 3. Halaman Admin: Pengguna (`/admin/pengguna`) ✅ SELESAI
+- [x] Tampilkan daftar semua user terdaftar (COUPLE, ADMIN, PRIEST)
+- [x] Informasi: nama, email, role, tanggal daftar
+- [x] KPI cards: jumlah per role
+- [x] Badge role berwarna dan status verifikasi email
 
 #### 4. Halaman Admin: Pengaturan (`/admin/pengaturan`)
 - [ ] Form edit informasi gereja (nama, alamat, nomor telepon, email)
@@ -313,6 +314,7 @@
 | 30 Apr 2026 | Google OAuth production berhasil dikonfigurasi |
 | 30 Apr 2026 | Sistem unggah dokumen di-skip; file PROGRESS_LOG.md dibuat |
 | 30 Apr 2026 | Tambah 8 fitur baru ke backlog berdasarkan analisis gap |
+| 30 Apr 2026 | Implementasi: Penugasan Romo, KPI Perlu Verifikasi, Halaman Pengguna |
 
 ---
 

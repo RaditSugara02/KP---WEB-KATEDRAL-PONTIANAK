@@ -100,11 +100,11 @@ export default async function BerandaDasborPage() {
     .where(eq(marriageApplications.coupleProfileId, profile.id)).limit(1);
   const application = appRecord[0];
 
-  // Fetch Latest Note
-  const latestHistory = await db.select().from(stageHistory)
+  // Fetch ALL Stage History for Timeline
+  const allHistory = await db.select().from(stageHistory)
     .where(eq(stageHistory.applicationId, application.id))
-    .orderBy(desc(stageHistory.changedAt)).limit(1);
-  const adminMessage = latestHistory[0]?.note || "Berkas pendaftaran sedang ditinjau.";
+    .orderBy(desc(stageHistory.changedAt));
+  const adminMessage = allHistory[0]?.note || "Berkas pendaftaran sedang ditinjau.";
 
   // Fetch Docs
   const docs = await db.select().from(requiredDocuments)
@@ -290,6 +290,70 @@ export default async function BerandaDasborPage() {
         </div>
 
       </div>
+
+      {/* Riwayat Tahap Timeline */}
+      {allHistory.length > 0 && (
+        <div className="bg-white rounded-xl border border-[#DDD8D0] shadow-sm overflow-hidden">
+          <div className="px-5 py-4 border-b border-[#EDE8DF] flex items-center gap-2">
+            <Clock size={16} className="text-[#B8960C]" />
+            <h3 className="font-bold text-[#3D2B1F] text-sm uppercase tracking-wide">Riwayat Perubahan Tahap</h3>
+          </div>
+          <div className="p-5">
+            <div className="relative">
+              {/* Vertical Line */}
+              <div className="absolute left-4 top-0 bottom-0 w-px bg-[#EDE8DF]" />
+              <div className="space-y-5">
+                {allHistory.map((h, i) => {
+                  const isLast = i === allHistory.length - 1;
+                  const date = h.changedAt
+                    ? new Date(h.changedAt).toLocaleDateString("id-ID", {
+                        day: "numeric", month: "long", year: "numeric",
+                      })
+                    : "—";
+                  const time = h.changedAt
+                    ? new Date(h.changedAt).toLocaleTimeString("id-ID", {
+                        hour: "2-digit", minute: "2-digit",
+                      })
+                    : "";
+                  const isCancelEntry = h.stageNumber === 99;
+                  return (
+                    <div key={i} className="flex gap-4 pl-2">
+                      {/* Dot */}
+                      <div className={`w-5 h-5 rounded-full border-2 flex-shrink-0 mt-0.5 z-10 flex items-center justify-center ${
+                        i === 0
+                          ? isCancelEntry
+                            ? "bg-[#C0392B] border-[#C0392B]"
+                            : "bg-[#B8960C] border-[#B8960C]"
+                          : isLast
+                          ? "bg-[#EDE8DF] border-[#DDD8D0]"
+                          : "bg-[#D8F3DC] border-[#2D6A4F]"
+                      }`}>
+                        {i === 0 && !isCancelEntry && (
+                          <div className="w-2 h-2 bg-white rounded-full" />
+                        )}
+                      </div>
+                      {/* Content */}
+                      <div className="flex-1 pb-2">
+                        <div className="flex items-center gap-2 mb-1 flex-wrap">
+                          <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
+                            isCancelEntry
+                              ? "bg-[#FDECEA] text-[#C0392B]"
+                              : "bg-[#FFF8E1] text-[#B8960C]"
+                          }`}>
+                            {isCancelEntry ? "Dibatalkan" : `Tahap ${h.stageNumber}`}
+                          </span>
+                          <span className="text-xs text-[#A89880]">{date} · {time}</span>
+                        </div>
+                        <p className="text-sm text-[#3D2B1F]">{h.note}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
