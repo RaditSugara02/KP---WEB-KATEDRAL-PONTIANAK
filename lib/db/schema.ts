@@ -162,6 +162,7 @@ export const notifications = pgTable("notifications", {
 export const contents = pgTable("contents", {
   id: text("id").primaryKey(),
   type: varchar("type", { length: 50 }).notNull(), // NEWS | MASS_SCHEDULE | AGENDA
+  category: varchar("category", { length: 50 }), // Sub-kategori untuk NEWS, misal: Pengumuman, Kegiatan, Renungan
   title: text("title").notNull(),
   slug: text("slug").unique(),
   body: text("body"),

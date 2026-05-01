@@ -21,6 +21,7 @@ export default function TambahKontenPage() {
   const [form, setForm] = useState({
     title: "",
     type: "NEWS",
+    category: "",
     body: "",
     eventDate: "",
     location: "",
@@ -102,6 +103,24 @@ export default function TambahKontenPage() {
             ))}
           </div>
         </div>
+
+        {/* Kategori Berita (Khusus Berita) */}
+        {form.type === "NEWS" && (
+          <div>
+            <label className="block text-xs font-bold text-[#6B6560] uppercase tracking-wider mb-2">
+              Kategori Berita <span className="text-[#A89880] font-normal">(Opsional)</span>
+            </label>
+            <input
+              type="text"
+              name="category"
+              value={form.category}
+              onChange={handleChange}
+              placeholder="cth: Pengumuman, Kegiatan, Renungan"
+              className="w-full h-11 px-4 border border-[#DDD8D0] rounded-md text-sm focus:border-[#B8960C] focus:ring-1 focus:ring-[#B8960C] outline-none"
+            />
+            <p className="mt-1.5 text-xs text-[#A89880]">Kategori ini akan muncul sebagai filter di halaman berita publik.</p>
+          </div>
+        )}
 
         {/* Judul */}
         <div>

@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json();
-  const { title, body: contentBody, type, eventDate, location, imageUrl } = body;
+  const { title, body: contentBody, type, category, eventDate, location, imageUrl } = body;
 
   if (!title || !type) {
     return NextResponse.json({ error: "Judul dan tipe konten wajib diisi." }, { status: 400 });
@@ -37,6 +37,7 @@ export async function POST(req: NextRequest) {
     slug: createSlug(title),
     body: contentBody || "",
     type,
+    category: category || null,
     eventDate: eventDate || null,
     location: location || null,
     imageUrl: imageUrl || null,
@@ -56,7 +57,7 @@ export async function PUT(req: NextRequest) {
   }
 
   const body = await req.json();
-  const { id, title, body: contentBody, type, eventDate, location, imageUrl } = body;
+  const { id, title, body: contentBody, type, category, eventDate, location, imageUrl } = body;
 
   if (!id) {
     return NextResponse.json({ error: "ID konten tidak ditemukan." }, { status: 400 });
@@ -66,6 +67,7 @@ export async function PUT(req: NextRequest) {
     title,
     body: contentBody || "",
     type,
+    category: category || null,
     eventDate: eventDate || null,
     location: location || null,
     imageUrl: imageUrl || null,

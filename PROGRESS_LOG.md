@@ -414,3 +414,70 @@ npm run db:seed      # Isi data awal
 ---
 
 *Catatan: Dokumen ini dikompilasi dari `PROJECT_TRACKER.md`, `progress_tracking_(Gemini 3.1 pro).md`, `rencana_migrasi_supabase_google_auth.md`, dan riwayat sesi pengembangan.*
+
+---
+
+## 📅 PEMBARUAN — 1 Mei 2026
+
+### ✅ Fitur Daftar Ulang Lengkap
+
+**Deskripsi:** Implementasi sistem daftar ulang pernikahan yang memungkinkan pasangan yang pendaftarannya dibatalkan untuk mengajukan pendaftaran baru, dengan visibilitas penuh bagi Admin.
+
+#### Perubahan Database
+- [x] Tambah kolom `is_reregistration BOOLEAN DEFAULT false` pada tabel `marriage_applications`
+- [x] Tambah kolom `previous_application_id TEXT NULL` pada tabel `marriage_applications` (referensi ke aplikasi yang dibatalkan)
+- [x] Migrasi dijalankan langsung ke Supabase via SQL
+
+#### Sisi Admin
+- [x] **Badge "🔄 Daftar Ulang"** di tabel `/admin/pernikahan` — muncul di samping nama pasangan
+- [x] **Filter "🔄 Daftar Ulang"** di dropdown filter tahap
+- [x] **Badge di header** halaman detail `/admin/pernikahan/[id]` — tampil berdampingan dengan badge tahap
+- [x] **Section "Riwayat Pendaftaran Sebelumnya"** di halaman detail — tabel berisi:
+  - No. registrasi lama
+  - Tanggal daftar pertama
+  - Tanggal dibatalkan
+  - Alasan pembatalan dari sekretariat
+  - Status: DIBATALKAN
+
+#### Sisi Pengantin (Dasbor)
+- [x] **Tombol "Ajukan Daftar Ulang"** di banner pembatalan pada `/dasbor/beranda`
+- [x] Konfirmasi dialog sebelum submit
+- [x] Spinner loading saat proses berlangsung
+- [x] Redirect otomatis ke dasbor aktif setelah sukses
+
+#### API Baru
+- [x] `POST /api/dasbor/daftar-ulang` — membuat aplikasi baru dengan:
+  - `isReregistration = true`
+  - `previousApplicationId` = id aplikasi yang dibatalkan
+  - 11 dokumen default direset
+  - Riwayat tahap dicatat
+  - Notifikasi dikirim ke pengantin
+
+#### File yang Diubah/Dibuat
+| File | Perubahan |
+|---|---|
+| `lib/db/schema.ts` | +2 kolom baru di `marriageApplications` |
+| `app/api/dasbor/daftar-ulang/route.ts` | **[BARU]** API endpoint daftar ulang |
+| `app/dasbor/beranda/DaftarUlangButton.tsx` | **[BARU]** Client component tombol |
+| `app/dasbor/beranda/page.tsx` | Import + tambah tombol di banner |
+| `app/admin/pernikahan/page.tsx` | Query tambah `isReregistration` |
+| `app/admin/pernikahan/PernikahanTableClient.tsx` | Badge + filter daftar ulang |
+| `app/admin/pernikahan/[id]/page.tsx` | Fetch previous app data + badge header |
+| `app/admin/pernikahan/[id]/DetailClient.tsx` | Section riwayat pendaftaran sebelumnya |
+
+---
+
+### ✅ Perbaikan Halaman Berita (Pagination & Kategori Dinamis)
+
+**Deskripsi:** Memperbarui sistem berita agar kategori yang muncul dapat menyesuaikan dengan data input dari admin, serta mengimplementasikan fungsionalitas limit (10 berita/grid) dengan nomor halaman.
+
+#### Perubahan yang Dilakukan
+- **Database Schema:** Menambahkan kolom `category` (VARCHAR 50) pada tabel `contents` untuk menyimpan sub-kategori khusus tipe `NEWS` (seperti Pengumuman, Kegiatan, Renungan, dsb).
+- **Admin UI:** Menambahkan field input teks "Kategori Berita" pada form `tambah/page.tsx` dan `EditKontenClient.tsx` (muncul hanya jika tipe konten adalah "Berita / Artikel").
+- **API Server:** Memperbarui `POST` dan `PUT` pada endpoint `/api/admin/konten/route.ts` untuk memproses dan menyimpan atribut `category`.
+- **Public UI (Client Component):** Membuat komponen baru `BeritaListClient.tsx` yang menangani:
+  - Ekstraksi kategori secara dinamis dari database (tombol filter menyesuaikan otomatis dengan kategori berita yang sudah diinput admin).
+  - Sistem filter berita client-side yang sangat responsif.
+  - Implementasi *pagination* dengan membatasi grid maksimal 10 berita per halaman, beserta kontrol nomor halaman di bagian bawah.
+  - Skenario layar kosong (Empty State) yang menampilkan placeholder apabila belum ada berita dalam kategori tersebut.
+- **Berita Page Wrapper:** Mengubah halaman `app/(public)/berita/page.tsx` untuk mengambil semua berita (`type="NEWS"`) secara *Server-Side* dari database lalu meneruskannya ke `BeritaListClient` untuk interaktivitas instan tanpa memuat ulang (reload) halaman.
