@@ -23,6 +23,7 @@ export default async function AdminPernikahanPage() {
     groom: coupleProfiles.groomName,
     bride: coupleProfiles.brideName,
     createdAt: marriageApplications.createdAt,
+    isReregistration: marriageApplications.isReregistration,
   })
   .from(marriageApplications)
   .leftJoin(coupleProfiles, eq(marriageApplications.coupleProfileId, coupleProfiles.id))
@@ -33,6 +34,7 @@ export default async function AdminPernikahanPage() {
     ...a,
     weddingDate: a.weddingDate ? String(a.weddingDate) : null,
     createdAt: a.createdAt ? a.createdAt.toISOString() : null,
+    isReregistration: a.isReregistration ?? false,
   }));
 
   return (

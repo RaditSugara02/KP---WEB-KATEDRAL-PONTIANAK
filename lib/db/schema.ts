@@ -105,8 +105,11 @@ export const marriageApplications = pgTable("marriage_applications", {
     .notNull()
     .references(() => coupleProfiles.id, { onDelete: "cascade" }),
   priestId: text("priestId").references(() => users.id), // Romo yang ditugaskan
-  currentStage: integer("currentStage").default(1).notNull(), // 1-5
+  currentStage: integer("currentStage").default(1).notNull(), // 1-5, 99=dibatalkan
   weddingDate: text("weddingDate"), // ISO datetime string
+  // === Daftar Ulang ===
+  isReregistration: boolean("is_reregistration").default(false),
+  previousApplicationId: text("previous_application_id"), // nullable, ref ke app lama
   createdAt: timestamp("createdAt").defaultNow(),
   updatedAt: timestamp("updatedAt").defaultNow(),
 });

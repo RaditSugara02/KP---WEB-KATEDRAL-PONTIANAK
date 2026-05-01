@@ -2,18 +2,27 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Check, X, Send, ArrowUpCircle, Trash2, UserCheck, CalendarDays } from "lucide-react";
+import { Check, X, Send, ArrowUpCircle, Trash2, UserCheck, CalendarDays, History } from "lucide-react";
+
+type PreviousApp = {
+  regNum: string | null;
+  createdAt: Date | null;
+  canceledAt: Date | null;
+  cancelReason: string | null;
+} | null;
 
 export default function DetailClient({ 
   application, 
   docs, 
   history,
   priests,
+  previousApp,
 }: { 
-  application: Record<string, string | number | null | undefined>;
+  application: Record<string, string | number | null | undefined | boolean>;
   docs: Array<{ id: string, documentName: string | null, isReceived: boolean | null, receivedAt: Date | null }>;
   history: Array<{ stageNumber: number | null, note: string | null, changedAt: Date | null }>;
   priests: Array<{ id: string, name: string, email: string }>;
+  previousApp: PreviousApp;
 }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -394,6 +403,68 @@ export default function DetailClient({
                   {loading ? "Memproses..." : "Ya, Batalkan Pendaftaran"}
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ====== RIWAYAT PENDAFTARAN SEBELUMNYA ====== */}
+      {previousApp && (
+        <div className="mt-6 bg-blue-50 border border-blue-200 rounded-xl overflow-hidden">
+          <div className="bg-blue-100 px-6 py-4 border-b border-blue-200 flex items-center gap-3">
+            <History size={18} className="text-blue-700" />
+            <h3 className="font-bold text-blue-800 uppercase tracking-wide text-sm">
+              Riwayat Pendaftaran Sebelumnya
+            </h3>
+            <span className="ml-auto text-[10px] font-bold bg-blue-200 text-blue-800 px-2 py-0.5 rounded-full uppercase tracking-wider">
+              Daftar Ulang
+            </span>
+          </div>
+          <div className="p-6">
+            <p className="text-sm text-blue-700 mb-4">
+              Pasangan ini pernah memiliki pendaftaran sebelumnya yang dibatalkan.
+            </p>
+            <div className="bg-white border border-blue-100 rounded-lg overflow-hidden">
+              <table className="w-full text-sm">
+                <thead className="bg-blue-50 text-blue-600 text-xs uppercase tracking-wider">
+                  <tr>
+                    <th className="px-4 py-3 text-left font-semibold">No. Registrasi Lama</th>
+                    <th className="px-4 py-3 text-left font-semibold">Tgl. Daftar</th>
+                    <th className="px-4 py-3 text-left font-semibold">Tgl. Dibatalkan</th>
+                    <th className="px-4 py-3 text-left font-semibold">Alasan Pembatalan</th>
+                    <th className="px-4 py-3 text-left font-semibold">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="border-t border-blue-50">
+                    <td className="px-4 py-4 font-bold text-[#B8960C]">
+                      {previousApp.regNum ?? "—"}
+                    </td>
+                    <td className="px-4 py-4 text-[#6B6560]">
+                      {previousApp.createdAt
+                        ? new Date(previousApp.createdAt).toLocaleDateString("id-ID", {
+                            day: "numeric", month: "long", year: "numeric",
+                          })
+                        : "—"}
+                    </td>
+                    <td className="px-4 py-4 text-[#6B6560]">
+                      {previousApp.canceledAt
+                        ? new Date(previousApp.canceledAt).toLocaleDateString("id-ID", {
+                            day: "numeric", month: "long", year: "numeric",
+                          })
+                        : "—"}
+                    </td>
+                    <td className="px-4 py-4 text-[#3D2B1F] italic max-w-xs">
+                      &ldquo;{previousApp.cancelReason ?? "Tidak ada keterangan"}&rdquo;
+                    </td>
+                    <td className="px-4 py-4">
+                      <span className="inline-flex px-2 py-1 bg-[#FDECEA] text-[#C0392B] text-[10px] font-bold uppercase rounded-full border border-red-200">
+                        DIBATALKAN
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
         </div>

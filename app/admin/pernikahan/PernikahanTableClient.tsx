@@ -28,6 +28,7 @@ type App = {
   groom: string | null;
   bride: string | null;
   createdAt: string | null;
+  isReregistration: boolean;
 };
 
 export default function PernikahanTableClient({ apps }: { apps: App[] }) {
@@ -46,7 +47,9 @@ export default function PernikahanTableClient({ apps }: { apps: App[] }) {
 
       const matchStage =
         stageFilter === "all" ||
-        (stageFilter === "99"
+        (stageFilter === "reregistration"
+          ? app.isReregistration === true
+          : stageFilter === "99"
           ? app.currentStage === 99
           : String(app.currentStage) === stageFilter);
 
@@ -96,20 +99,23 @@ export default function PernikahanTableClient({ apps }: { apps: App[] }) {
                 ? "Filter Tahap"
                 : stageFilter === "99"
                 ? "Dibatalkan"
+                : stageFilter === "reregistration"
+                ? "🔄 Daftar Ulang"
                 : `Tahap ${stageFilter}`}
             </button>
 
             {showFilter && (
               <div className="absolute right-0 top-full mt-1 bg-white border border-[#DDD8D0] rounded-lg shadow-lg z-20 w-52 py-1 animate-in fade-in slide-in-from-top-1 duration-150">
                 {[
-                  { label: "Semua Tahap", val: "all" },
-                  { label: "Tahap 1 – Pengisian Profil", val: "1" },
-                  { label: "Tahap 2 – KPP", val: "2" },
-                  { label: "Tahap 3 – Pemberkasan", val: "3" },
-                  { label: "Tahap 4 – Kanonik", val: "4" },
-                  { label: "Tahap 5 – Selesai", val: "5" },
-                  { label: "Dibatalkan", val: "99" },
-                ].map((opt) => (
+                   { label: "Semua Tahap", val: "all" },
+                   { label: "Tahap 1 – Pengisian Profil", val: "1" },
+                   { label: "Tahap 2 – KPP", val: "2" },
+                   { label: "Tahap 3 – Pemberkasan", val: "3" },
+                   { label: "Tahap 4 – Kanonik", val: "4" },
+                   { label: "Tahap 5 – Selesai", val: "5" },
+                   { label: "Dibatalkan", val: "99" },
+                   { label: "🔄 Daftar Ulang", val: "reregistration" },
+                 ].map((opt) => (
                   <button
                     key={opt.val}
                     onClick={() => {
@@ -164,9 +170,16 @@ export default function PernikahanTableClient({ apps }: { apps: App[] }) {
                   <tr key={app.id} className="hover:bg-[#FAF7F2] transition-colors">
                     <td className="px-6 py-4">
                       <p className="font-bold text-[#B8960C]">{app.regNum || "—"}</p>
-                      <p className="text-[#3D2B1F] font-medium mt-1">
-                        {app.groom} &amp; {app.bride}
-                      </p>
+                      <div className="flex items-center gap-2 mt-1 flex-wrap">
+                        <p className="text-[#3D2B1F] font-medium">
+                          {app.groom} &amp; {app.bride}
+                        </p>
+                        {app.isReregistration && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 rounded-full text-[10px] font-bold uppercase tracking-wide">
+                            🔄 Daftar Ulang
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="px-6 py-4">
                       {stageNum === 99 ? (

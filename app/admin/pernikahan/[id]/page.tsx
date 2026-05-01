@@ -28,6 +28,8 @@ export default async function AdminPernikahanDetailPage({ params }: { params: { 
     currentStage: marriageApplications.currentStage,
     weddingDate: marriageApplications.weddingDate,
     priestId: marriageApplications.priestId,
+    isReregistration: marriageApplications.isReregistration,
+    previousApplicationId: marriageApplications.previousApplicationId,
     regNum: coupleProfiles.registrationNumber,
     groomName: coupleProfiles.groomName,
     groomBirthdate: coupleProfiles.groomBirthdate,
@@ -64,6 +66,42 @@ export default async function AdminPernikahanDetailPage({ params }: { params: { 
     .from(users)
     .where(eq(users.role, "PRIEST"));
 
+  // Fetch previous application data (if daftar ulang)
+  let previousApp: {
+    regNum: string | null;
+    createdAt: Date | null;
+    canceledAt: Date | null;
+    cancelReason: string | null;
+  } | null = null;
+
+  if (application.isReregistration && application.previousApplicationId) {
+    const prevAppRecord = await db.select({
+      regNum: coupleProfiles.registrationNumber,
+      createdAt: marriageApplications.createdAt,
+    })
+    .from(marriageApplications)
+    .leftJoin(coupleProfiles, eq(marriageApplications.coupleProfileId, coupleProfiles.id))
+    .where(eq(marriageApplications.id, application.previousApplicationId))
+    .limit(1);
+
+    if (prevAppRecord[0]) {
+      // Fetch cancellation entry from stage_history (stage = 99)
+      const cancelHistory = await db.select()
+        .from(stageHistory)
+        .where(eq(stageHistory.applicationId, application.previousApplicationId))
+        .orderBy(desc(stageHistory.changedAt))
+        .limit(1);
+      
+      const cancelEntry = cancelHistory.find(h => h.stageNumber === 99) ?? cancelHistory[0];
+      previousApp = {
+        regNum: prevAppRecord[0].regNum ?? null,
+        createdAt: prevAppRecord[0].createdAt ?? null,
+        canceledAt: cancelEntry?.changedAt ?? null,
+        cancelReason: cancelEntry?.note ?? null,
+      };
+    }
+  }
+
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       
@@ -83,15 +121,28 @@ export default async function AdminPernikahanDetailPage({ params }: { params: { 
             <h1 className="text-3xl font-bold text-[#3D2B1F] mb-2" style={{ fontFamily: "var(--font-cormorant)" }}>
               {application.regNum} · {application.groomName?.split(" ")[0]} & {application.brideName?.split(" ")[0]}
             </h1>
-            <div className="inline-flex items-center px-3 py-1 bg-[#FFF8E1] text-[#B8960C] text-xs font-bold uppercase rounded-full tracking-wider border border-[#B8960C]/20">
-              Tahap {application.currentStage}
+            <div className="flex items-center gap-2 flex-wrap">
+              <div className="inline-flex items-center px-3 py-1 bg-[#FFF8E1] text-[#B8960C] text-xs font-bold uppercase rounded-full tracking-wider border border-[#B8960C]/20">
+                {application.currentStage === 99 ? "DIBATALKAN" : `Tahap ${application.currentStage}`}
+              </div>
+              {application.isReregistration && (
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50 text-blue-700 text-xs font-bold uppercase rounded-full tracking-wider border border-blue-200">
+                  🔄 Daftar Ulang
+                </div>
+              )}
             </div>
           </div>
         </div>
       </div>
 
       {/* Interactive Client Component */}
-      <DetailClient application={application} docs={docs} history={history} priests={priests} />
+      <DetailClient
+        application={application}
+        docs={docs}
+        history={history}
+        priests={priests}
+        previousApp={previousApp}
+      />
 
     </div>
   );

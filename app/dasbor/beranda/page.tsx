@@ -18,6 +18,7 @@ import {
   ChevronRight,
   Printer
 } from "lucide-react";
+import DaftarUlangButton from "./DaftarUlangButton";
 
 const STAGE_NAMES = [
   "Pengisian Profil",
@@ -213,6 +214,7 @@ export default async function BerandaDasborPage() {
                 Untuk mendaftar ulang atau mendapat informasi lebih lanjut, silakan hubungi Sekretariat Katedral secara langsung.
               </p>
               <div className="flex flex-wrap gap-3 justify-center md:justify-start">
+                <DaftarUlangButton />
                 <a
                   href="https://wa.me/6251234567"
                   target="_blank"
