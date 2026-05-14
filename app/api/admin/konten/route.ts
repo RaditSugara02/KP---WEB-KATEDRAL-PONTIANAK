@@ -5,6 +5,7 @@ import { contents } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { headers } from "next/headers";
+import { revalidatePath } from "next/cache";
 
 // Helper to create slug from title
 function createSlug(title: string): string {
@@ -47,6 +48,10 @@ export async function POST(req: NextRequest) {
     updatedAt: now,
   }).returning();
 
+  revalidatePath("/");
+  revalidatePath("/berita");
+  revalidatePath("/jadwal-misa");
+
   return NextResponse.json({ success: true, content: newContent[0] });
 }
 
@@ -76,6 +81,10 @@ export async function PUT(req: NextRequest) {
     updatedAt: new Date(),
   }).where(eq(contents.id, id));
 
+  revalidatePath("/");
+  revalidatePath("/berita");
+  revalidatePath("/jadwal-misa");
+
   return NextResponse.json({ success: true });
 }
 
@@ -94,5 +103,10 @@ export async function DELETE(req: NextRequest) {
   }
 
   await db.delete(contents).where(eq(contents.id, id));
+
+  revalidatePath("/");
+  revalidatePath("/berita");
+  revalidatePath("/jadwal-misa");
+
   return NextResponse.json({ success: true });
 }
