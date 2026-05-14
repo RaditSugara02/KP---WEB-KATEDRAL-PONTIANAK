@@ -340,35 +340,17 @@ export default async function LandingPage() {
                 );
               })
             ) : (
-              /* Placeholder cards if no news in DB */
-              [
-                { title: "Pendaftaran Katekumen Dewasa Periode 2024 Telah Dibuka", date: "12 Oktober 2023", label: "Pengumuman" },
-                { title: "Aksi Sosial OMK Katedral dalam Rangka Bulan Rosario", date: "08 Oktober 2023", label: "Kegiatan" },
-                { title: "Jadwal Pengakuan Dosa Menjelang Masa Adven", date: "05 Oktober 2023", label: "Liturgi" },
-              ].map((item, index) => (
-                <ScrollReveal key={index} delay={index * 150} className="h-full">
-                  <div className="bg-transparent flex flex-col h-full cursor-pointer group">
-                    <div className="h-64 relative rounded-xl overflow-hidden mb-6 bg-[#F5F0E8]">
-                      <div className="w-full h-full flex items-center justify-center bg-[#EDE8DF] transition-transform duration-700 group-hover:scale-105">
-                        <Newspaper className="text-[#B8960C]/40" size={48} />
-                      </div>
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                      <span className="absolute top-4 left-4 bg-[#FAF7F2]/90 backdrop-blur-sm text-[#3D2B1F] text-xs font-bold px-3 py-1.5 rounded uppercase tracking-wider shadow-sm">
-                        {item.label}
-                      </span>
-                    </div>
-                    <div className="flex flex-col flex-grow">
-                      <span className="text-[#B8960C] text-xs font-bold tracking-widest uppercase mb-3 flex items-center gap-2">
-                        <span className="w-4 h-px bg-[#B8960C]"></span>
-                        {item.date}
-                      </span>
-                      <h3 className="text-2xl text-[#3D2B1F] font-bold leading-snug mb-4 line-clamp-3 group-hover:text-[#B8960C] transition-colors" style={{ fontFamily: "var(--font-cormorant)" }}>
-                        {item.title}
-                      </h3>
-                    </div>
-                  </div>
-                </ScrollReveal>
-              ))
+              <div className="col-span-1 md:col-span-3 py-16 flex flex-col items-center justify-center text-center">
+                <div className="w-20 h-20 bg-[#F5F0E8] rounded-full flex items-center justify-center mb-6 shadow-sm border border-[#E8E0D0]">
+                  <Newspaper className="text-[#B8960C] h-10 w-10 opacity-80" />
+                </div>
+                <h3 className="text-2xl font-bold text-[#3D2B1F] mb-3" style={{ fontFamily: "var(--font-cormorant)" }}>
+                  Belum Ada Berita
+                </h3>
+                <p className="text-[#6B5744] text-base max-w-md">
+                  Informasi dan berita terbaru seputar kegiatan paroki akan segera hadir di sini.
+                </p>
+              </div>
             )}
           </div>
         </div>

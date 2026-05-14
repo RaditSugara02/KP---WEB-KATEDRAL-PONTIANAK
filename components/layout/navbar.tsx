@@ -115,15 +115,13 @@ export function Navbar() {
             })}
 
             {/* Divider */}
-            {session?.user && (
-              <div className={cn(
-                "w-px h-5 mx-2",
-                isTransparent ? "bg-white/20" : "bg-[#E8E0D0]"
-              )} />
-            )}
+            <div className={cn(
+              "w-px h-5 mx-2",
+              isTransparent ? "bg-white/20" : "bg-[#E8E0D0]"
+            )} />
 
             {/* CTA Masuk */}
-            {session?.user && (
+            {session?.user ? (
               <Link
                 href={(session.user as any).role === "ADMIN" ? "/admin/ringkasan" : "/dasbor"}
                 className={cn(
@@ -134,6 +132,18 @@ export function Navbar() {
                 )}
               >
                 Halo, {session.user.name}
+              </Link>
+            ) : (
+              <Link
+                href="/masuk"
+                className={cn(
+                  "px-5 py-2 text-[13px] font-semibold rounded-lg transition-all duration-200 border",
+                  isTransparent
+                    ? "border-white/50 text-white hover:bg-white hover:text-[#2C1F14]"
+                    : "border-[#B8960C] text-[#B8960C] hover:bg-[#B8960C] hover:text-white"
+                )}
+              >
+                Masuk
               </Link>
             )}
           </div>
@@ -176,7 +186,7 @@ export function Navbar() {
               </Link>
             );
           })}
-          {session?.user && (
+          {session?.user ? (
             <>
               <div className="h-px bg-[#E8E0D0] my-2" />
               <Link
@@ -184,6 +194,16 @@ export function Navbar() {
                 className="block px-4 py-3 rounded-lg text-[14px] font-semibold text-center bg-[#B8960C] text-white hover:bg-[#9A7A0A] transition-colors"
               >
                 Dasbor ({session.user.name})
+              </Link>
+            </>
+          ) : (
+            <>
+              <div className="h-px bg-[#E8E0D0] my-2" />
+              <Link
+                href="/masuk"
+                className="block px-4 py-3 rounded-lg text-[14px] font-semibold text-center border border-[#B8960C] text-[#B8960C] hover:bg-[#FDF3D0] transition-colors"
+              >
+                Masuk
               </Link>
             </>
           )}
