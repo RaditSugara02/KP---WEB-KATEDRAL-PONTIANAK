@@ -15,6 +15,21 @@ type NewsItem = {
   category: string | null;
 };
 
+function SafeImage({ src, alt, className }: { src: string; alt: string; className?: string }) {
+  const [error, setError] = useState(false);
+
+  if (error) return null;
+
+  return (
+    <img
+      src={src}
+      alt={alt}
+      className={className}
+      onError={() => setError(true)}
+    />
+  );
+}
+
 export default function BeritaListClient({ allNews }: { allNews: NewsItem[] }) {
   const [activeCategory, setActiveCategory] = useState<string>("Semua Berita");
   const [currentPage, setCurrentPage] = useState(1);
@@ -131,16 +146,13 @@ export default function BeritaListClient({ allNews }: { allNews: NewsItem[] }) {
                 >
                   <div className="absolute inset-0 flex flex-col items-center justify-center p-4 bg-[#F5F0E8] z-0">
                     <Church size={40} style={{ color: "#D5C6AF", marginBottom: "8px" }} />
-                    <span className="text-xs font-medium uppercase tracking-wider" style={{ color: "#A89880" }}>Katedral Santo Yosef</span>
+                    <span className="text-xs font-medium uppercase tracking-wider text-center" style={{ color: "#A89880" }}>Katedral Santo Yosef</span>
                   </div>
                   {news.imageUrl && (
-                    <img
+                    <SafeImage
                       src={news.imageUrl}
                       alt={news.title}
                       className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 z-10"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                      }}
                     />
                   )}
 
