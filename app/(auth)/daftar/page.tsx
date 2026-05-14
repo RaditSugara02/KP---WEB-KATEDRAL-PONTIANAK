@@ -87,7 +87,7 @@ export default function DaftarPage() {
         {/* Background Image */}
         <div
           className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 hover:scale-105"
-          style={{ backgroundImage: 'url("/bg-katedral.jpg")' }}
+          style={{ backgroundImage: 'url("/bg-login.jpg")' }}
         />
         {/* Dark Overlay for text readability */}
         <div className="absolute inset-0 bg-[#2C1F14]/70 mix-blend-multiply" />
@@ -154,32 +154,6 @@ export default function DaftarPage() {
         </Link>
 
         <div className="w-full max-w-md">
-          {/* Logo kecil + teks gold */}
-          <div className="flex items-center justify-center lg:justify-start gap-2 mb-8">
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#B8960C"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M18 22V11c0-2.8-2.2-5-5-5H9" />
-              <path d="M12 22V2l-4 4" />
-              <path d="M12 2l4 4" />
-              <path d="M4 22v-6c0-1.7 1.3-3 3-3" />
-              <path d="M22 22H2" />
-            </svg>
-            <span
-              className="font-bold text-lg"
-              style={{ fontFamily: "var(--font-cormorant)", color: "#B8960C" }}
-            >
-              Katedral Santo Yosef
-            </span>
-          </div>
-
           <h2
             className="mb-2 text-center lg:text-left"
             style={{ fontFamily: "var(--font-cormorant)", fontSize: "32px", color: "#3D2B1F" }}

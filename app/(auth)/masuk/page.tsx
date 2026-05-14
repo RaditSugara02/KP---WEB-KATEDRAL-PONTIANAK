@@ -55,7 +55,7 @@ export default function MasukPage() {
         {/* Background Image */}
         <div
           className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 hover:scale-105"
-          style={{ backgroundImage: 'url("/bg-katedral.jpg")' }}
+          style={{ backgroundImage: 'url("/bg-login.jpg")' }}
         />
         {/* Dark Overlay for text readability */}
         <div className="absolute inset-0 bg-[#2C1F14]/70 mix-blend-multiply" />
