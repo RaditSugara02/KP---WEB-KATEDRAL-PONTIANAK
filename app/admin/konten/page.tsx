@@ -2,24 +2,38 @@ import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { contents } from "@/lib/db/schema";
-import { desc } from "drizzle-orm";
+import { desc, asc, eq } from "drizzle-orm";
 import Link from "next/link";
 import { PlusCircle, Pencil, Newspaper, CalendarDays } from "lucide-react";
 import { DeleteContentButton } from "./DeleteContentButton";
+import { FilterKonten } from "./FilterKonten";
 
 const TYPE_LABELS: Record<string, { label: string; color: string }> = {
   NEWS: { label: "Berita", color: "bg-[#EBF5FB] text-[#2471A3]" },
   MASS_SCHEDULE: { label: "Jadwal Misa", color: "bg-[#D8F3DC] text-[#2D6A4F]" },
   ANNOUNCEMENT: { label: "Pengumuman", color: "bg-[#FFF8E1] text-[#B8960C]" },
+  GALLERY: { label: "Galeri", color: "bg-[#F4F6F7] text-[#5D6D7E]" },
 };
 
-export default async function AdminKontenPage() {
+type Props = {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+};
+
+export default async function AdminKontenPage(props: Props) {
+  const searchParams = await props.searchParams;
+  const filterType = typeof searchParams.type === 'string' ? searchParams.type : 'ALL';
+  const sortDate = typeof searchParams.sort === 'string' ? searchParams.sort : 'desc';
+
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session || session.user.role !== "ADMIN") return null;
 
   const allContents = await db.select()
     .from(contents)
-    .orderBy(desc(contents.createdAt));
+    .where(filterType !== 'ALL' ? eq(contents.type, filterType) : undefined)
+    .orderBy(sortDate === 'asc' ? asc(contents.createdAt) : desc(contents.createdAt));
+
+  // Note: we fetch counts separately to show total stats regardless of active filters
+  const allForStats = await db.select().from(contents);
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
@@ -49,7 +63,7 @@ export default async function AdminKontenPage() {
           </div>
           <div>
             <p className="text-xs text-[#A89880] uppercase font-bold tracking-wider">Total Berita</p>
-            <p className="text-2xl font-bold text-[#3D2B1F]">{allContents.filter(c => c.type === "NEWS").length}</p>
+            <p className="text-2xl font-bold text-[#3D2B1F]">{allForStats.filter(c => c.type === "NEWS").length}</p>
           </div>
         </div>
         <div className="bg-white p-5 rounded-xl border border-[#DDD8D0] shadow-sm flex items-center gap-4">
@@ -58,7 +72,7 @@ export default async function AdminKontenPage() {
           </div>
           <div>
             <p className="text-xs text-[#A89880] uppercase font-bold tracking-wider">Jadwal Misa</p>
-            <p className="text-2xl font-bold text-[#3D2B1F]">{allContents.filter(c => c.type === "MASS_SCHEDULE").length}</p>
+            <p className="text-2xl font-bold text-[#3D2B1F]">{allForStats.filter(c => c.type === "MASS_SCHEDULE").length}</p>
           </div>
         </div>
         <div className="bg-white p-5 rounded-xl border border-[#DDD8D0] shadow-sm flex items-center gap-4">
@@ -67,10 +81,12 @@ export default async function AdminKontenPage() {
           </div>
           <div>
             <p className="text-xs text-[#A89880] uppercase font-bold tracking-wider">Total Konten</p>
-            <p className="text-2xl font-bold text-[#3D2B1F]">{allContents.length}</p>
+            <p className="text-2xl font-bold text-[#3D2B1F]">{allForStats.length}</p>
           </div>
         </div>
       </div>
+
+      <FilterKonten />
 
       {/* Table */}
       <div className="bg-white rounded-xl border border-[#DDD8D0] shadow-sm overflow-hidden">
