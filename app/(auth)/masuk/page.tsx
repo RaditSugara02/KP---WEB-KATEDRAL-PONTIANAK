@@ -33,7 +33,16 @@ export default function MasukPage() {
     setLoading(true);
     try {
       const { data, error: signInError } = await authClient.signIn.email({ email, password });
-      if (signInError) throw new Error(signInError.message || "Gagal masuk.");
+      
+      if (signInError) {
+        if (signInError.status === 403) {
+          toast.error("Email Anda belum diverifikasi.");
+          router.push(`/cek-email?email=${encodeURIComponent(email)}`);
+          return;
+        }
+        throw new Error(signInError.message || "Gagal masuk.");
+      }
+      
       toast.success("Berhasil masuk!");
       const user = data?.user as { role?: string } | undefined;
       router.push(user?.role === "ADMIN" ? "/admin/ringkasan" : "/dasbor/beranda");

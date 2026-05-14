@@ -69,8 +69,8 @@ export default function DaftarPage() {
         throw new Error(signUpError.message || "Gagal mendaftar");
       }
 
-      toast.success("Akun berhasil dibuat!");
-      router.push("/dasbor/beranda");
+      toast.success("Akun berhasil dibuat! Silakan cek email Anda.");
+      router.push(`/cek-email?email=${encodeURIComponent(email)}`);
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : "Terjadi kesalahan sistem.");
     } finally {

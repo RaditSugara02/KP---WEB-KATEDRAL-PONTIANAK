@@ -94,7 +94,7 @@ export default async function LandingPage() {
     <div className="flex flex-col bg-transparent">
 
       {/* ═══════════════════ HERO SECTION ═══════════════════ */}
-      <section className="relative min-h-screen w-full flex items-center justify-center overflow-hidden -mt-[72px]">
+      <section className="relative min-h-[90vh] md:min-h-[85vh] w-full flex items-center justify-center overflow-hidden -mt-[72px]">
         <div className="absolute inset-0">
           <img
             alt="Eksterior Katedral Santo Yosef Pontianak"
@@ -105,7 +105,7 @@ export default async function LandingPage() {
           <div className="absolute inset-0 bg-gradient-to-b from-[#2C1F14]/70 via-[#2C1F14]/50 to-[#FAF7F2]" />
         </div>
         
-        <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-8 text-center flex flex-col items-center mt-20 pb-24 md:pb-40">
+        <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-8 text-center flex flex-col items-center mt-20 pb-20 md:pb-32">
           <ScrollReveal direction="up" delay={100} duration={1000}>
             <span className="font-sans text-xs md:text-sm tracking-[0.3em] text-white mb-6 uppercase font-bold inline-block border-b border-white/50 pb-2">
               Keuskupan Agung Pontianak

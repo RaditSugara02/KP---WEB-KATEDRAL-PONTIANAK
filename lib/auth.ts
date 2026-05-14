@@ -21,8 +21,7 @@ export const auth = betterAuth({
   }),
   emailAndPassword: {
     enabled: true,
-    // Skip email verification for local development
-    requireEmailVerification: false,
+    requireEmailVerification: true,
     sendResetPassword: async ({ user, url, token }, request) => {
       if (!resend) return; // skip if no API key
       try {
@@ -43,6 +42,32 @@ export const auth = betterAuth({
         });
       } catch (error) {
         console.error("Gagal mengirim email reset password:", error);
+      }
+    },
+  },
+  emailVerification: {
+    sendOnSignUp: true,
+    autoSignInAfterVerification: true,
+    sendVerificationEmail: async ({ user, url, token }, request) => {
+      if (!resend) return;
+      try {
+        await resend.emails.send({
+          from: "Katedral Santo Yosef <onboarding@resend.dev>",
+          to: user.email,
+          subject: "Verifikasi Alamat Email Anda",
+          html: `
+            <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+              <h2 style="color: #3D2B1F;">Selamat Datang, ${user.name}!</h2>
+              <p>Terima kasih telah mendaftar di Sistem Informasi Katedral Santo Yosef Pontianak.</p>
+              <p>Untuk menyelesaikan pendaftaran dan mengaktifkan akun Anda, silakan verifikasi alamat email Anda dengan mengklik tombol di bawah ini:</p>
+              <a href="${url}" style="display: inline-block; padding: 12px 24px; background-color: #B8960C; color: white; text-decoration: none; border-radius: 4px; font-weight: bold; margin: 20px 0;">Verifikasi Email Saya</a>
+              <p>Jika Anda tidak merasa mendaftar, silakan abaikan email ini.</p>
+              <p style="color: #6B6560; font-size: 12px; margin-top: 40px;">Tuhan memberkati,<br>Sekretariat Paroki Katedral Santo Yosef</p>
+            </div>
+          `,
+        });
+      } catch (error) {
+        console.error("Gagal mengirim email verifikasi:", error);
       }
     },
   },
