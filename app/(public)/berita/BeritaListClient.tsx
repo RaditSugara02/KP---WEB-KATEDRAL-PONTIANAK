@@ -35,16 +35,8 @@ export default function BeritaListClient({ allNews }: { allNews: NewsItem[] }) {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  // Unique categories from DB
-  const categories = useMemo(() => {
-    const cats = new Set<string>();
-    allNews.forEach((news) => {
-      if (news.category && news.category.trim() !== "") {
-        cats.add(news.category.trim());
-      }
-    });
-    return ["Semua Berita", ...Array.from(cats).sort()];
-  }, [allNews]);
+  // Kategori hardcoded sesuai kesepakatan agar stabil dan tidak terpengaruh data kotor
+  const categories = ["Semua Berita", "Berita Paroki", "Pengumuman"];
 
   // Filter + pagination
   const { filteredNews, totalPages } = useMemo(() => {

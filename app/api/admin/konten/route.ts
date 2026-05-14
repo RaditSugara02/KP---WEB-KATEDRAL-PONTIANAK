@@ -31,6 +31,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Judul dan tipe konten wajib diisi." }, { status: 400 });
   }
 
+  // VALIDASI KETAT: Berita hanya boleh 2 kategori
+  if (type === "NEWS" && category !== "Berita Paroki" && category !== "Pengumuman") {
+    return NextResponse.json({ error: "Bug Fatal Dicegah: Kategori berita HANYA boleh 'Berita Paroki' atau 'Pengumuman'." }, { status: 400 });
+  }
+
   const now = new Date();
   const newContent = await db.insert(contents).values({
     id: nanoid(),
@@ -65,6 +70,11 @@ export async function PUT(req: NextRequest) {
 
   if (!id) {
     return NextResponse.json({ error: "ID konten tidak ditemukan." }, { status: 400 });
+  }
+
+  // VALIDASI KETAT: Berita hanya boleh 2 kategori
+  if (type === "NEWS" && category !== "Berita Paroki" && category !== "Pengumuman") {
+    return NextResponse.json({ error: "Bug Fatal Dicegah: Kategori berita HANYA boleh 'Berita Paroki' atau 'Pengumuman'." }, { status: 400 });
   }
 
   await db.update(contents).set({
