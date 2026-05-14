@@ -71,8 +71,8 @@ export default function DaftarPage() {
 
       toast.success("Akun berhasil dibuat!");
       router.push("/dasbor/beranda");
-    } catch (err: any) {
-      toast.error(err.message || "Terjadi kesalahan sistem.");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Terjadi kesalahan sistem.");
     } finally {
       setLoading(false);
     }

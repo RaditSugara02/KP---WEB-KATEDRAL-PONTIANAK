@@ -35,11 +35,11 @@ export default function MasukPage() {
       const { data, error: signInError } = await authClient.signIn.email({ email, password });
       if (signInError) throw new Error(signInError.message || "Gagal masuk.");
       toast.success("Berhasil masuk!");
-      const user = data?.user as any;
+      const user = data?.user as { role?: string } | undefined;
       router.push(user?.role === "ADMIN" ? "/admin/ringkasan" : "/dasbor/beranda");
       router.refresh();
-    } catch (err: any) {
-      toast.error(err.message || "Terjadi kesalahan sistem.");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Terjadi kesalahan sistem.");
     } finally {
       setLoading(false);
     }
