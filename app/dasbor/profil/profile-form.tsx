@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { User } from "lucide-react";
+import ImageUpload from "@/components/admin/ImageUpload";
 
 export function ProfileForm() {
   const router = useRouter();
@@ -18,7 +19,8 @@ export function ProfileForm() {
   const [bridePhone, setBridePhone] = useState("");
   const [brideBaptismChurch, setBrideBaptismChurch] = useState("Katedral Santo Yosef Martapura");
   
-  const [plannedWeddingDate, setPlannedWeddingDate] = useState("");
+  const [groomPhoto, setGroomPhoto] = useState("");
+  const [bridePhoto, setBridePhoto] = useState("");
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -33,9 +35,8 @@ export function ProfileForm() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          groomName, groomBirthdate, groomPhone, groomBaptismChurch,
-          brideName, brideBirthdate, bridePhone, brideBaptismChurch,
-          plannedWeddingDate
+          groomName, groomBirthdate, groomPhone, groomBaptismChurch, groomPhoto,
+          brideName, brideBirthdate, bridePhone, brideBaptismChurch, bridePhoto
         })
       });
 
@@ -116,6 +117,10 @@ export function ProfileForm() {
                 className="w-full h-11 px-4 rounded-md border border-[#DDD8D0] focus:border-[#B8960C] focus:ring-1 focus:ring-[#B8960C] outline-none" 
               />
             </div>
+            <div className="md:col-span-2">
+              <label className="block mb-2 text-xs font-bold text-[#6B6560] uppercase tracking-wider">Pas Foto Berdampingan Pria (Boleh Pas Foto Sendiri)</label>
+              <ImageUpload value={groomPhoto} onChange={setGroomPhoto} />
+            </div>
           </div>
         </div>
 
@@ -159,27 +164,9 @@ export function ProfileForm() {
                 className="w-full h-11 px-4 rounded-md border border-[#DDD8D0] focus:border-[#B8960C] focus:ring-1 focus:ring-[#B8960C] outline-none" 
               />
             </div>
-          </div>
-        </div>
-
-        {/* RENCANA PERNIKAHAN */}
-        <div className="bg-white rounded-xl border border-[#DDD8D0] shadow-sm overflow-hidden">
-          <div className="bg-[#FAF7F2] px-6 py-4 border-b border-[#EDE8DF]">
-            <h2 className="font-bold text-[#3D2B1F] flex items-center gap-2 uppercase tracking-wide text-sm">
-              📅 Rencana Pemberkatan
-            </h2>
-          </div>
-          <div className="p-6">
-            <p className="text-[#6B6560] text-sm mb-4">
-              Tanggal ini masih berupa rencana dan akan disesuaikan dengan ketersediaan Romo dan jadwal Katedral.
-            </p>
-            <div className="max-w-md">
-              <label className="block mb-2 text-xs font-bold text-[#6B6560] uppercase tracking-wider">Estimasi Tanggal Pernikahan</label>
-              <input 
-                type="date" required
-                value={plannedWeddingDate} onChange={e => setPlannedWeddingDate(e.target.value)}
-                className="w-full h-11 px-4 rounded-md border border-[#DDD8D0] focus:border-[#B8960C] focus:ring-1 focus:ring-[#B8960C] outline-none text-[#3D2B1F]" 
-              />
+            <div className="md:col-span-2">
+              <label className="block mb-2 text-xs font-bold text-[#6B6560] uppercase tracking-wider">Pas Foto Berdampingan Wanita (Boleh Pas Foto Sendiri)</label>
+              <ImageUpload value={bridePhoto} onChange={setBridePhoto} />
             </div>
           </div>
         </div>

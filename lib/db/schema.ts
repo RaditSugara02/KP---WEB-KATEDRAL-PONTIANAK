@@ -91,7 +91,8 @@ export const coupleProfiles = pgTable("couple_profiles", {
   brideBirthdate: text("brideBirthdate"), // ISO date string
   bridePhone: varchar("bridePhone", { length: 20 }),
   brideBaptismChurch: text("brideBaptismChurch"),
-  plannedWeddingDate: text("plannedWeddingDate"), // ISO date string
+  groomPhoto: text("groomPhoto"),
+  bridePhoto: text("bridePhoto"),
   createdAt: timestamp("createdAt").defaultNow(),
 });
 

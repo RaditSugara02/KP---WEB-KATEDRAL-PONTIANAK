@@ -7,6 +7,32 @@ import { ProfileForm } from "./profile-form";
 import { User, Calendar, Phone, Church, Info, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
+const formatDate = (d: string | null) => {
+  if (!d) return "—";
+  try { return new Date(d).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" }); }
+  catch { return d; }
+};
+
+const Field = ({ label, value }: { label: string; value: string | null }) => (
+  <div>
+    <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: "#9C8B7A" }}>{label}</p>
+    <p className="text-[15px] font-semibold" style={{ color: "#2C1F14" }}>{value || "—"}</p>
+  </div>
+);
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const FieldIcon = ({ icon: Icon, label, value }: { icon: any; label: string; value: string | null }) => (
+  <div className="flex items-center gap-3.5">
+    <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "#F5F0E8" }}>
+      <Icon size={15} style={{ color: "#B8960C" }} />
+    </div>
+    <div>
+      <p className="text-[10px] font-bold uppercase tracking-wider mb-0.5" style={{ color: "#9C8B7A" }}>{label}</p>
+      <p className="text-[14px] font-medium" style={{ color: "#2C1F14" }}>{value || "—"}</p>
+    </div>
+  </div>
+);
+
 export default async function ProfilPage() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) return null;
@@ -18,31 +44,6 @@ export default async function ProfilPage() {
   if (!profile) {
     return <div className="max-w-4xl mx-auto"><ProfileForm /></div>;
   }
-
-  const formatDate = (d: string | null) => {
-    if (!d) return "—";
-    try { return new Date(d).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" }); }
-    catch { return d; }
-  };
-
-  const Field = ({ label, value }: { label: string; value: string | null }) => (
-    <div>
-      <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: "#9C8B7A" }}>{label}</p>
-      <p className="text-[15px] font-semibold" style={{ color: "#2C1F14" }}>{value || "—"}</p>
-    </div>
-  );
-
-  const FieldIcon = ({ icon: Icon, label, value }: { icon: any; label: string; value: string | null }) => (
-    <div className="flex items-center gap-3.5">
-      <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "#F5F0E8" }}>
-        <Icon size={15} style={{ color: "#B8960C" }} />
-      </div>
-      <div>
-        <p className="text-[10px] font-bold uppercase tracking-wider mb-0.5" style={{ color: "#9C8B7A" }}>{label}</p>
-        <p className="text-[14px] font-medium" style={{ color: "#2C1F14" }}>{value || "—"}</p>
-      </div>
-    </div>
-  );
 
   return (
     <div className="max-w-4xl mx-auto space-y-5 page-fade">
@@ -85,6 +86,13 @@ export default async function ProfilPage() {
             <FieldIcon icon={Calendar} label="Tanggal Lahir" value={formatDate(profile.groomBirthdate)} />
             <FieldIcon icon={Phone} label="No. Telepon / WhatsApp" value={profile.groomPhone} />
             <FieldIcon icon={Church} label="Paroki Tempat Baptis" value={profile.groomBaptismChurch} />
+            {profile.groomPhoto && (
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-wider mb-2" style={{ color: "#9C8B7A" }}>Pas Foto</p>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={profile.groomPhoto} alt="Pas Foto Pria" className="w-24 h-32 object-cover rounded border border-[#DDD8D0]" />
+              </div>
+            )}
           </div>
         </div>
 
@@ -101,20 +109,18 @@ export default async function ProfilPage() {
             <FieldIcon icon={Calendar} label="Tanggal Lahir" value={formatDate(profile.brideBirthdate)} />
             <FieldIcon icon={Phone} label="No. Telepon / WhatsApp" value={profile.bridePhone} />
             <FieldIcon icon={Church} label="Paroki Tempat Baptis" value={profile.brideBaptismChurch} />
+            {profile.bridePhoto && (
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-wider mb-2" style={{ color: "#9C8B7A" }}>Pas Foto</p>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={profile.bridePhoto} alt="Pas Foto Wanita" className="w-24 h-32 object-cover rounded border border-[#DDD8D0]" />
+              </div>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Wedding Date + Reg Number */}
       <div className="card-sacred p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <p className="text-[10px] font-bold uppercase tracking-wider mb-1.5" style={{ color: "#9C8B7A" }}>
-            Rencana Tanggal Pemberkatan
-          </p>
-          <p className="text-[18px] font-bold" style={{ fontFamily: "var(--font-cormorant)", color: "#2C1F14" }}>
-            {formatDate(profile.plannedWeddingDate)}
-          </p>
-        </div>
         <div className="px-5 py-3 rounded-xl text-center" style={{ background: "#FDF3D0", border: "1px solid #E8D070" }}>
           <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: "#B8960C" }}>
             Nomor Registrasi

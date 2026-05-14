@@ -171,6 +171,16 @@ export default function DetailClient({
                 <div><span className="block text-xs text-[#A89880] uppercase">Tgl Lahir</span> <span className="font-medium text-[#3D2B1F]">{application.groomBirthdate || "—"}</span></div>
                 <div><span className="block text-xs text-[#A89880] uppercase">Telepon</span> <span className="font-medium text-[#3D2B1F]">{application.groomPhone || "—"}</span></div>
                 <div><span className="block text-xs text-[#A89880] uppercase">Paroki Asal</span> <span className="font-medium text-[#3D2B1F]">{application.groomBaptismChurch || "—"}</span></div>
+                {application.groomPhoto && (
+                  <div>
+                    <span className="block text-xs text-[#A89880] uppercase mb-1">Pas Foto</span>
+                    <a href={application.groomPhoto as string} target="_blank" rel="noreferrer">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={application.groomPhoto as string} alt="Pas Foto Pria" className="w-24 h-32 object-cover rounded border border-[#DDD8D0]" />
+                    </a>
+                    <a href={application.groomPhoto as string} download className="text-xs text-[#2D6A4F] hover:underline mt-1 block">⬇ Download</a>
+                  </div>
+                )}
               </div>
             </div>
             <div>
@@ -180,6 +190,16 @@ export default function DetailClient({
                 <div><span className="block text-xs text-[#A89880] uppercase">Tgl Lahir</span> <span className="font-medium text-[#3D2B1F]">{application.brideBirthdate || "—"}</span></div>
                 <div><span className="block text-xs text-[#A89880] uppercase">Telepon</span> <span className="font-medium text-[#3D2B1F]">{application.bridePhone || "—"}</span></div>
                 <div><span className="block text-xs text-[#A89880] uppercase">Paroki Asal</span> <span className="font-medium text-[#3D2B1F]">{application.brideBaptismChurch || "—"}</span></div>
+                {application.bridePhoto && (
+                  <div>
+                    <span className="block text-xs text-[#A89880] uppercase mb-1">Pas Foto</span>
+                    <a href={application.bridePhoto as string} target="_blank" rel="noreferrer">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={application.bridePhoto as string} alt="Pas Foto Wanita" className="w-24 h-32 object-cover rounded border border-[#DDD8D0]" />
+                    </a>
+                    <a href={application.bridePhoto as string} download className="text-xs text-[#2D6A4F] hover:underline mt-1 block">⬇ Download</a>
+                  </div>
+                )}
               </div>
             </div>
           </div>

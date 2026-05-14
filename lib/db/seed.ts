@@ -212,7 +212,6 @@ async function seed() {
       brideBirthdate: "1997-07-22",
       bridePhone: "081234567891",
       brideBaptismChurch: "Gereja St. Theresia Banjarmasin",
-      plannedWeddingDate: "2026-08-15",
       createdAt: now,
     },
     {
@@ -227,7 +226,6 @@ async function seed() {
       brideBirthdate: "1996-05-30",
       bridePhone: "082345678902",
       brideBaptismChurch: "Gereja Katedral Santo Yosef Martapura",
-      plannedWeddingDate: "2026-09-20",
       createdAt: now,
     },
     {
@@ -242,7 +240,6 @@ async function seed() {
       brideBirthdate: "1995-12-10",
       bridePhone: "083456789013",
       brideBaptismChurch: "Gereja St. Ignatius Palangkaraya",
-      plannedWeddingDate: "2026-10-05",
       createdAt: now,
     },
   ]);

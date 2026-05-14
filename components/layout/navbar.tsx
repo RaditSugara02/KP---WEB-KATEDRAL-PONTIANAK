@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Church, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { authClient } from "@/lib/auth-client";
@@ -24,6 +24,7 @@ export function Navbar() {
 
   // Close mobile menu on route change
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMobileMenuOpen(false);
   }, [pathname]);
 
@@ -123,7 +124,7 @@ export function Navbar() {
             {/* CTA Masuk */}
             {session?.user ? (
               <Link
-                href={(session.user as any).role === "ADMIN" ? "/admin/ringkasan" : "/dasbor"}
+                href={(session.user as { role?: string }).role === "ADMIN" ? "/admin/ringkasan" : "/dasbor"}
                 className={cn(
                   "px-5 py-2 text-[13px] font-semibold rounded-lg transition-all duration-200 border",
                   isTransparent
@@ -190,7 +191,7 @@ export function Navbar() {
             <>
               <div className="h-px bg-[#E8E0D0] my-2" />
               <Link
-                href={(session.user as any).role === "ADMIN" ? "/admin/ringkasan" : "/dasbor"}
+                href={(session.user as { role?: string }).role === "ADMIN" ? "/admin/ringkasan" : "/dasbor"}
                 className="block px-4 py-3 rounded-lg text-[14px] font-semibold text-center bg-[#B8960C] text-white hover:bg-[#9A7A0A] transition-colors"
               >
                 Dasbor ({session.user.name})

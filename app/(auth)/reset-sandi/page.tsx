@@ -18,6 +18,7 @@ export default function ResetSandiPage() {
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsClient(true);
   }, []);
 
@@ -61,6 +62,7 @@ export default function ResetSandiPage() {
 
       setIsSuccess(true);
       toast.success("Kata sandi berhasil diubah!");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       toast.error(err.message || "Terjadi kesalahan sistem.");
     } finally {

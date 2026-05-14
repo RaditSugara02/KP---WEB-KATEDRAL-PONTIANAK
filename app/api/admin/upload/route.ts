@@ -15,9 +15,9 @@ function getSupabaseAdmin() {
 
 export async function POST(req: NextRequest) {
   try {
-    // Auth check — hanya admin
+    // Auth check — admin dan couple
     const session = await auth.api.getSession({ headers: await headers() });
-    if (!session || session.user.role !== "ADMIN") {
+    if (!session || (session.user.role !== "ADMIN" && session.user.role !== "COUPLE")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

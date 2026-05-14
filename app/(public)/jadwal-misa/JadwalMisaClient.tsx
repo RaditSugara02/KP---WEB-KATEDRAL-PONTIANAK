@@ -13,6 +13,24 @@ type MassItem = {
 
 type ScheduleRow = { label: string; time: string; subtitle?: string; key: string };
 
+const ScheduleList = ({ rows }: { rows: ScheduleRow[] }) => (
+  <ul className="space-y-6">
+    {rows.length > 0 ? rows.map((g) => (
+      <li key={g.key} className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 group">
+        <div className="flex flex-col">
+          <span className="font-medium text-[#6B6560] group-hover:text-[#3D2B1F] transition-colors">{g.label}</span>
+          {g.subtitle && <span className="text-xs text-[#9C8B7A]">{g.subtitle}</span>}
+        </div>
+        <span className="font-semibold text-[#B8960C] bg-[#FFF8E1] px-4 py-1.5 rounded-full text-sm w-fit whitespace-nowrap">
+          {g.time}
+        </span>
+      </li>
+    )) : (
+      <li className="text-[#9C8B7A] italic text-sm">Belum ada jadwal.</li>
+    )}
+  </ul>
+);
+
 export default function JadwalMisaClient({ masses }: { masses: MassItem[] }) {
   const massesHarian = masses.filter(m => m.category?.endsWith("::Harian"));
   const massesKhusus = masses.filter(m => m.category?.endsWith("::Khusus"));
@@ -115,23 +133,7 @@ export default function JadwalMisaClient({ masses }: { masses: MassItem[] }) {
     }
   }
 
-  const ScheduleList = ({ rows }: { rows: ScheduleRow[] }) => (
-    <ul className="space-y-6">
-      {rows.length > 0 ? rows.map((g) => (
-        <li key={g.key} className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 group">
-          <div className="flex flex-col">
-            <span className="font-medium text-[#6B6560] group-hover:text-[#3D2B1F] transition-colors">{g.label}</span>
-            {g.subtitle && <span className="text-xs text-[#9C8B7A]">{g.subtitle}</span>}
-          </div>
-          <span className="font-semibold text-[#B8960C] bg-[#FFF8E1] px-4 py-1.5 rounded-full text-sm w-fit whitespace-nowrap">
-            {g.time}
-          </span>
-        </li>
-      )) : (
-        <li className="text-[#9C8B7A] italic text-sm">Belum ada jadwal.</li>
-      )}
-    </ul>
-  );
+
 
   return (
     <div className="space-y-12">

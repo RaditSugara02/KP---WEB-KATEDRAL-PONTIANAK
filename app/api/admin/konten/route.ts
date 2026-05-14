@@ -48,9 +48,7 @@ export async function POST(req: NextRequest) {
     updatedAt: now,
   }).returning();
 
-  revalidatePath("/");
-  revalidatePath("/berita");
-  revalidatePath("/jadwal-misa");
+  revalidatePath("/", "layout");
 
   return NextResponse.json({ success: true, content: newContent[0] });
 }
@@ -81,9 +79,7 @@ export async function PUT(req: NextRequest) {
     updatedAt: new Date(),
   }).where(eq(contents.id, id));
 
-  revalidatePath("/");
-  revalidatePath("/berita");
-  revalidatePath("/jadwal-misa");
+  revalidatePath("/", "layout");
 
   return NextResponse.json({ success: true });
 }
@@ -104,9 +100,7 @@ export async function DELETE(req: NextRequest) {
 
   await db.delete(contents).where(eq(contents.id, id));
 
-  revalidatePath("/");
-  revalidatePath("/berita");
-  revalidatePath("/jadwal-misa");
+  revalidatePath("/", "layout");
 
   return NextResponse.json({ success: true });
 }

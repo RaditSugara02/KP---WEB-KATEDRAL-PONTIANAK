@@ -45,7 +45,8 @@ export async function POST(req: Request) {
       brideBirthdate,
       bridePhone,
       brideBaptismChurch,
-      plannedWeddingDate,
+      groomPhoto,
+      bridePhoto,
     } = body;
 
     // Validate minimal fields
@@ -77,7 +78,8 @@ export async function POST(req: Request) {
         brideBirthdate,
         bridePhone,
         brideBaptismChurch,
-        plannedWeddingDate,
+        groomPhoto,
+        bridePhoto,
       });
 
       // 2. Create Application
@@ -86,7 +88,7 @@ export async function POST(req: Request) {
         id: applicationId,
         coupleProfileId: profileId,
         currentStage: 1,
-        weddingDate: plannedWeddingDate,
+        weddingDate: null,
       });
 
       // 3. Create initial stage history
