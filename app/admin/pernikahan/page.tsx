@@ -38,18 +38,18 @@ export default async function AdminPernikahanPage() {
   }));
 
   return (
-    <div className="space-y-4 max-w-7xl mx-auto">
+    <div className="space-y-4 max-w-7xl mx-auto page-fade">
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between md:items-end gap-4 mb-6">
+      <div className="flex flex-col md:flex-row justify-between md:items-end gap-4 mb-4">
         <div>
-          <h1 className="text-3xl font-bold text-[#3D2B1F] mb-1" style={{ fontFamily: "var(--font-cormorant)" }}>
+          <p className="section-label mb-2">Panel Admin</p>
+          <h1 className="text-[32px] font-bold leading-tight" style={{ fontFamily: "var(--font-cormorant)", color: "#2C1F14" }}>
             Data Pernikahan
           </h1>
-          <p className="text-[#6B6560] text-sm">Kelola seluruh data pendaftaran calon pengantin.</p>
+          <p className="text-[14px] mt-1" style={{ color: "#9C8B7A" }}>Kelola seluruh data pendaftaran calon pengantin.</p>
         </div>
       </div>
 
-      {/* Client Component with Search + Filter + Table */}
       <PernikahanTableClient apps={serialized} />
     </div>
   );

@@ -24,11 +24,7 @@ Dokumen ini berfungsi sebagai peta jalan (*roadmap*) pengembangan proyek. Tanda 
 ## 🚀 FASE 3: Fitur Fungsional Kritis (SEDANG DIKERJAKAN)
 
 ### Prioritas 1: Sistem Dokumen & Keamanan
-- [ ] **Sistem Unggah Dokumen (File Uploads)**
-  - Menambahkan kolom `fileUrl` di tabel `requiredDocuments`.
-  - Integrasi dengan Supabase Storage Bucket.
-  - Pembuatan komponen `Dropzone` UI untuk halaman Pengantin.
-  - Fitur "Tinjau Dokumen" (Preview/Download) untuk Admin.
+
 - [x] **Fitur Lupa Kata Sandi (Password Reset)**
   - Integrasi Email Provider (Resend/SMTP).
   - Pembuatan alur pengiriman token ke email dan formulir ganti sandi.
@@ -36,7 +32,7 @@ Dokumen ini berfungsi sebagai peta jalan (*roadmap*) pengembangan proyek. Tanda 
 ### Prioritas 2: Penyempurnaan Dasbor & Operasional
 - [ ] **Penugasan Romo (Priest Assignment)**
   - Fitur bagi Admin untuk memilih dan menugaskan Romo pada pengajuan pernikahan (Tahap lanjut).
-  - Tampilan khusus bagi Romo untuk melihat jadwal yang ditugaskan (Opsional).
+
 - [ ] **Pembaruan Tabel & Form dengan Shadcn**
   - Mengganti tabel biasa di dasbor Admin menjadi Shadcn Data-Table (Paginasi, Filter, Sortir).
   - Memasang Shadcn Date Picker dan Select untuk form.

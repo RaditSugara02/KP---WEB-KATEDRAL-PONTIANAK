@@ -3,149 +3,125 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { 
-  Home, 
-  FileText, 
-  Bell, 
-  User, 
-  LogOut 
+import {
+  Home,
+  FileText,
+  Bell,
+  User,
+  LogOut,
+  Church,
 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
+import { cn } from "@/lib/utils";
 
 export function SidebarUser() {
   const pathname = usePathname();
   const router = useRouter();
+  const [notifCount, setNotifCount] = useState(0);
 
   const handleLogout = async () => {
     await authClient.signOut();
     router.push("/masuk");
   };
 
-  const [notifCount, setNotifCount] = useState(0);
-
   useEffect(() => {
     fetch("/api/notifikasi/count")
-      .then(r => r.json())
-      .then(data => setNotifCount(data.count || 0));
+      .then((r) => r.json())
+      .then((data) => setNotifCount(data.count || 0));
   }, []);
 
   const navItems = [
-    { icon: Home, label: "Beranda", href: "/dasbor/beranda" },
-    { icon: FileText, label: "Dokumen", href: "/dasbor/dokumen" },
-    { icon: Bell, label: "Notifikasi", href: "/dasbor/notifikasi", badge: notifCount },
-    { icon: User, label: "Profil Saya", href: "/dasbor/profil" },
+    { icon: Home,     label: "Beranda",   href: "/dasbor/beranda" },
+    { icon: FileText, label: "Dokumen",   href: "/dasbor/dokumen" },
+    { icon: Bell,     label: "Notifikasi", href: "/dasbor/notifikasi", badge: notifCount },
+    { icon: User,     label: "Profil Saya", href: "/dasbor/profil" },
   ];
 
   return (
     <aside
-      className="hidden md:flex h-screen flex-shrink-0 flex-col justify-between"
+      className="hidden md:flex h-screen w-[240px] flex-shrink-0 flex-col justify-between"
       style={{
-        width: "240px",
         background: "#FFFFFF",
-        borderRight: "1px solid #DDD8D0",
+        borderRight: "1px solid #E8E0D0",
       }}
     >
+      {/* ── Top ── */}
       <div>
-        {/* [A] Header */}
-        <Link href="/" className="block p-6 pb-6 text-center border-b border-[#EDE8DF] mb-4 hover:bg-[#FDFBF7] transition-colors">
-          <div className="flex justify-center mb-2">
-            <svg
-              width="32"
-              height="32"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#B8960C"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M18 22V11c0-2.8-2.2-5-5-5H9" />
-              <path d="M12 22V2l-4 4" />
-              <path d="M12 2l4 4" />
-              <path d="M4 22v-6c0-1.7 1.3-3 3-3" />
-              <path d="M22 22H2" />
-            </svg>
+        {/* Brand header */}
+        <Link
+          href="/"
+          className="flex flex-col items-center gap-2 px-6 pt-7 pb-6 transition-colors hover:bg-[#FDFBF7]"
+          style={{ borderBottom: "1px solid #E8E0D0" }}
+        >
+          <div className="w-11 h-11 rounded-full flex items-center justify-center"
+               style={{ background: "#B8960C" }}>
+            <Church size={22} color="#FFFFFF" />
           </div>
-          <h2
-            className="font-bold"
-            style={{
-              fontFamily: "var(--font-cormorant)",
-              fontSize: "16px",
-              color: "#B8960C",
-            }}
-          >
-            Katedral Santo Yosef
-          </h2>
-          <p
-            style={{
-              fontFamily: "var(--font-dm-sans)",
-              fontSize: "12px",
-              color: "#6B6560",
-            }}
-          >
-            Portal Pengantin
-          </p>
+          <div className="text-center">
+            <p className="font-bold leading-tight"
+               style={{ fontFamily: "var(--font-cormorant)", fontSize: "17px", color: "#2C1F14" }}>
+              Katedral Santo Yosef
+            </p>
+            <p className="text-[11px] uppercase tracking-wider mt-0.5"
+               style={{ color: "#B8960C", fontFamily: "var(--font-dm-sans)", fontWeight: 600 }}>
+              Portal Pengantin
+            </p>
+          </div>
         </Link>
 
-        {/* [B] Menu Navigasi */}
-        <nav className="flex flex-col px-2 gap-1">
+        {/* Navigation */}
+        <nav className="flex flex-col px-3 pt-4 gap-0.5">
           {navItems.map((item) => {
             const isActive = pathname.startsWith(item.href);
             const Icon = item.icon;
-
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className="flex items-center justify-between rounded-md transition-colors hover:bg-[#F5F0E8]"
-                style={{
-                  padding: "10px 16px",
-                  fontFamily: "var(--font-dm-sans)",
-                  fontSize: "13px",
-                  background: isActive ? "#F5F0E8" : "transparent",
-                  color: isActive ? "#B8960C" : "#6B6560",
-                  fontWeight: isActive ? "bold" : "normal",
-                  borderLeft: isActive ? "3px solid #B8960C" : "3px solid transparent",
-                }}
+                className={cn(
+                  "flex items-center justify-between rounded-lg px-4 py-2.5 text-[13px] transition-all duration-150",
+                  isActive ? "user-nav-active" : "user-nav-item"
+                )}
+                style={{ fontFamily: "var(--font-dm-sans)" }}
               >
                 <div className="flex items-center gap-3">
-                  <Icon size={18} color={isActive ? "#B8960C" : "#6B6560"} />
+                  <Icon
+                    size={17}
+                    color={isActive ? "#B8960C" : "#9C8B7A"}
+                    strokeWidth={isActive ? 2.5 : 2}
+                  />
                   {item.label}
                 </div>
-                {item.badge && (
+                {item.badge ? (
                   <span
                     className="flex items-center justify-center rounded-full text-white font-bold"
                     style={{
-                      width: "18px",
+                      minWidth: "18px",
                       height: "18px",
                       fontSize: "10px",
-                      background: "#EF4444",
+                      background: "#8B3A3A",
+                      padding: "0 4px",
                     }}
                   >
                     {item.badge}
                   </span>
-                )}
+                ) : null}
               </Link>
             );
           })}
         </nav>
       </div>
 
-      {/* [C] Divider & [D] Footer sidebar */}
+      {/* ── Bottom ── */}
       <div>
-        <div style={{ height: "1px", background: "#EDE8DF" }} />
-        <div className="p-4">
+        <div style={{ height: "1px", background: "#E8E0D0" }} />
+        <div className="p-3">
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 rounded-md transition-colors hover:bg-[#FDECEA]"
-            style={{
-              padding: "10px 16px",
-              fontFamily: "var(--font-dm-sans)",
-              fontSize: "13px",
-              color: "#EF4444",
-            }}
+            className="w-full flex items-center gap-3 rounded-lg px-4 py-2.5 text-[13px] text-left transition-all hover:bg-[#FAEDED]"
+            style={{ color: "#8B3A3A", fontFamily: "var(--font-dm-sans)" }}
           >
-            <LogOut size={18} />
+            <LogOut size={17} />
             Keluar
           </button>
         </div>

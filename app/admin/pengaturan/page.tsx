@@ -11,17 +11,14 @@ type ChurchInfo = {
   phone: string;
   email: string;
   operationalHours: string;
-  massTimes: string;
 };
 
 const DEFAULT_CHURCH: ChurchInfo = {
-  name: "Katedral Santo Yosef Martapura",
-  address: "Jl. Gereja No. 1, Martapura, Kalimantan Selatan",
-  phone: "0511-1234567",
-  email: "sekretariat@katedral.id",
+  name: "Katedral Santo Yosef Pontianak",
+  address: "Jl. Pattimura Indah No. 195, Darat Sekip, Kec. Pontianak Kota, Kota Pontianak, Kalimantan Barat 78011",
+  phone: "+62 851-7544-7819",
+  email: "skrt.kat.ptk@gmail.com",
   operationalHours: "Senin–Jumat: 08.00–12.00 dan 13.00–16.00\nSabtu: 08.00–12.00\nMinggu & Hari Raya: Tutup",
-  massTimes:
-    "Jumat: 06.00 WIB\nSabtu: 17.00 WIB\nMinggu: 06.00 | 08.00 | 10.00 | 17.00 WIB",
 };
 
 export default function PengaturanAdminPage() {
@@ -180,18 +177,13 @@ export default function PengaturanAdminPage() {
 
             <div className="flex items-center gap-2 pt-2 border-t border-[#EDE8DF]">
               <Clock size={15} className="text-[#A89880]" />
-              <h3 className="text-xs font-bold text-[#6B6560] uppercase tracking-wider">Jam & Jadwal</h3>
+              <h3 className="text-xs font-bold text-[#6B6560] uppercase tracking-wider">Jam Operasional</h3>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 gap-5">
               <div>
                 <label className={labelCls}>Jam Operasional Sekretariat</label>
                 <textarea rows={4} value={church.operationalHours} onChange={(e) => setChurch({ ...church, operationalHours: e.target.value })} className={textareaCls} placeholder="Contoh: Senin–Jumat: 08.00–16.00" />
                 <p className="text-[10px] text-[#A89880] mt-1">Satu baris per hari.</p>
-              </div>
-              <div>
-                <label className={labelCls}>Jadwal Misa Default</label>
-                <textarea rows={4} value={church.massTimes} onChange={(e) => setChurch({ ...church, massTimes: e.target.value })} className={textareaCls} placeholder="Contoh: Minggu: 06.00 | 08.00 | 10.00" />
-                <p className="text-[10px] text-[#A89880] mt-1">Satu baris per hari/waktu.</p>
               </div>
             </div>
 

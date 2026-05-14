@@ -1,84 +1,188 @@
 import Link from "next/link";
-import { Church, MapPin, Phone, Mail } from "lucide-react";
+import { MapPin, Phone, Mail } from "lucide-react";
+import { db } from "@/lib/db";
+import { contents } from "@/lib/db/schema";
+import { eq } from "drizzle-orm";
 
-export function Footer() {
+const SETTINGS_SLUG = "church-settings-v1";
+
+const DEFAULT_INFO = {
+  name: "Katedral Santo Yosef Pontianak",
+  address: "Jl. Gereja No. 1, Pontianak, Kalimantan Barat",
+  phone: "0561-1234567",
+  email: "sekretariat@katedral.id",
+};
+
+async function getChurchInfo() {
+  try {
+    const record = await db
+      .select({ body: contents.body })
+      .from(contents)
+      .where(eq(contents.slug, SETTINGS_SLUG))
+      .limit(1);
+
+    if (record.length === 0) return DEFAULT_INFO;
+
+    const settings = JSON.parse(record[0].body ?? "{}");
+    return { ...DEFAULT_INFO, ...settings };
+  } catch {
+    return DEFAULT_INFO;
+  }
+}
+
+export async function Footer() {
+  const info = await getChurchInfo();
+
   return (
-    <footer className="bg-[#3D2B1F] text-[#FAF7F2] pt-16 md:pt-24 pb-10 md:pb-12 border-t border-[#B8960C]/30 relative overflow-hidden">
-      {/* Decorative background element */}
-      <div className="absolute top-0 right-0 w-64 h-64 bg-[#B8960C]/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4 pointer-events-none" />
-      
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-12 lg:gap-16 mb-16">
-          
-          {/* Brand Col */}
-          <div className="col-span-1 md:col-span-12 lg:col-span-4 flex flex-col">
-            <Link href="/" className="flex items-center gap-4 mb-6 group inline-flex w-fit">
-              <div className="w-12 h-12 rounded-full bg-[#B8960C] text-white flex items-center justify-center shadow-lg group-hover:bg-[#9A7A00] transition-colors">
-                <Church size={24} />
-              </div>
-              <div className="flex flex-col">
-                <span className="font-bold text-2xl text-white leading-none tracking-wide" style={{ fontFamily: "var(--font-cormorant)" }}>
-                  Katedral
+    <footer
+      className="relative overflow-hidden"
+      style={{
+        background: "#2C1F14",
+        borderTop: "1px solid rgba(184,150,12,0.25)",
+      }}
+    >
+      {/* Decorative soft glow */}
+      <div
+        className="absolute top-0 right-0 w-96 h-96 pointer-events-none"
+        style={{
+          background: "radial-gradient(circle at top right, rgba(184,150,12,0.06) 0%, transparent 70%)",
+        }}
+      />
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20 relative z-10">
+
+        {/* ── Gold Divider Top ── */}
+        <div className="divider-gold mb-14" />
+
+        {/* ── 3-Column Grid ── */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-12">
+
+          {/* Col 1: Brand */}
+          <div className="md:col-span-5">
+            <Link href="/" className="inline-flex items-center gap-4 mb-6 group">
+              <div
+                className="w-16 h-16 transition-colors group-hover:opacity-90 flex-shrink-0"
+                style={{
+                  backgroundColor: "#B8960C",
+                  WebkitMaskImage: "url('/logo-katedral.png')",
+                  WebkitMaskSize: "contain",
+                  WebkitMaskRepeat: "no-repeat",
+                  WebkitMaskPosition: "center",
+                  maskImage: "url('/logo-katedral.png')",
+                  maskSize: "contain",
+                  maskRepeat: "no-repeat",
+                  maskPosition: "center",
+                }}
+              />
+              <div>
+                <span
+                  className="font-bold text-2xl leading-none block text-white"
+                  style={{ fontFamily: "var(--font-cormorant)" }}
+                >
+                  Katedral Santo Yosef
                 </span>
-                <span className="text-xs uppercase tracking-[0.25em] text-[#B8960C] font-semibold mt-1.5">Santo Yosef</span>
+                <span
+                  className="text-[10px] uppercase tracking-[0.25em] font-semibold block mt-1"
+                  style={{ color: "#B8960C" }}
+                >
+                  Pontianak
+                </span>
               </div>
             </Link>
-            <p className="text-[#EDE8DF]/80 text-base leading-relaxed mb-8 max-w-sm font-light">
+            <p
+              className="text-[15px] leading-relaxed font-light max-w-sm"
+              style={{ color: "rgba(253,247,242,0.65)" }}
+            >
               Menjadi komunitas umat beriman yang paguyuban, memasyarakat, dan berpusat pada Kristus.
             </p>
           </div>
 
-          {/* Links Col 1 */}
-          <div className="col-span-1 md:col-span-4 lg:col-span-2">
-            <h4 className="text-white font-bold uppercase tracking-[0.15em] text-xs mb-8" style={{ fontFamily: "var(--font-cormorant)" }}>Navigasi</h4>
-            <ul className="space-y-4 text-sm text-[#EDE8DF]/80">
-              <li><Link href="/" className="hover:text-[#B8960C] transition-colors inline-block hover:translate-x-1 transform duration-300">Beranda</Link></li>
-              <li><Link href="/jadwal-misa" className="hover:text-[#B8960C] transition-colors inline-block hover:translate-x-1 transform duration-300">Jadwal Misa</Link></li>
-              <li><Link href="/berita" className="hover:text-[#B8960C] transition-colors inline-block hover:translate-x-1 transform duration-300">Berita Paroki</Link></li>
-              <li><Link href="/daftar" className="hover:text-[#B8960C] transition-colors inline-block hover:translate-x-1 transform duration-300">Sakramen</Link></li>
+          {/* Col 2: Navigasi */}
+          <div className="md:col-span-3">
+            <h4
+              className="text-[11px] uppercase tracking-[0.2em] font-bold mb-6"
+              style={{ color: "#B8960C", fontFamily: "var(--font-dm-sans)" }}
+            >
+              Navigasi
+            </h4>
+            <ul className="space-y-3.5">
+              {[
+                { label: "Beranda",              href: "/" },
+                { label: "Jadwal Misa",          href: "/jadwal-misa" },
+                { label: "Berita Paroki",        href: "/berita" },
+                { label: "Sakramen Perkawinan",  href: "/sakramen-perkawinan" },
+                { label: "Kontak",               href: "/kontak" },
+              ].map((link) => (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    className="text-[14px] transition-colors hover:text-[#B8960C] font-light"
+                    style={{ color: "rgba(253,247,242,0.65)" }}
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
-          {/* Links Col 2 */}
-          <div className="col-span-1 md:col-span-4 lg:col-span-3">
-            <h4 className="text-white font-bold uppercase tracking-[0.15em] text-xs mb-8" style={{ fontFamily: "var(--font-cormorant)" }}>Layanan Paroki</h4>
-            <ul className="space-y-4 text-sm text-[#EDE8DF]/80">
-              <li><Link href="#" className="hover:text-[#B8960C] transition-colors inline-block hover:translate-x-1 transform duration-300">Sakramen Baptis</Link></li>
-              <li><Link href="#" className="hover:text-[#B8960C] transition-colors inline-block hover:translate-x-1 transform duration-300">Komuni Pertama</Link></li>
-              <li><Link href="#" className="hover:text-[#B8960C] transition-colors inline-block hover:translate-x-1 transform duration-300">Sakramen Krisma</Link></li>
-              <li><Link href="/masuk" className="hover:text-[#B8960C] transition-colors inline-block hover:translate-x-1 transform duration-300 flex items-center gap-2">Login Pendaftar Nikah</Link></li>
+          {/* Col 3: Kontak Sekretariat — Dynamic from DB */}
+          <div className="md:col-span-4">
+            <h4
+              className="text-[11px] uppercase tracking-[0.2em] font-bold mb-6"
+              style={{ color: "#B8960C", fontFamily: "var(--font-dm-sans)" }}
+            >
+              Sekretariat
+            </h4>
+            <ul className="space-y-4">
+              <li className="flex items-start gap-3.5">
+                <MapPin size={16} className="flex-shrink-0 mt-0.5" style={{ color: "#B8960C" }} />
+                <span
+                  className="text-[14px] leading-relaxed font-light"
+                  style={{ color: "rgba(253,247,242,0.65)" }}
+                >
+                  {info.address}
+                </span>
+              </li>
+              <li className="flex items-center gap-3.5">
+                <Phone size={16} className="flex-shrink-0" style={{ color: "#B8960C" }} />
+                <span
+                  className="text-[14px] font-light tracking-wide"
+                  style={{ color: "rgba(253,247,242,0.65)" }}
+                >
+                  {info.phone}
+                </span>
+              </li>
+              <li className="flex items-center gap-3.5">
+                <Mail size={16} className="flex-shrink-0" style={{ color: "#B8960C" }} />
+                <span
+                  className="text-[14px] font-light"
+                  style={{ color: "rgba(253,247,242,0.65)" }}
+                >
+                  {info.email}
+                </span>
+              </li>
             </ul>
           </div>
-
-          {/* Contact Col */}
-          <div className="col-span-1 md:col-span-4 lg:col-span-3">
-            <h4 className="text-white font-bold uppercase tracking-[0.15em] text-xs mb-8" style={{ fontFamily: "var(--font-cormorant)" }}>Sekretariat</h4>
-            <ul className="space-y-5 text-sm text-[#EDE8DF]/80">
-              <li className="flex items-start gap-4">
-                <MapPin size={18} className="text-[#B8960C] flex-shrink-0 mt-0.5" />
-                <span className="leading-relaxed font-light">Jl. Gereja No.12, Martapura, Kalimantan Selatan</span>
-              </li>
-              <li className="flex items-center gap-4">
-                <Phone size={18} className="text-[#B8960C] flex-shrink-0" />
-                <span className="font-light tracking-wide">(0511) 1234567</span>
-              </li>
-              <li className="flex items-center gap-4">
-                <Mail size={18} className="text-[#B8960C] flex-shrink-0" />
-                <span className="font-light tracking-wide">sekretariat@katedral.id</span>
-              </li>
-            </ul>
-          </div>
-
         </div>
 
-        {/* Bottom Bar */}
-        <div className="pt-8 border-t border-[#FAF7F2]/10 flex flex-col md:flex-row justify-between items-center gap-6">
-          <p className="text-[#EDE8DF]/60 text-xs font-light tracking-wide">
-            © {new Date().getFullYear()} Paroki Katedral Santo Yosef Martapura. Semua hak dilindungi.
+        {/* ── Gold Divider Bottom ── */}
+        <div className="divider-gold mt-14 mb-8" />
+
+        {/* ── Copyright Row ── */}
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+          <p
+            className="text-[12px] font-light tracking-wide"
+            style={{ color: "rgba(253,247,242,0.40)" }}
+          >
+            © {new Date().getFullYear()} Paroki Katedral Santo Yosef Pontianak. Semua hak dilindungi.
           </p>
-          <div className="flex gap-8 text-[#EDE8DF]/60 text-xs font-light tracking-wide">
+          <div
+            className="flex gap-6 text-[12px] font-light tracking-wide"
+            style={{ color: "rgba(253,247,242,0.40)" }}
+          >
             <Link href="#" className="hover:text-white transition-colors">Kebijakan Privasi</Link>
-            <Link href="#" className="hover:text-white transition-colors">Syarat & Ketentuan</Link>
+            <Link href="#" className="hover:text-white transition-colors">Syarat &amp; Ketentuan</Link>
           </div>
         </div>
       </div>

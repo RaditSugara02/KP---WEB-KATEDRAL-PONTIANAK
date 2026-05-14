@@ -22,8 +22,11 @@ export default function TambahKontenPage() {
     title: "",
     type: "NEWS",
     category: "",
+    massDay: "",
+    massType: "Harian",
     body: "",
-    eventDate: "",
+    eventDate: "07:00",
+    eventEndDate: "",
     location: "",
     imageUrl: "",
   });
@@ -38,10 +41,15 @@ export default function TambahKontenPage() {
     setLoading(true);
 
     try {
+      const payload = { ...form };
+      if (payload.type === "MASS_SCHEDULE") {
+        payload.category = `${payload.massDay}::${payload.massType}`;
+      }
+
       const res = await fetch("/api/admin/konten", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify(payload),
       });
 
       const data = await res.json();
@@ -122,6 +130,54 @@ export default function TambahKontenPage() {
           </div>
         )}
 
+        {/* Pengumuman Fields */}
+        {form.type === "ANNOUNCEMENT" && (
+          <div className="space-y-5 p-5 bg-[#F5F0E8] rounded-lg border border-[#EDE8DF]">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div>
+                <label className="block text-xs font-bold text-[#6B6560] uppercase tracking-wider mb-2">
+                  Tanggal Acara <span className="text-[#A89880] font-normal">(Opsional)</span>
+                </label>
+                <input
+                  type="date"
+                  name="eventDate"
+                  value={form.type === "ANNOUNCEMENT" ? form.eventDate : ""}
+                  onChange={handleChange}
+                  className="w-full h-11 px-4 border border-[#DDD8D0] rounded-md text-sm bg-white focus:border-[#B8960C] focus:ring-1 focus:ring-[#B8960C] outline-none"
+                />
+                <p className="mt-1.5 text-xs text-[#A89880]">Tanggal acara akan ditampilkan di agenda.</p>
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-[#6B6560] uppercase tracking-wider mb-2">
+                  Tampilkan Sampai <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="date"
+                  name="eventEndDate"
+                  value={form.eventEndDate}
+                  onChange={handleChange}
+                  required
+                  className="w-full h-11 px-4 border border-[#DDD8D0] rounded-md text-sm bg-white focus:border-[#B8960C] focus:ring-1 focus:ring-[#B8960C] outline-none"
+                />
+                <p className="mt-1.5 text-xs text-[#A89880]">Setelah tanggal ini, pengumuman tidak tampil di landing page tapi tetap ada di halaman berita.</p>
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-[#6B6560] uppercase tracking-wider mb-2">
+                Lokasi <span className="text-[#A89880] font-normal">(Opsional)</span>
+              </label>
+              <input
+                type="text"
+                name="location"
+                value={form.location}
+                onChange={handleChange}
+                placeholder="cth: Gereja Katedral, Aula Paroki"
+                className="w-full h-11 px-4 border border-[#DDD8D0] rounded-md text-sm bg-white focus:border-[#B8960C] focus:ring-1 focus:ring-[#B8960C] outline-none"
+              />
+            </div>
+          </div>
+        )}
+
         {/* Judul */}
         <div>
           <label className="block text-xs font-bold text-[#6B6560] uppercase tracking-wider mb-2">
@@ -140,32 +196,62 @@ export default function TambahKontenPage() {
 
         {/* Conditional: Jadwal Misa Fields */}
         {isMassSchedule && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 p-5 bg-[#F5F0E8] rounded-lg border border-[#EDE8DF]">
-            <div>
-              <label className="block text-xs font-bold text-[#6B6560] uppercase tracking-wider mb-2">
-                Waktu (Jam) <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                name="eventDate"
-                value={form.eventDate}
-                onChange={handleChange}
-                placeholder="cth: 07.00 / 09.00 / 17.00"
-                className="w-full h-11 px-4 border border-[#DDD8D0] rounded-md text-sm bg-white focus:border-[#B8960C] focus:ring-1 focus:ring-[#B8960C] outline-none"
-              />
+          <div className="space-y-5 p-5 bg-[#F5F0E8] rounded-lg border border-[#EDE8DF]">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div>
+                <label className="block text-xs font-bold text-[#6B6560] uppercase tracking-wider mb-2">
+                  Tanggal <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="date"
+                  name="massDay"
+                  value={form.massDay}
+                  onChange={handleChange}
+                  className="w-full h-11 px-4 border border-[#DDD8D0] rounded-md text-sm bg-white focus:border-[#B8960C] focus:ring-1 focus:ring-[#B8960C] outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-[#6B6560] uppercase tracking-wider mb-2">
+                  Jenis Misa <span className="text-red-500">*</span>
+                </label>
+                <select
+                  name="massType"
+                  value={form.massType}
+                  onChange={handleChange}
+                  className="w-full h-11 px-4 border border-[#DDD8D0] rounded-md text-sm bg-white focus:border-[#B8960C] focus:ring-1 focus:ring-[#B8960C] outline-none"
+                >
+                  <option value="Harian">Misa Harian / Umum</option>
+                  <option value="Khusus">Misa Khusus (Hari Raya / Acara Khusus)</option>
+                </select>
+              </div>
             </div>
-            <div>
-              <label className="block text-xs font-bold text-[#6B6560] uppercase tracking-wider mb-2">
-                Lokasi / Gedung
-              </label>
-              <input
-                type="text"
-                name="location"
-                value={form.location}
-                onChange={handleChange}
-                placeholder="cth: Gereja Utama"
-                className="w-full h-11 px-4 border border-[#DDD8D0] rounded-md text-sm bg-white focus:border-[#B8960C] focus:ring-1 focus:ring-[#B8960C] outline-none"
-              />
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div>
+                <label className="block text-xs font-bold text-[#6B6560] uppercase tracking-wider mb-2">
+                  Waktu (Jam) <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="time"
+                  name="eventDate"
+                  value={form.eventDate}
+                  onChange={handleChange}
+                  className="w-full h-11 px-4 border border-[#DDD8D0] rounded-md text-sm bg-white focus:border-[#B8960C] focus:ring-1 focus:ring-[#B8960C] outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-[#6B6560] uppercase tracking-wider mb-2">
+                  Lokasi / Gedung
+                </label>
+                <input
+                  type="text"
+                  name="location"
+                  value={form.location}
+                  onChange={handleChange}
+                  placeholder="cth: Gereja Utama"
+                  className="w-full h-11 px-4 border border-[#DDD8D0] rounded-md text-sm bg-white focus:border-[#B8960C] focus:ring-1 focus:ring-[#B8960C] outline-none"
+                />
+              </div>
             </div>
           </div>
         )}

@@ -310,14 +310,6 @@
 
 ---
 
-## 🚫 FITUR YANG DI-SKIP / DITUNDA
-
-| Fitur | Alasan |
-|---|---|
-| **Sistem Unggah Dokumen (File Uploads)** | Ditunda — kemungkinan besar tidak akan dipakai karena ada perubahan rencana sistem laporan. Bisa diimplementasi ulang jika dibutuhkan di masa mendatang. |
-| **Dasbor Romo** | Di-skip sejak awal — scope terlalu luas untuk fase ini. |
-
----
 
 ## 📝 Riwayat Perubahan (Changelog)
 
@@ -336,6 +328,9 @@
 | 30 Apr 2026 | Implementasi: Search/Filter pernikahan, Timeline riwayat tahap, Halaman pengaturan gereja |
 | 30 Apr 2026 | Implementasi: Jadwal pemberkatan (admin+dasbor), Print/PDF bukti pendaftaran |
 | 30 Apr 2026 | Implementasi: Email Resend, SEO metadata+sitemap+robots, Halaman Kontak publik |
+| 13 Mei 2026 | Fase 11: Migrasi Admin UI ke Shadcn (Data-Table, DatePicker, Select) |
+| 13 Mei 2026 | Memperbaiki masalah z-index/tumpang tindih UI di Landing Page |
+| 13 Mei 2026 | Menyelesaikan fitur Jadwal Misa (CMS Admin & UI Tab Interaktif) |
 
 ---
 

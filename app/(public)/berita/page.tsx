@@ -1,35 +1,40 @@
 import { db } from "@/lib/db";
 import { contents } from "@/lib/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { inArray, desc } from "drizzle-orm";
 import Link from "next/link";
 import { CalendarDays, Church } from "lucide-react";
+import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import BeritaListClient from "./BeritaListClient";
 
 export default async function BeritaPage() {
   const allNews = await db.select()
     .from(contents)
-    .where(eq(contents.type, "NEWS"))
+    .where(inArray(contents.type, ["NEWS", "ANNOUNCEMENT"]))
     .orderBy(desc(contents.createdAt));
 
   return (
-    <div className="min-h-screen bg-[#FAF7F2]">
-      
+    <div className="min-h-screen" style={{ background: "#FAF7F2" }}>
       {/* Header */}
-      <div className="bg-[#F5F0E8] border-b border-[#DDD8D0] py-16">
+      <div className="py-16" style={{ background: "#F5F0E8", borderBottom: "1px solid #E8E0D0" }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <span className="text-xs font-bold text-[#A89880] uppercase tracking-wider mb-2 block">Beranda / Berita</span>
-          <h1 className="text-4xl md:text-5xl font-bold text-[#3D2B1F] mb-4" style={{ fontFamily: "var(--font-cormorant)" }}>
-            Berita & Pengumuman
-          </h1>
-          <p className="text-[#6B6560] max-w-2xl mx-auto">
-            Informasi terbaru seputar kegiatan, agenda paroki, dan pengumuman sakramen.
-          </p>
+          <ScrollReveal direction="none">
+            <p className="section-label mb-3">Paroki Katedral Santo Yosef</p>
+            <h1 className="text-5xl md:text-6xl font-bold mb-4"
+                style={{ fontFamily: "var(--font-cormorant)", color: "#2C1F14" }}>
+              Berita &amp; Pengumuman
+            </h1>
+            <p className="text-[16px] max-w-xl mx-auto" style={{ color: "#6B5744" }}>
+              Informasi terbaru seputar kegiatan, agenda paroki, dan pengumuman sakramen.
+            </p>
+          </ScrollReveal>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <BeritaListClient allNews={allNews} />
-      </div>
+      <ScrollReveal delay={100}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+          <BeritaListClient allNews={allNews} />
+        </div>
+      </ScrollReveal>
     </div>
   );
 }

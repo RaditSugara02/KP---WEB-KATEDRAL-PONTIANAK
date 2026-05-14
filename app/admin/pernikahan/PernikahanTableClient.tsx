@@ -1,24 +1,35 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { ArrowRight, Search, Filter, X } from "lucide-react";
+import { ArrowRight, Search, Filter, X, ArrowUpDown } from "lucide-react";
 import Link from "next/link";
+import {
+  ColumnDef,
+  flexRender,
+  getCoreRowModel,
+  useReactTable,
+  getPaginationRowModel,
+  getSortedRowModel,
+  SortingState,
+} from "@tanstack/react-table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 
-const STAGE_NAMES = [
-  "Pengisian Profil",
-  "KPP",
-  "Pemberkasan Dokumen",
-  "Kanonik",
-  "Selesai (Menunggu Pemberkatan)",
-];
-
-const STAGE_COLORS = [
-  "bg-[#F0EFED] text-[#6B6560]",
-  "bg-[#EBF5FB] text-[#2471A3]",
-  "bg-[#FFF8E1] text-[#B8960C]",
-  "bg-[#FFF8E1] text-[#B8960C]",
-  "bg-[#D8F3DC] text-[#2D6A4F]",
-];
+const STAGE_NAMES = ["Pengisian Profil", "KPP", "Pemberkasan", "Kanonik", "Selesai"];
+const STAGE_BADGE: Record<number, { bg: string; color: string; border: string }> = {
+  1: { bg: "#EAF0FA", color: "#2E4E85", border: "#A8BEDE" },
+  2: { bg: "#FDF3D0", color: "#9A7A0A", border: "#E8D070" },
+  3: { bg: "#FDF3D0", color: "#9A7A0A", border: "#E8D070" },
+  4: { bg: "#F0EAF8", color: "#6A3D96", border: "#C8A8DE" },
+  5: { bg: "#EAF4ED", color: "#2E6B41", border: "#A8D5B4" },
+};
 
 type App = {
   id: string;
@@ -31,11 +42,137 @@ type App = {
   isReregistration: boolean;
 };
 
+const FILTER_OPTIONS = [
+  { label: "Semua Tahap", val: "all" },
+  { label: "Tahap 1 – Profil", val: "1" },
+  { label: "Tahap 2 – KPP", val: "2" },
+  { label: "Tahap 3 – Pemberkasan", val: "3" },
+  { label: "Tahap 4 – Kanonik", val: "4" },
+  { label: "Tahap 5 – Selesai", val: "5" },
+  { label: "Dibatalkan", val: "99" },
+  { label: "🔄 Daftar Ulang", val: "reregistration" },
+];
+
+export const columns: ColumnDef<App>[] = [
+  {
+    accessorKey: "regNum",
+    header: ({ column }) => (
+      <button 
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")} 
+        className="flex items-center gap-1 uppercase text-[11px] font-semibold text-[#9C8B7A] tracking-wider outline-none"
+      >
+        No. Registrasi &amp; Pasangan <ArrowUpDown className="w-3 h-3 ml-1" />
+      </button>
+    ),
+    cell: ({ row }) => {
+      const app = row.original;
+      return (
+        <div>
+          <p className="font-bold text-[12px] mb-0.5" style={{ color: "#B8960C", fontFamily: "var(--font-geist-mono)" }}>
+            {app.regNum || "—"}
+          </p>
+          <div className="flex items-center gap-2 flex-wrap">
+            <p className="font-medium" style={{ color: "#2C1F14" }}>
+              {app.groom} &amp; {app.bride}
+            </p>
+            {app.isReregistration && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold"
+                    style={{ background: "#EAF0FA", color: "#2E4E85", border: "1px solid #A8BEDE" }}>
+                🔄 Daftar Ulang
+              </span>
+            )}
+          </div>
+        </div>
+      );
+    }
+  },
+  {
+    accessorKey: "currentStage",
+    header: ({ column }) => (
+      <button 
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")} 
+        className="flex items-center gap-1 uppercase text-[11px] font-semibold text-[#9C8B7A] tracking-wider outline-none"
+      >
+        Tahap Saat Ini <ArrowUpDown className="w-3 h-3 ml-1" />
+      </button>
+    ),
+    cell: ({ row }) => {
+      const s = row.original.currentStage ?? 1;
+      const badge = s === 99
+        ? { bg: "#FAEDED", color: "#8B3A3A", border: "#E8AAAA" }
+        : STAGE_BADGE[s] ?? STAGE_BADGE[1];
+      return (
+        <span className="inline-flex px-2.5 py-1 text-[10px] font-bold uppercase rounded-full"
+              style={{ background: badge.bg, color: badge.color, border: `1px solid ${badge.border}` }}>
+          {s === 99 ? "Dibatalkan" : `Tahap ${s}: ${STAGE_NAMES[s - 1]}`}
+        </span>
+      );
+    }
+  },
+  {
+    accessorKey: "weddingDate",
+    header: ({ column }) => (
+      <button 
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")} 
+        className="flex items-center gap-1 uppercase text-[11px] font-semibold text-[#9C8B7A] tracking-wider outline-none"
+      >
+        Rencana Pemberkatan <ArrowUpDown className="w-3 h-3 ml-1" />
+      </button>
+    ),
+    cell: ({ row }) => {
+      const val = row.original.weddingDate;
+      return (
+        <span className="text-[13px]" style={{ color: "#6B5744" }}>
+          {val
+            ? new Date(val).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })
+            : <span style={{ color: "#D4CAC0", fontStyle: "italic" }}>Belum ditentukan</span>}
+        </span>
+      );
+    }
+  },
+  {
+    accessorKey: "createdAt",
+    header: ({ column }) => (
+      <button 
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")} 
+        className="flex items-center gap-1 uppercase text-[11px] font-semibold text-[#9C8B7A] tracking-wider outline-none"
+      >
+        Terdaftar Pada <ArrowUpDown className="w-3 h-3 ml-1" />
+      </button>
+    ),
+    cell: ({ row }) => {
+      const val = row.original.createdAt;
+      return (
+        <span className="text-[13px]" style={{ color: "#9C8B7A" }}>
+          {val ? new Date(val).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }) : "—"}
+        </span>
+      );
+    }
+  },
+  {
+    id: "actions",
+    header: () => <div className="text-right text-[11px] font-semibold text-[#9C8B7A] uppercase tracking-wider">Aksi</div>,
+    cell: ({ row }) => {
+      return (
+        <div className="text-right">
+          <Link href={`/admin/pernikahan/${row.original.id}`}
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-[12px] font-bold border transition-all hover:bg-[#FDF3D0]"
+            style={{ color: "#B8960C", borderColor: "#E8D070" }}>
+            Kelola <ArrowRight size={13} />
+          </Link>
+        </div>
+      );
+    }
+  }
+];
+
 export default function PernikahanTableClient({ apps }: { apps: App[] }) {
   const [search, setSearch] = useState("");
   const [stageFilter, setStageFilter] = useState<string>("all");
   const [showFilter, setShowFilter] = useState(false);
+  const [sorting, setSorting] = useState<SortingState>([]);
 
+  // We maintain the existing custom filter logic
   const filtered = useMemo(() => {
     return apps.filter((app) => {
       const q = search.toLowerCase();
@@ -44,90 +181,78 @@ export default function PernikahanTableClient({ apps }: { apps: App[] }) {
         (app.groom ?? "").toLowerCase().includes(q) ||
         (app.bride ?? "").toLowerCase().includes(q) ||
         (app.regNum ?? "").toLowerCase().includes(q);
-
       const matchStage =
         stageFilter === "all" ||
-        (stageFilter === "reregistration"
-          ? app.isReregistration === true
-          : stageFilter === "99"
-          ? app.currentStage === 99
-          : String(app.currentStage) === stageFilter);
-
+        (stageFilter === "reregistration" ? app.isReregistration : stageFilter === "99" ? app.currentStage === 99 : String(app.currentStage) === stageFilter);
       return matchSearch && matchStage;
     });
   }, [apps, search, stageFilter]);
 
+  const table = useReactTable({
+    data: filtered,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    onSortingChange: setSorting,
+    getSortedRowModel: getSortedRowModel(),
+    state: {
+      sorting,
+    },
+    initialState: {
+      pagination: {
+        pageSize: 10,
+      },
+    },
+  });
+
+  const hasFilter = search || stageFilter !== "all";
+  const activeFilterLabel = FILTER_OPTIONS.find((o) => o.val === stageFilter)?.label ?? "Filter";
+
   return (
     <>
       {/* Toolbar */}
-      <div className="bg-white p-4 rounded-xl border border-[#DDD8D0] shadow-sm flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
+      <div className="card-sacred p-4 flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between mb-4">
+        {/* Search */}
         <div className="relative flex-1 md:max-w-sm">
-          <Search
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A89880]"
-            size={16}
-          />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2" size={15} style={{ color: "#9C8B7A" }} />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Cari nama atau no. registrasi..."
-            className="w-full h-10 pl-9 pr-4 text-sm border border-[#DDD8D0] rounded-md focus:border-[#B8960C] focus:ring-1 focus:ring-[#B8960C] outline-none"
+            className="w-full h-10 pl-9 pr-9 text-[13px] rounded-lg outline-none transition-all input-gold"
+            style={{ border: "1px solid #E8E0D0", background: "#FDFBF8", color: "#2C1F14" }}
           />
           {search && (
-            <button
-              onClick={() => setSearch("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A89880] hover:text-[#3D2B1F]"
-            >
-              <X size={14} />
+            <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2" style={{ color: "#9C8B7A" }}>
+              <X size={13} />
             </button>
           )}
         </div>
 
-        <div className="flex gap-2 flex-wrap">
-          {/* Stage Filter */}
+        <div className="flex gap-2 flex-wrap items-center">
+          {/* Filter Dropdown */}
           <div className="relative">
             <button
               onClick={() => setShowFilter(!showFilter)}
-              className={`flex items-center gap-2 px-4 py-2 border rounded-md text-sm font-semibold transition-colors ${
-                stageFilter !== "all"
-                  ? "bg-[#B8960C] text-white border-[#B8960C]"
-                  : "bg-white border-[#DDD8D0] text-[#3D2B1F] hover:bg-[#FAF7F2]"
-              }`}
+              className="flex items-center gap-2 px-4 h-10 rounded-lg text-[13px] font-semibold border transition-all outline-none"
+              style={{
+                background: stageFilter !== "all" ? "#B8960C" : "#FFFFFF",
+                color: stageFilter !== "all" ? "#FFFFFF" : "#6B5744",
+                borderColor: stageFilter !== "all" ? "#B8960C" : "#E8E0D0",
+              }}
             >
-              <Filter size={15} />
-              {stageFilter === "all"
-                ? "Filter Tahap"
-                : stageFilter === "99"
-                ? "Dibatalkan"
-                : stageFilter === "reregistration"
-                ? "🔄 Daftar Ulang"
-                : `Tahap ${stageFilter}`}
+              <Filter size={14} />
+              {stageFilter !== "all" ? activeFilterLabel : "Filter Tahap"}
             </button>
 
             {showFilter && (
-              <div className="absolute right-0 top-full mt-1 bg-white border border-[#DDD8D0] rounded-lg shadow-lg z-20 w-52 py-1 animate-in fade-in slide-in-from-top-1 duration-150">
-                {[
-                   { label: "Semua Tahap", val: "all" },
-                   { label: "Tahap 1 – Pengisian Profil", val: "1" },
-                   { label: "Tahap 2 – KPP", val: "2" },
-                   { label: "Tahap 3 – Pemberkasan", val: "3" },
-                   { label: "Tahap 4 – Kanonik", val: "4" },
-                   { label: "Tahap 5 – Selesai", val: "5" },
-                   { label: "Dibatalkan", val: "99" },
-                   { label: "🔄 Daftar Ulang", val: "reregistration" },
-                 ].map((opt) => (
-                  <button
-                    key={opt.val}
-                    onClick={() => {
-                      setStageFilter(opt.val);
-                      setShowFilter(false);
-                    }}
-                    className={`w-full text-left px-4 py-2 text-sm hover:bg-[#FAF7F2] transition-colors ${
-                      stageFilter === opt.val
-                        ? "font-bold text-[#B8960C]"
-                        : "text-[#3D2B1F]"
-                    }`}
-                  >
+              <div className="absolute right-0 top-full mt-1.5 rounded-xl shadow-lg z-30 w-52 py-1.5 overflow-hidden"
+                   style={{ background: "#FFFFFF", border: "1px solid #E8E0D0" }}>
+                {FILTER_OPTIONS.map((opt) => (
+                  <button key={opt.val} onClick={() => { setStageFilter(opt.val); setShowFilter(false); }}
+                    className="w-full text-left px-4 py-2.5 text-[13px] transition-colors hover:bg-[#F5F0E8] outline-none"
+                    style={{ color: stageFilter === opt.val ? "#B8960C" : "#2C1F14", fontWeight: stageFilter === opt.val ? 700 : 400 }}>
                     {opt.label}
                   </button>
                 ))}
@@ -135,110 +260,91 @@ export default function PernikahanTableClient({ apps }: { apps: App[] }) {
             )}
           </div>
 
-          {/* Clear filter */}
-          {(search || stageFilter !== "all") && (
-            <button
-              onClick={() => {
-                setSearch("");
-                setStageFilter("all");
-              }}
-              className="flex items-center gap-1.5 px-3 py-2 bg-[#FDECEA] text-[#C0392B] border border-[#C0392B]/20 rounded-md text-xs font-bold hover:bg-[#F5B7B1]/30 transition-colors"
-            >
-              <X size={13} /> Reset
+          {/* Reset */}
+          {hasFilter && (
+            <button onClick={() => { setSearch(""); setStageFilter("all"); }}
+              className="flex items-center gap-1.5 px-3 h-10 rounded-lg text-[12px] font-bold border transition-all outline-none"
+              style={{ background: "#FAEDED", color: "#8B3A3A", borderColor: "#E8AAAA" }}>
+              <X size={12} /> Reset
             </button>
           )}
         </div>
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-xl border border-[#DDD8D0] shadow-sm overflow-hidden">
+      <div className="card-sacred overflow-hidden bg-white">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm whitespace-nowrap">
-            <thead className="bg-[#F5F0E8] text-[#6B6560] text-xs uppercase tracking-wider border-b border-[#EDE8DF]">
-              <tr>
-                <th className="px-6 py-4 font-semibold">No. Registrasi &amp; Pasangan</th>
-                <th className="px-6 py-4 font-semibold">Tahap Saat Ini</th>
-                <th className="px-6 py-4 font-semibold">Rencana Pemberkatan</th>
-                <th className="px-6 py-4 font-semibold">Terdaftar Pada</th>
-                <th className="px-6 py-4 font-semibold text-right">Aksi</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#EDE8DF]">
-              {filtered.map((app) => {
-                const stageNum = app.currentStage || 1;
-                return (
-                  <tr key={app.id} className="hover:bg-[#FAF7F2] transition-colors">
-                    <td className="px-6 py-4">
-                      <p className="font-bold text-[#B8960C]">{app.regNum || "—"}</p>
-                      <div className="flex items-center gap-2 mt-1 flex-wrap">
-                        <p className="text-[#3D2B1F] font-medium">
-                          {app.groom} &amp; {app.bride}
-                        </p>
-                        {app.isReregistration && (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 rounded-full text-[10px] font-bold uppercase tracking-wide">
-                            🔄 Daftar Ulang
-                          </span>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      {stageNum === 99 ? (
-                        <span className="inline-flex px-2.5 py-1 text-[10px] font-bold uppercase rounded-full bg-[#FDECEA] text-[#C0392B] border border-[#C0392B]/20">
-                          Dibatalkan
-                        </span>
-                      ) : (
-                        <span
-                          className={`inline-flex px-2.5 py-1 text-[10px] font-bold uppercase rounded-full ${
-                            STAGE_COLORS[stageNum - 1]
-                          }`}
-                        >
-                          Tahap {stageNum}: {STAGE_NAMES[stageNum - 1]}
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 text-[#6B6560]">
-                      {app.weddingDate
-                        ? new Date(app.weddingDate).toLocaleDateString("id-ID", {
-                            day: "numeric",
-                            month: "long",
-                            year: "numeric",
-                          })
-                        : "Belum ditentukan"}
-                    </td>
-                    <td className="px-6 py-4 text-[#6B6560]">
-                      {app.createdAt
-                        ? new Date(app.createdAt).toLocaleDateString("id-ID", {
-                            day: "numeric",
-                            month: "short",
-                            year: "numeric",
-                          })
-                        : "—"}
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <Link
-                        href={`/admin/pernikahan/${app.id}`}
-                        className="inline-flex items-center gap-1.5 px-4 py-2 bg-white border border-[#B8960C] rounded-md text-xs font-bold text-[#B8960C] hover:bg-[#FFF8E1] transition-colors"
-                      >
-                        Kelola <ArrowRight size={14} />
-                      </Link>
-                    </td>
-                  </tr>
-                );
-              })}
-              {filtered.length === 0 && (
-                <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-[#6B6560]">
-                    {apps.length === 0
-                      ? "Belum ada data pendaftaran pernikahan."
-                      : `Tidak ada hasil untuk pencarian "${search}" dengan filter tahap ini.`}
-                  </td>
-                </tr>
+          <Table>
+            <TableHeader style={{ background: "#F5F0E8", borderBottom: "1px solid #E8E0D0" }}>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id} className="border-b-[#E8E0D0] hover:bg-transparent">
+                  {headerGroup.headers.map((header) => {
+                    return (
+                      <TableHead key={header.id} className="h-12 px-6">
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                      </TableHead>
+                    )
+                  })}
+                </TableRow>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() && "selected"}
+                    className="border-b-[#F0EBE3] hover:bg-[#FDFBF8]"
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id} className="px-6 py-4 align-middle">
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={columns.length} className="h-32 text-center text-[14px] text-[#9C8B7A]">
+                    {apps.length === 0 ? "Belum ada data pendaftaran pernikahan." : `Tidak ada hasil untuk pencarian ini.`}
+                  </TableCell>
+                </TableRow>
               )}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
-        <div className="px-6 py-4 border-t border-[#EDE8DF] bg-[#FAF7F2] text-xs text-[#6B6560]">
-          Menampilkan {filtered.length} dari {apps.length} data
+        
+        {/* Pagination Controls */}
+        <div className="flex items-center justify-between px-6 py-4 border-t border-[#F0EBE3] bg-[#FDFBF8]">
+          <div className="text-[12px] text-[#9C8B7A]">
+            Menampilkan <span className="font-bold text-[#2C1F14]">{table.getRowModel().rows.length}</span> baris di halaman ini
+            (dari total <span className="font-bold text-[#2C1F14]">{table.getFilteredRowModel().rows.length}</span> data yang cocok).
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+              className="text-[#6B5744] border-[#E8E0D0] h-8 text-xs font-semibold hover:bg-[#F5F0E8] hover:text-[#2C1F14]"
+            >
+              Sebelumnya
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+              className="text-[#6B5744] border-[#E8E0D0] h-8 text-xs font-semibold hover:bg-[#F5F0E8] hover:text-[#2C1F14]"
+            >
+              Selanjutnya
+            </Button>
+          </div>
         </div>
       </div>
     </>

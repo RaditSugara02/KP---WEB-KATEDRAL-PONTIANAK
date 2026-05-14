@@ -4,7 +4,7 @@ import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 
 export default function DaftarPage() {
@@ -107,7 +107,7 @@ export default function DaftarPage() {
             className="text-white text-4xl lg:text-5xl mb-4"
             style={{ fontFamily: "var(--font-cormorant)" }}
           >
-            Katedral Santo Yosef Martapura
+            Katedral Santo Yosef Pontianak
           </h1>
           <p
             className="text-white/80 italic text-lg"
@@ -120,9 +120,19 @@ export default function DaftarPage() {
 
       {/* KOLOM KANAN (50%) */}
       <div
-        className="w-full lg:w-1/2 flex items-center justify-center py-12"
+        className="w-full lg:w-1/2 flex items-center justify-center py-12 relative"
         style={{ background: "#FAF7F2", padding: "48px" }}
       >
+        {/* Back Button */}
+        <Link
+          href="/"
+          className="absolute top-6 left-6 sm:top-8 sm:left-8 flex items-center gap-2 text-[13px] font-semibold transition-colors hover:text-[#B8960C]"
+          style={{ color: "#9C8B7A" }}
+        >
+          <ArrowLeft size={16} />
+          Kembali ke Beranda
+        </Link>
+
         <div className="w-full max-w-md">
           {/* Logo kecil + teks gold */}
           <div className="flex items-center justify-center lg:justify-start gap-2 mb-8">

@@ -6,32 +6,109 @@ import { ArrowRight, Calendar, Newspaper, BookOpen, MapPin, CalendarDays, ArrowU
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 
 export default async function LandingPage() {
-  // Fetch latest news
   const latestNews = await db.select()
     .from(contents)
     .where(eq(contents.type, "NEWS"))
     .orderBy(desc(contents.createdAt))
     .limit(3);
 
+  const allAgendas = await db.select()
+    .from(contents)
+    .where(eq(contents.type, "ANNOUNCEMENT"))
+    .orderBy(desc(contents.createdAt))
+    .limit(20);
+
+  // Filter: only show agendas where eventEndDate >= today (not expired)
+  const todayStr = new Date().toISOString().split("T")[0]; // "YYYY-MM-DD"
+  const upcomingAgendas = allAgendas.filter(a => {
+    if (!a.eventEndDate) return false; // no expiry set = don't show on landing
+    return a.eventEndDate >= todayStr;
+  }).slice(0, 3);
+
+  const allMasses = await db.select()
+    .from(contents)
+    .where(eq(contents.type, "MASS_SCHEDULE"));
+
+  const HARI_ORDER = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"];
+  const harianDays = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat"];
+  const mingguanDays = ["Sabtu", "Minggu"];
+
+  const regularMasses = allMasses.filter(m => m.category?.endsWith("::Harian"));
+
+  const getDayName = (rawStr: string | undefined | null) => {
+    if (!rawStr) return "";
+    const prefix = rawStr.split("::")[0];
+    const dateObj = new Date(prefix);
+    if (!isNaN(dateObj.getTime())) {
+      const HARI_NAMES = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+      return HARI_NAMES[dateObj.getDay()];
+    }
+    return prefix;
+  };
+
+  const misaHarian = regularMasses.filter(m => {
+    const hari = getDayName(m.category);
+    return hari && harianDays.includes(hari);
+  });
+
+  const misaMingguan = regularMasses.filter(m => {
+    const hari = getDayName(m.category);
+    return hari && mingguanDays.includes(hari);
+  });
+
+  function groupMasses(masses: typeof allMasses, dayOrder: string[]) {
+    const groups: { [key: string]: { days: Set<string>, title: string, time: string } } = {};
+    
+    masses.forEach(m => {
+      const hari = getDayName(m.category);
+      if (!hari) return;
+      const key = `${m.title}||${m.eventDate}||${m.location}`;
+      if (!groups[key]) {
+        groups[key] = { days: new Set(), title: m.title, time: m.eventDate || "" };
+      }
+      groups[key].days.add(hari);
+    });
+
+    return Object.values(groups).map(g => {
+      const sortedDays = Array.from(g.days).sort((a, b) => dayOrder.indexOf(a) - dayOrder.indexOf(b));
+      let dayLabel = sortedDays.join(", ");
+      
+      const isSeninToJumat = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat"].every(d => sortedDays.includes(d));
+      if (isSeninToJumat && sortedDays.length === 5) {
+        dayLabel = "Senin - Jumat";
+      }
+
+      return {
+        label: dayLabel,
+        title: g.title,
+        time: g.time,
+        key: g.title + g.time + dayLabel
+      };
+    });
+  }
+
+  const groupedHarian = groupMasses(misaHarian, HARI_ORDER);
+  const groupedMingguan = groupMasses(misaMingguan, HARI_ORDER);
+
   return (
     <div className="flex flex-col bg-transparent">
 
       {/* ═══════════════════ HERO SECTION ═══════════════════ */}
-      <section className="relative min-h-screen w-full flex items-center justify-center overflow-hidden">
+      <section className="relative min-h-screen w-full flex items-center justify-center overflow-hidden -mt-[72px]">
         <div className="absolute inset-0">
           <img
-            alt="Eksterior Katedral Santo Yosef"
+            alt="Eksterior Katedral Santo Yosef Pontianak"
             className="w-full h-full object-cover"
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuAZmMfRH_S_YL6oasfS_wa1cjG3rJCzeedUhbwJVf6z3VoqLtpc2ue_bQaa7IMypXOmUrmcyyrL2BpDC-o5uSoh8_8MXK8BH7x7o2e-7pxa_OO5rtOI6SnhkrV2aWkYPeZ9uVd-IWquFbJjusKF-zIfWR6aHXgQ-1rp60Q7uJGEeRj_AOBg2k3nxXdYtT-1ILoRdkQfDRiUTDXZs3IUsULLIPF_GAnXOLT5IDQm3ssmxZ4mtzMkTbBk9pSF1Fsetp7DHctoRTu_QWw"
+            src="/bg-katedral.jpg"
           />
           {/* Elegant gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-b from-[#2C1F14]/70 via-[#2C1F14]/50 to-[#FAF7F2]" />
         </div>
         
-        <div className="relative z-10 max-w-5xl mx-auto px-8 text-center flex flex-col items-center mt-20">
+        <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-8 text-center flex flex-col items-center mt-20 pb-24 md:pb-40">
           <ScrollReveal direction="up" delay={100} duration={1000}>
-            <span className="font-sans text-xs md:text-sm tracking-[0.3em] text-[#B8960C] mb-6 uppercase font-bold inline-block border-b border-[#B8960C]/30 pb-2">
-              Keuskupan Banjarmasin
+            <span className="font-sans text-xs md:text-sm tracking-[0.3em] text-white mb-6 uppercase font-bold inline-block border-b border-white/50 pb-2">
+              Keuskupan Agung Pontianak
             </span>
           </ScrollReveal>
           
@@ -40,13 +117,13 @@ export default async function LandingPage() {
               className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl leading-[1.1] text-white mb-6 md:mb-8 font-bold drop-shadow-lg"
               style={{ fontFamily: "var(--font-cormorant)" }}
             >
-              Selamat Datang di<br className="hidden md:block" /> Katedral Santo Yosef<br className="hidden md:block" /> Martapura
+              Selamat Datang di<br className="hidden md:block" /> Katedral Santo Yosef<br className="hidden md:block" /> Pontianak
             </h1>
           </ScrollReveal>
 
           <ScrollReveal direction="up" delay={500} duration={1000}>
-            <p className="font-light text-base sm:text-lg md:text-2xl text-white/90 max-w-3xl mb-10 md:mb-12 leading-relaxed drop-shadow">
-              Sebuah tempat perlindungan spiritual dan sejarah, mengundang Anda untuk merasakan kedamaian dan kebersamaan dalam iman.
+            <p className="font-light text-base sm:text-lg md:text-xl text-white/90 max-w-4xl mb-10 md:mb-12 leading-relaxed drop-shadow">
+              Dibangun pada tahun 1908, Katedral ini menjadi pusat kedudukan Uskup Keuskupan Agung Pontianak. Memadukan arsitektur bergaya Romawi, Timur Tengah, dengan sentuhan ornamen khas Dayak dan Tionghoa sebagai simbol keagungan iman dan inkulturasi budaya.
             </p>
           </ScrollReveal>
 
@@ -61,7 +138,7 @@ export default async function LandingPage() {
               </Link>
               <Link
                 href="/sakramen-perkawinan"
-                className="group w-full sm:w-auto inline-flex items-center justify-center bg-transparent border border-white/50 text-white px-8 md:px-10 py-3.5 md:py-4 rounded-sm font-sans text-sm tracking-wide font-semibold hover:bg-white hover:text-[#3D2B1F] transition-all duration-300"
+                className="group w-full sm:w-auto inline-flex items-center justify-center bg-white/15 backdrop-blur-md border border-white/80 text-white px-8 md:px-10 py-3.5 md:py-4 rounded-sm font-sans text-sm tracking-wide font-semibold hover:bg-white hover:text-[#3D2B1F] transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-1"
               >
                 Sakramen Perkawinan
               </Link>
@@ -153,14 +230,17 @@ export default async function LandingPage() {
                   Misa Harian
                 </h3>
                 <ul className="space-y-4 md:space-y-6">
-                  <li className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 group">
-                    <span className="font-medium text-[#6B6560] group-hover:text-[#3D2B1F] transition-colors">Senin - Jumat</span>
-                    <span className="font-semibold text-[#B8960C] bg-[#FFF8E1] px-4 py-1.5 rounded-full text-sm w-fit">05.30 WIB</span>
-                  </li>
-                  <li className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 group">
-                    <span className="font-medium text-[#6B6560] group-hover:text-[#3D2B1F] transition-colors">Jumat Pertama</span>
-                    <span className="font-semibold text-[#B8960C] bg-[#FFF8E1] px-4 py-1.5 rounded-full text-sm w-fit">18.00 WIB</span>
-                  </li>
+                  {groupedHarian.length > 0 ? groupedHarian.map((g) => (
+                    <li key={g.key} className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 group">
+                      <div className="flex flex-col">
+                        <span className="font-medium text-[#6B6560] group-hover:text-[#3D2B1F] transition-colors">{g.label}</span>
+                        {g.title && <span className="text-xs text-[#9C8B7A]">{g.title}</span>}
+                      </div>
+                      <span className="font-semibold text-[#B8960C] bg-[#FFF8E1] px-4 py-1.5 rounded-full text-sm w-fit whitespace-nowrap">{g.time}</span>
+                    </li>
+                  )) : (
+                    <li className="text-[#9C8B7A] italic text-sm">Belum ada jadwal.</li>
+                  )}
                 </ul>
               </div>
               
@@ -171,18 +251,17 @@ export default async function LandingPage() {
                   Misa Mingguan
                 </h3>
                 <ul className="space-y-4 md:space-y-6">
-                  <li className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 group">
-                    <span className="font-medium text-[#6B6560] group-hover:text-[#3D2B1F] transition-colors">Sabtu</span>
-                    <span className="font-semibold text-[#B8960C] bg-[#FFF8E1] px-4 py-1.5 rounded-full text-sm w-fit">18.00 WIB</span>
-                  </li>
-                  <li className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 group">
-                    <span className="font-medium text-[#6B6560] group-hover:text-[#3D2B1F] transition-colors">Minggu Pagi</span>
-                    <span className="font-semibold text-[#B8960C] bg-[#FFF8E1] px-4 py-1.5 rounded-full text-sm w-fit">06.00 &amp; 08.30 WIB</span>
-                  </li>
-                  <li className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 group">
-                    <span className="font-medium text-[#6B6560] group-hover:text-[#3D2B1F] transition-colors">Minggu Sore</span>
-                    <span className="font-semibold text-[#B8960C] bg-[#FFF8E1] px-4 py-1.5 rounded-full text-sm w-fit">16.00 &amp; 18.00 WIB</span>
-                  </li>
+                  {groupedMingguan.length > 0 ? groupedMingguan.map((g) => (
+                    <li key={g.key} className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 group">
+                      <div className="flex flex-col">
+                        <span className="font-medium text-[#6B6560] group-hover:text-[#3D2B1F] transition-colors">{g.label}</span>
+                        {g.title && <span className="text-xs text-[#9C8B7A]">{g.title}</span>}
+                      </div>
+                      <span className="font-semibold text-[#B8960C] bg-[#FFF8E1] px-4 py-1.5 rounded-full text-sm w-fit whitespace-nowrap">{g.time}</span>
+                    </li>
+                  )) : (
+                    <li className="text-[#9C8B7A] italic text-sm">Belum ada jadwal.</li>
+                  )}
                 </ul>
               </div>
             </div>
@@ -221,7 +300,6 @@ export default async function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
             {latestNews.length > 0 ? (
               latestNews.map((news, index) => {
-                const categoryLabels = ["Pengumuman", "Kegiatan", "Liturgi"];
                 return (
                   <ScrollReveal key={news.id} delay={index * 150} className="h-full">
                     <Link href={`/berita/${news.slug}`} className="group block h-full">
@@ -240,7 +318,7 @@ export default async function LandingPage() {
                           )}
                           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                           <span className="absolute top-4 left-4 bg-[#FAF7F2]/90 backdrop-blur-sm text-[#3D2B1F] text-xs font-bold px-3 py-1.5 rounded uppercase tracking-wider shadow-sm">
-                            {categoryLabels[index % 3]}
+                            {news.category || "Berita"}
                           </span>
                         </div>
                         <div className="flex flex-col flex-grow">
@@ -312,31 +390,61 @@ export default async function LandingPage() {
           </ScrollReveal>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-            {[
-              { bulan: "Okt", tanggal: "15", judul: "Rapat Dewan Pastoral", lokasi: "Aula Paroki" },
-              { bulan: "Okt", tanggal: "22", judul: "Misa Orang Muda Katolik", lokasi: "Gereja Katedral" },
-              { bulan: "Nov", tanggal: "01", judul: "Hari Raya Semua Orang Kudus", lokasi: "Pemakaman Katolik" },
-            ].map((agenda, i) => (
-              <ScrollReveal key={i} delay={i * 150}>
-                <div className="bg-white rounded-xl p-6 flex items-center gap-6 shadow-sm border border-transparent hover:border-[#B8960C]/30 hover:shadow-elegant transition-all duration-300 group">
-                  <div className="text-center min-w-[70px] flex flex-col items-center justify-center">
-                    <span className="block font-sans text-xs text-[#B8960C] font-bold uppercase tracking-wider mb-1">{agenda.bulan}</span>
-                    <span className="block text-4xl text-[#3D2B1F] font-bold" style={{ fontFamily: "var(--font-cormorant)" }}>
-                      {agenda.tanggal}
-                    </span>
-                  </div>
-                  <div className="w-px h-16 bg-[#EDE8DF]" />
-                  <div>
-                    <h4 className="text-xl font-bold text-[#3D2B1F] mb-2 group-hover:text-[#B8960C] transition-colors" style={{ fontFamily: "var(--font-cormorant)" }}>
-                      {agenda.judul}
-                    </h4>
-                    <p className="text-sm text-[#6B6560] font-light flex items-center gap-2">
-                      <MapPin className="h-3.5 w-3.5 text-[#B8960C]" /> {agenda.lokasi}
-                    </p>
-                  </div>
+            {upcomingAgendas.length > 0 ? (
+              upcomingAgendas.map((agenda, i) => {
+                // Safely parse date: try eventDate first, then createdAt
+                let dateObj: Date | null = null;
+                if (agenda.eventDate) {
+                  const parsed = new Date(agenda.eventDate);
+                  if (!isNaN(parsed.getTime())) dateObj = parsed;
+                }
+                if (!dateObj && agenda.createdAt) {
+                  const parsed = agenda.createdAt instanceof Date ? agenda.createdAt : new Date(agenda.createdAt);
+                  if (!isNaN(parsed.getTime())) dateObj = parsed;
+                }
+                if (!dateObj) dateObj = new Date();
+
+                const bulan = dateObj.toLocaleDateString("id-ID", { month: "short" });
+                const tanggal = String(dateObj.getDate()).padStart(2, "0");
+
+                return (
+                  <ScrollReveal key={agenda.id} delay={i * 150}>
+                    <div className="bg-white rounded-xl p-6 flex items-start gap-6 shadow-sm border border-transparent hover:border-[#B8960C]/30 hover:shadow-elegant transition-all duration-300 group min-h-[120px]">
+                      <div className="text-center min-w-[70px] shrink-0 flex flex-col items-center justify-center pt-1">
+                        <span className="block font-sans text-xs text-[#B8960C] font-bold uppercase tracking-wider mb-1">{bulan}</span>
+                        <span className="block text-4xl text-[#3D2B1F] font-bold" style={{ fontFamily: "var(--font-cormorant)" }}>
+                          {tanggal}
+                        </span>
+                      </div>
+                      <div className="w-px self-stretch bg-[#EDE8DF]" />
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-lg font-bold text-[#3D2B1F] mb-2 group-hover:text-[#B8960C] transition-colors line-clamp-2" style={{ fontFamily: "var(--font-cormorant)" }}>
+                          {agenda.title}
+                        </h4>
+                        <p className="text-sm text-[#6B6560] font-light flex items-center gap-2">
+                          <MapPin className="h-3.5 w-3.5 text-[#B8960C] shrink-0" /> {agenda.location || "Gereja Katedral"}
+                        </p>
+                      </div>
+                    </div>
+                  </ScrollReveal>
+                );
+              })
+            ) : (
+              <div className="lg:col-span-3 flex flex-col items-center justify-center py-12 text-center">
+                <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center mb-5 shadow-sm">
+                  <CalendarDays className="h-7 w-7 text-[#B8960C]/50" />
                 </div>
-              </ScrollReveal>
-            ))}
+                <h4 className="text-xl font-bold text-[#3D2B1F] mb-2" style={{ fontFamily: "var(--font-cormorant)" }}>
+                  Belum Ada Agenda Terbaru
+                </h4>
+                <p className="text-sm text-[#6B6560] max-w-md mb-6">
+                  Saat ini tidak ada pengumuman atau kegiatan mendatang. Kunjungi halaman berita untuk melihat informasi terdahulu.
+                </p>
+                <Link href="/berita" className="inline-flex items-center gap-2 text-sm font-bold text-[#B8960C] hover:text-[#9A7A00] transition-colors border-b border-[#B8960C] pb-1">
+                  Lihat Semua Berita <ArrowRight className="h-4 w-4" />
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       </section>
@@ -378,9 +486,9 @@ export default async function LandingPage() {
                 { kali: "Pengumuman Ketiga", pasangan: "Stefanus Ari & Magdalena Sari" },
               ].map((item, i) => (
                 <li key={i} className="pb-6 border-b border-[#EDE8DF] flex flex-col md:flex-row md:items-center justify-between gap-2 group">
-                  <div className="flex items-center gap-4">
-                    <span className="w-8 h-8 rounded-full bg-[#F5F0E8] text-[#B8960C] flex items-center justify-center font-bold text-sm" style={{ fontFamily: "var(--font-cormorant)" }}>{i + 1}</span>
-                    <span className="text-[#6B6560] text-sm uppercase tracking-wider font-bold">{item.kali}</span>
+                  <div className="flex items-center gap-4 shrink-0">
+                    <span className="w-8 h-8 shrink-0 rounded-full bg-[#F5F0E8] text-[#B8960C] flex items-center justify-center font-bold text-sm" style={{ fontFamily: "var(--font-cormorant)" }}>{i + 1}</span>
+                    <span className="text-[#6B6560] text-sm uppercase tracking-wider font-bold shrink-0">{item.kali}</span>
                   </div>
                   <span className="font-bold text-[#3D2B1F] text-xl md:text-right group-hover:text-[#B8960C] transition-colors" style={{ fontFamily: "var(--font-cormorant)" }}>{item.pasangan}</span>
                 </li>

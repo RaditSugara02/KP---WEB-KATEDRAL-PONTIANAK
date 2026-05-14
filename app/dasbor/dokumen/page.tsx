@@ -7,26 +7,30 @@ import { CheckCircle2, Circle, AlertTriangle, FileText, Info } from "lucide-reac
 import Link from "next/link";
 
 export default async function DokumenPage() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
+  const session = await auth.api.getSession({ headers: await headers() });
   if (!session) return null;
 
-  // Fetch Couple Profile & Application
   const profileRecord = await db.select().from(coupleProfiles)
     .where(eq(coupleProfiles.userId, session.user.id)).limit(1);
   const profile = profileRecord[0];
 
   if (!profile) {
     return (
-      <div className="max-w-4xl mx-auto flex flex-col items-center justify-center py-20">
-        <AlertTriangle size={48} className="text-[#A89880] mb-4" />
-        <h2 className="text-2xl font-bold text-[#3D2B1F] mb-2" style={{ fontFamily: "var(--font-cormorant)" }}>Profil Belum Dilengkapi</h2>
-        <p className="text-[#6B6560] mb-6 text-center max-w-md">
-          Anda harus melengkapi profil pendaftaran terlebih dahulu untuk melihat daftar kelengkapan dokumen.
+      <div className="max-w-4xl mx-auto flex flex-col items-center justify-center py-24">
+        <div className="w-16 h-16 rounded-full flex items-center justify-center mb-5"
+             style={{ background: "#F5F0E8" }}>
+          <AlertTriangle size={28} style={{ color: "#B8960C" }} />
+        </div>
+        <h2 className="text-2xl font-bold mb-2"
+            style={{ fontFamily: "var(--font-cormorant)", color: "#2C1F14" }}>
+          Profil Belum Dilengkapi
+        </h2>
+        <p className="text-[14px] mb-6 text-center max-w-md" style={{ color: "#9C8B7A" }}>
+          Anda harus melengkapi profil pendaftaran terlebih dahulu untuk melihat daftar dokumen.
         </p>
-        <Link href="/dasbor/profil" className="px-6 py-2 bg-[#B8960C] text-white rounded-md font-bold hover:bg-[#9A7A00]">
+        <Link href="/dasbor/profil"
+          className="px-6 py-2.5 rounded-lg font-bold text-white text-[14px] transition-all hover:opacity-90"
+          style={{ background: "#B8960C" }}>
           Lengkapi Profil
         </Link>
       </div>
@@ -40,86 +44,135 @@ export default async function DokumenPage() {
   const docs = await db.select().from(requiredDocuments)
     .where(eq(requiredDocuments.applicationId, application.id));
 
-  const receivedDocs = docs.filter(d => d.isReceived).length;
+  const receivedDocs = docs.filter((d) => d.isReceived).length;
   const totalDocs = docs.length;
   const isComplete = receivedDocs === totalDocs && totalDocs > 0;
+  const percent = totalDocs > 0 ? Math.round((receivedDocs / totalDocs) * 100) : 0;
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-[#3D2B1F]" style={{ fontFamily: "var(--font-cormorant)" }}>
+    <div className="max-w-4xl mx-auto space-y-6 page-fade">
+      {/* Page Header */}
+      <div className="mb-6">
+        <p className="section-label mb-2">Dasbor Pengantin</p>
+        <h1 className="text-[32px] font-bold leading-tight"
+            style={{ fontFamily: "var(--font-cormorant)", color: "#2C1F14" }}>
           Kelengkapan Dokumen
         </h1>
-        <p className="text-[#6B6560]">
+        <p className="text-[14px] mt-1" style={{ color: "#9C8B7A" }}>
           Checklist dokumen persyaratan administrasi yang harus diserahkan ke Sekretariat Paroki.
         </p>
       </div>
 
-      <div className="bg-[#FAF7F2] p-5 rounded-xl border border-[#EDE8DF] flex gap-4">
-        <Info className="text-[#B8960C] flex-shrink-0 mt-0.5" />
-        <div>
-          <h3 className="font-bold text-[#3D2B1F] text-sm mb-1">Informasi Penting</h3>
-          <p className="text-sm text-[#6B6560]">
-            Untuk menjamin keamanan dan keaslian data (seperti KTP dan Surat Baptis), sistem ini <strong>tidak menerima unggahan dokumen digital</strong>. 
-            Silakan siapkan seluruh dokumen fisik di bawah ini dalam satu map, dan serahkan langsung ke Sekretariat Katedral Santo Yosef pada jam kerja. Admin akan mencentang sistem ini begitu berkas Anda diverifikasi.
-          </p>
+      {/* Progress Card */}
+      <div className="card-sacred p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-wider mb-1" style={{ color: "#9C8B7A" }}>
+              Progres Berkas
+            </p>
+            <p className="text-[28px] font-bold leading-none"
+               style={{ fontFamily: "var(--font-cormorant)", color: isComplete ? "#4A7C59" : "#B8960C" }}>
+              {receivedDocs}
+              <span className="text-[18px] font-normal" style={{ color: "#9C8B7A" }}> / {totalDocs} dokumen</span>
+            </p>
+          </div>
+          <span
+            className="inline-flex px-3.5 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider self-start sm:self-center"
+            style={{
+              background: isComplete ? "#EAF4ED" : "#FDF3D0",
+              color: isComplete ? "#2E6B41" : "#9A7A0A",
+              border: `1px solid ${isComplete ? "#A8D5B4" : "#E8D070"}`,
+            }}
+          >
+            {isComplete ? "Lengkap" : `${percent}% Selesai`}
+          </span>
+        </div>
+        {/* Progress bar */}
+        <div className="w-full h-2 rounded-full overflow-hidden" style={{ background: "#F0EBE3" }}>
+          <div
+            className="h-full rounded-full transition-all duration-700"
+            style={{ width: `${percent}%`, background: isComplete ? "#4A7C59" : "#B8960C" }}
+          />
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-[#DDD8D0] shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-[#EDE8DF] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      {/* Info Banner */}
+      <div className="flex gap-3.5 p-5 rounded-xl"
+           style={{ background: "#EAF0FA", border: "1px solid #A8BEDE" }}>
+        <Info size={17} className="flex-shrink-0 mt-0.5" style={{ color: "#4A6FA5" }} />
+        <p className="text-[13px] leading-relaxed" style={{ color: "#2E4E85" }}>
+          Sistem ini <strong>tidak menerima unggahan digital</strong>. Serahkan dokumen fisik 
+          dalam satu map ke Sekretariat Katedral pada jam kerja. 
+          Admin akan memperbarui status setelah verifikasi.
+        </p>
+      </div>
+
+      {/* Document Checklist */}
+      <div className="card-sacred overflow-hidden">
+        <div className="px-6 py-4 flex items-center justify-between"
+             style={{ borderBottom: "1px solid #E8E0D0", background: "#FDFBF8" }}>
           <div className="flex items-center gap-2">
-            <FileText className="text-[#B8960C]" />
-            <h2 className="font-bold text-[#3D2B1F] uppercase tracking-wide text-sm">Daftar Dokumen Fisik</h2>
+            <FileText size={17} style={{ color: "#B8960C" }} />
+            <h2 className="font-bold text-[15px]"
+                style={{ fontFamily: "var(--font-cormorant)", color: "#2C1F14" }}>
+              Daftar Dokumen Fisik
+            </h2>
           </div>
-          
-          <div className="flex items-center gap-3">
-            <div className="text-right">
-              <span className="text-xs text-[#6B6560] block font-semibold uppercase">Status Kelengkapan</span>
-              <span className={`font-bold ${isComplete ? "text-[#2D6A4F]" : "text-[#B8960C]"}`}>
-                {receivedDocs} dari {totalDocs} Selesai
-              </span>
-            </div>
-          </div>
+          <span className="text-[13px] font-bold" style={{ color: isComplete ? "#4A7C59" : "#B8960C" }}>
+            {receivedDocs} / {totalDocs} Selesai
+          </span>
         </div>
 
-        <div className="divide-y divide-[#EDE8DF]">
+        <div>
           {docs.length === 0 ? (
-            <div className="p-8 text-center text-[#6B6560]">Daftar dokumen belum tersedia.</div>
+            <div className="p-10 text-center text-[14px]" style={{ color: "#9C8B7A" }}>
+              Daftar dokumen belum tersedia.
+            </div>
           ) : (
-            docs.map((doc) => (
-              <div key={doc.id} className="p-5 flex items-start sm:items-center justify-between gap-4 hover:bg-[#FAF7F2] transition-colors">
-                <div className="flex items-start gap-3">
-                  <div className="mt-0.5">
+            docs.map((doc, idx) => (
+              <div
+                key={doc.id}
+                className="flex items-center justify-between gap-4 px-6 py-4 transition-colors hover:bg-[#FDFBF8]"
+                style={{
+                  borderTop: idx > 0 ? "1px solid #F0EBE3" : undefined,
+                  borderLeft: doc.isReceived ? "3px solid #4A7C59" : "3px solid transparent",
+                }}
+              >
+                <div className="flex items-center gap-3.5">
+                  <div className="flex-shrink-0">
                     {doc.isReceived ? (
-                      <CheckCircle2 className="text-[#2D6A4F]" />
+                      <CheckCircle2 size={20} style={{ color: "#4A7C59" }} />
                     ) : (
-                      <Circle className="text-[#A89880]" />
+                      <Circle size={20} style={{ color: "#D4CAC0" }} />
                     )}
                   </div>
                   <div>
-                    <h4 className={`font-medium ${doc.isReceived ? "text-[#3D2B1F]" : "text-[#6B6560]"}`}>
+                    <p
+                      className="text-[14px] font-medium"
+                      style={{ color: doc.isReceived ? "#2C1F14" : "#6B5744" }}
+                    >
                       {doc.documentName}
-                    </h4>
+                    </p>
                     {doc.isReceived && doc.receivedAt && (
-                      <p className="text-xs text-[#2D6A4F] mt-1">
-                        Diverifikasi pada {new Date(doc.receivedAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+                      <p className="text-[11px] mt-0.5" style={{ color: "#4A7C59" }}>
+                        Diverifikasi {new Date(doc.receivedAt).toLocaleDateString("id-ID", {
+                          day: "numeric", month: "long", year: "numeric",
+                        })}
                       </p>
                     )}
                   </div>
                 </div>
-                
-                <div className="flex-shrink-0">
-                  {doc.isReceived ? (
-                    <span className="inline-flex px-3 py-1 bg-[#D8F3DC] text-[#2D6A4F] text-xs font-bold rounded-full uppercase tracking-wider border border-[#B7E4C7]">
-                      Sudah Diterima
-                    </span>
-                  ) : (
-                    <span className="inline-flex px-3 py-1 bg-[#F5F0E8] text-[#A89880] text-xs font-bold rounded-full uppercase tracking-wider border border-[#DDD8D0]">
-                      Belum Diserahkan
-                    </span>
-                  )}
-                </div>
+
+                <span
+                  className="flex-shrink-0 inline-flex px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider"
+                  style={
+                    doc.isReceived
+                      ? { background: "#EAF4ED", color: "#2E6B41", border: "1px solid #A8D5B4" }
+                      : { background: "#F5F0E8", color: "#9C8B7A", border: "1px solid #E8E0D0" }
+                  }
+                >
+                  {doc.isReceived ? "Diterima" : "Belum"}
+                </span>
               </div>
             ))
           )}

@@ -1,192 +1,148 @@
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { 
-  coupleProfiles, 
-  marriageApplications, 
-  requiredDocuments,
-  stageHistory
-} from "@/lib/db/schema";
+import { coupleProfiles, marriageApplications, requiredDocuments, stageHistory } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
 import Link from "next/link";
-import { 
-  CheckCircle2, 
-  Circle, 
-  Clock, 
-  AlertCircle, 
-  FileText,
-  ChevronRight,
-  Printer
-} from "lucide-react";
+import { CheckCircle2, Circle, Clock, AlertCircle, FileText, ChevronRight, Printer, Church } from "lucide-react";
 import DaftarUlangButton from "./DaftarUlangButton";
 
-const STAGE_NAMES = [
-  "Pengisian Profil",
-  "Kursus Persiapan Pernikahan (KPP)",
-  "Pemberkasan Dokumen",
-  "Penyelidikan Kanonik",
-  "Pemberkatan Nikah"
-];
+const STAGE_NAMES = ["Pengisian Profil", "Kursus KPP", "Pemberkasan Dokumen", "Penyelidikan Kanonik", "Pemberkatan Nikah"];
+const STAGE_DESC: Record<number, string> = {
+  1: "Profil tersimpan. Tunggu info jadwal KPP dari sekretariat.",
+  2: "Anda di tahap KPP. Hadiri kursus sesuai jadwal.",
+  3: "Kumpulkan dokumen fisik ke sekretariat paroki.",
+  4: "Penyelidikan Kanonik sedang dijadwalkan bersama Romo.",
+  5: "Semua persiapan selesai! Menunggu hari pemberkatan.",
+};
 
 export default async function BerandaDasborPage() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
+  const session = await auth.api.getSession({ headers: await headers() });
   if (!session) return null;
   const user = session.user;
 
-  // Fetch Couple Profile
-  const profileRecord = await db.select().from(coupleProfiles)
-    .where(eq(coupleProfiles.userId, user.id)).limit(1);
+  const profileRecord = await db.select().from(coupleProfiles).where(eq(coupleProfiles.userId, user.id)).limit(1);
   const profile = profileRecord[0];
 
-  // ==========================================
-  // STATE: BELUM ADA PROFIL
-  // ==========================================
+  // ── STATE: BELUM ADA PROFIL ──
   if (!profile) {
     return (
-      <div className="max-w-4xl mx-auto mt-8">
-        <h1 className="text-4xl font-bold mb-2 text-[#3D2B1F]" style={{ fontFamily: "var(--font-cormorant)" }}>
-          Selamat datang, {user.name.split(" ")[0]} 👋
+      <div className="max-w-4xl mx-auto mt-8 page-fade">
+        <p className="section-label mb-2">Dasbor Pengantin</p>
+        <h1 className="text-[36px] font-bold mb-2" style={{ fontFamily: "var(--font-cormorant)", color: "#2C1F14" }}>
+          Selamat datang, {user.name.split(" ")[0]}
         </h1>
-        <p className="text-[#6B6560] mb-8">
-          Saat ini Anda belum memiliki data pendaftaran pernikahan yang aktif.
+        <p className="text-[14px] mb-8" style={{ color: "#9C8B7A" }}>
+          Anda belum memiliki data pendaftaran pernikahan yang aktif.
         </p>
 
-        <div className="bg-[#FFFFFF] rounded-xl border border-[#B8960C] shadow-sm overflow-hidden">
-          <div className="bg-[#FFF8E1] px-6 py-4 border-b border-[#B8960C]/20 flex items-center gap-3">
-            <AlertCircle className="text-[#B8960C]" />
-            <h3 className="font-bold text-[#B8960C]">Tindakan Diperlukan</h3>
+        <div className="card-sacred overflow-hidden mb-10">
+          <div className="px-6 py-4 flex items-center gap-3" style={{ borderBottom: "1px solid #E8E0D0", background: "#FDF3D0" }}>
+            <AlertCircle size={18} style={{ color: "#B8960C" }} />
+            <h3 className="font-bold text-[15px]" style={{ color: "#B8960C" }}>Tindakan Diperlukan</h3>
           </div>
-          <div className="p-8 text-center">
-            <h2 className="text-2xl font-bold mb-4" style={{ fontFamily: "var(--font-cormorant)", color: "#3D2B1F" }}>
+          <div className="p-10 text-center">
+            <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-5" style={{ background: "#F5F0E8" }}>
+              <Church size={28} style={{ color: "#B8960C" }} />
+            </div>
+            <h2 className="text-2xl font-bold mb-3" style={{ fontFamily: "var(--font-cormorant)", color: "#2C1F14" }}>
               Lengkapi Data Calon Pasangan
             </h2>
-            <p className="text-[#6B6560] mb-8 max-w-lg mx-auto">
-              Langkah pertama untuk mendaftar pernikahan di Katedral Santo Yosef adalah 
-              melengkapi data diri mempelai pria dan wanita.
+            <p className="text-[14px] mb-8 max-w-lg mx-auto" style={{ color: "#6B5744" }}>
+              Langkah pertama adalah melengkapi data diri mempelai pria dan wanita.
             </p>
-            <Link 
-              href="/dasbor/profil"
-              className="inline-flex items-center justify-center px-8 py-3 bg-[#B8960C] text-white font-bold rounded-md hover:bg-[#9A7A00] transition-colors"
-            >
-              Mulai Pendaftaran
+            <Link href="/dasbor/profil"
+              className="inline-flex items-center gap-2 px-8 py-3 rounded-lg font-bold text-white transition-all hover:opacity-90"
+              style={{ background: "#B8960C" }}>
+              Mulai Pendaftaran →
             </Link>
           </div>
         </div>
 
-        <div className="mt-12">
-          <h3 className="text-lg font-bold mb-4 text-[#3D2B1F]">Alur Pendaftaran Pernikahan</h3>
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-            {STAGE_NAMES.map((name, i) => (
-              <div key={i} className="bg-white p-4 rounded-lg border border-[#DDD8D0] text-center shadow-sm opacity-60">
-                <div className="w-8 h-8 rounded-full bg-[#EDE8DF] text-[#6B6560] flex items-center justify-center font-bold mx-auto mb-3">
-                  {i + 1}
-                </div>
-                <p className="text-sm font-medium text-[#3D2B1F] leading-tight">{name}</p>
-              </div>
-            ))}
-          </div>
+        <h3 className="text-lg font-bold mb-4" style={{ fontFamily: "var(--font-cormorant)", color: "#2C1F14" }}>
+          Alur Pendaftaran Pernikahan
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
+          {STAGE_NAMES.map((name, i) => (
+            <div key={i} className="card-sacred p-4 text-center opacity-50">
+              <div className="w-8 h-8 rounded-full flex items-center justify-center font-bold mx-auto mb-3 text-[14px]"
+                   style={{ background: "#F5F0E8", color: "#9C8B7A" }}>{i + 1}</div>
+              <p className="text-[12px] font-medium leading-tight" style={{ color: "#6B5744" }}>{name}</p>
+            </div>
+          ))}
         </div>
       </div>
     );
   }
 
-  // ==========================================
-  // STATE: PROFIL SUDAH ADA (AKTIF)
-  // ==========================================
-  
-  // Fetch App Data
-  const appRecord = await db.select().from(marriageApplications)
-    .where(eq(marriageApplications.coupleProfileId, profile.id)).limit(1);
+  const appRecord = await db.select().from(marriageApplications).where(eq(marriageApplications.coupleProfileId, profile.id)).limit(1);
   const application = appRecord[0];
-
-  // Fetch ALL Stage History for Timeline
-  const allHistory = await db.select().from(stageHistory)
-    .where(eq(stageHistory.applicationId, application.id))
-    .orderBy(desc(stageHistory.changedAt));
+  const allHistory = await db.select().from(stageHistory).where(eq(stageHistory.applicationId, application.id)).orderBy(desc(stageHistory.changedAt));
   const adminMessage = allHistory[0]?.note || "Berkas pendaftaran sedang ditinjau.";
-
-  // Fetch Docs
-  const docs = await db.select().from(requiredDocuments)
-    .where(eq(requiredDocuments.applicationId, application.id));
-
-  const receivedDocs = docs.filter(d => d.isReceived).length;
+  const docs = await db.select().from(requiredDocuments).where(eq(requiredDocuments.applicationId, application.id));
+  const receivedDocs = docs.filter((d) => d.isReceived).length;
   const totalDocs = docs.length;
-
   const isCanceled = application.currentStage === 99;
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
-      
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+    <div className="max-w-5xl mx-auto space-y-5 page-fade">
+
+      {/* ── Header ── */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-2">
         <div>
-          <h1 className="text-4xl font-bold mb-2 text-[#3D2B1F]" style={{ fontFamily: "var(--font-cormorant)" }}>
-            Selamat datang, {user.name.split(" ")[0]} 👋
+          <p className="section-label mb-2">Dasbor Pengantin</p>
+          <h1 className="text-[36px] font-bold leading-tight" style={{ fontFamily: "var(--font-cormorant)", color: "#2C1F14" }}>
+            Selamat datang, {user.name.split(" ")[0]}
           </h1>
-          <p className="text-[#6B6560]">
-            Pantau progres pendaftaran pernikahan Anda di bawah ini.
-          </p>
+          <p className="text-[14px] mt-1" style={{ color: "#9C8B7A" }}>Pantau progres pendaftaran pernikahan Anda.</p>
         </div>
-        <div>
-          <div className="flex items-center gap-3 flex-wrap">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#FFF8E1] border border-[#B8960C]/30 rounded-full">
-            <span className="text-xs uppercase tracking-wider font-semibold text-[#B8960C]">No. Registrasi:</span>
-            <span className="font-bold text-[#3D2B1F]">{profile.registrationNumber}</span>
-          </div>
-          <Link
-            href="/dasbor/cetak"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-[#DDD8D0] text-[#3D2B1F] font-semibold text-sm rounded-full hover:bg-[#F5F0E8] transition-colors"
-          >
-            <Printer size={14} className="text-[#A89880]" />
-            Cetak Bukti
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[12px] font-bold" style={{ background: "#FDF3D0", color: "#9A7A0A", border: "1px solid #E8D070" }}>
+            No. Reg: {profile.registrationNumber}
+          </span>
+          <Link href="/dasbor/cetak"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[12px] font-semibold border transition-colors hover:bg-[#F5F0E8]"
+            style={{ background: "#FFFFFF", borderColor: "#E8E0D0", color: "#6B5744" }}>
+            <Printer size={13} /> Cetak Bukti
           </Link>
-        </div>
         </div>
       </div>
 
-      {/* Progress Steps UI */}
-      <div className={`p-6 rounded-xl border shadow-sm mb-6 overflow-x-auto ${
-        isCanceled
-          ? "bg-[#FFF5F5] border-red-100"
-          : "bg-white border-[#DDD8D0]"
-      }`}>
+      {/* ── Progress Steps ── */}
+      <div className="card-sacred p-6 overflow-x-auto">
         {isCanceled && (
-          <div className="flex items-center justify-center mb-4">
-            <span className="px-4 py-1 bg-red-100 text-red-700 font-bold text-xs uppercase tracking-widest rounded-full border border-red-200">
-              ✕ PENDAFTARAN DIBATALKAN
+          <div className="flex justify-center mb-5">
+            <span className="px-5 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-widest"
+                  style={{ background: "#FAEDED", color: "#8B3A3A", border: "1px solid #E8AAAA" }}>
+              ✕ Pendaftaran Dibatalkan
             </span>
           </div>
         )}
-        <div className="flex items-center min-w-max justify-between px-4">
+        <div className="flex items-center min-w-max justify-between px-2">
           {STAGE_NAMES.map((name, i) => {
-            const stepNumber = i + 1;
-            const isCompleted = !isCanceled && stepNumber < application.currentStage;
-            const isCurrent = !isCanceled && stepNumber === application.currentStage;
+            const step = i + 1;
+            const done = !isCanceled && step < application.currentStage;
+            const current = !isCanceled && step === application.currentStage;
             return (
               <div key={i} className="flex items-center">
-                <div className="flex flex-col items-center relative z-10 w-32">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 mb-2 transition-colors ${
-                    isCanceled ? "bg-[#F5F0E8] border-[#DDD8D0] text-[#C8C0B8] opacity-50" :
-                    isCompleted ? "bg-[#D8F3DC] border-[#2D6A4F] text-[#2D6A4F]" :
-                    isCurrent ? "bg-[#B8960C] border-[#B8960C] text-white" :
-                    "bg-[#F5F0E8] border-[#DDD8D0] text-[#A89880]"
-                  }`}>
-                    {isCompleted ? <CheckCircle2 size={20} /> : <span className="font-bold">{stepNumber}</span>}
+                <div className="flex flex-col items-center w-28">
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center border-2 mb-2 transition-all"
+                    style={{
+                      background: isCanceled ? "#F0EDEB" : done ? "#EAF4ED" : current ? "#B8960C" : "#F5F0E8",
+                      borderColor: isCanceled ? "#D4CAC0" : done ? "#4A7C59" : current ? "#B8960C" : "#E8E0D0",
+                      color: isCanceled ? "#D4CAC0" : done ? "#4A7C59" : current ? "#FFFFFF" : "#9C8B7A",
+                      opacity: isCanceled ? 0.5 : 1,
+                    }}>
+                    {done ? <CheckCircle2 size={18} /> : <span className="font-bold text-[14px]">{step}</span>}
                   </div>
-                  <span className={`text-xs font-semibold text-center uppercase ${
-                    isCanceled ? "text-[#C8C0B8]" :
-                    isCompleted ? "text-[#2D6A4F]" :
-                    isCurrent ? "text-[#B8960C]" :
-                    "text-[#A89880]"
-                  }`}>{name}</span>
+                  <span className="text-[10px] font-semibold text-center uppercase tracking-wide leading-tight"
+                    style={{ color: isCanceled ? "#D4CAC0" : done ? "#4A7C59" : current ? "#B8960C" : "#9C8B7A" }}>
+                    {name}
+                  </span>
                 </div>
                 {i < STAGE_NAMES.length - 1 && (
-                  <div className={`w-16 h-1 -ml-4 -mr-4 rounded-full relative z-0 ${
-                    !isCanceled && stepNumber < application.currentStage ? "bg-[#2D6A4F]" : "bg-[#EDE8DF]"
-                  }`} />
+                  <div className="w-14 h-0.5 -mx-3 z-0 rounded-full"
+                    style={{ background: !isCanceled && step < application.currentStage ? "#4A7C59" : "#E8E0D0" }} />
                 )}
               </div>
             );
@@ -194,40 +150,34 @@ export default async function BerandaDasborPage() {
         </div>
       </div>
 
-      {/* ============ BANNER PEMBATALAN (BESAR) ============ */}
+      {/* ── BANNER PEMBATALAN ── */}
       {isCanceled && (
-        <div className="bg-gradient-to-br from-[#FFF0F0] to-[#FFF5F5] border-2 border-red-200 rounded-2xl p-8 mb-6 shadow-sm">
+        <div className="rounded-xl p-8" style={{ background: "#FAEDED", border: "2px solid #E8AAAA" }}>
           <div className="flex flex-col md:flex-row items-center gap-6">
-            <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0 shadow-inner">
-              <AlertCircle size={40} className="text-[#C0392B]" />
+            <div className="w-20 h-20 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "#F5D5D5" }}>
+              <AlertCircle size={40} style={{ color: "#8B3A3A" }} />
             </div>
             <div className="flex-1 text-center md:text-left">
-              <p className="text-[10px] font-bold uppercase tracking-[4px] text-red-400 mb-1">Status Pendaftaran</p>
-              <h2 className="text-2xl md:text-3xl font-bold text-[#C0392B] mb-3" style={{ fontFamily: "var(--font-cormorant)" }}>
-                Pendaftaran Dibatalkan
-              </h2>
-              <div className="bg-white border border-red-100 rounded-lg px-5 py-4 mb-4">
-                <p className="text-xs font-bold text-[#A89880] uppercase tracking-wider mb-1">Alasan Pembatalan dari Sekretariat:</p>
-                <p className="text-[#3D2B1F] font-medium italic">&ldquo;{adminMessage}&rdquo;</p>
+              <p className="text-[10px] font-bold uppercase tracking-[4px] mb-1" style={{ color: "#C08080" }}>Status Pendaftaran</p>
+              <h2 className="text-3xl font-bold mb-3" style={{ fontFamily: "var(--font-cormorant)", color: "#8B3A3A" }}>Pendaftaran Dibatalkan</h2>
+              <div className="p-4 rounded-lg mb-4" style={{ background: "#FFFFFF", border: "1px solid #F0D0D0" }}>
+                <p className="text-[11px] font-bold uppercase tracking-wider mb-1" style={{ color: "#9C8B7A" }}>Alasan dari Sekretariat:</p>
+                <p className="italic font-medium" style={{ color: "#2C1F14" }}>&ldquo;{adminMessage}&rdquo;</p>
               </div>
-              <p className="text-sm text-[#6B6560] mb-5">
-                Untuk mendaftar ulang atau mendapat informasi lebih lanjut, silakan hubungi Sekretariat Katedral secara langsung.
+              <p className="text-[13px] mb-5" style={{ color: "#6B5744" }}>
+                Untuk mendaftar ulang atau info lebih lanjut, hubungi Sekretariat Katedral.
               </p>
               <div className="flex flex-wrap gap-3 justify-center md:justify-start">
                 <DaftarUlangButton />
-                <a
-                  href="https://wa.me/6251234567"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#25D366] text-white font-bold text-sm rounded-md hover:bg-[#1DA851] transition-colors"
-                >
-                  💬 Hubungi via WhatsApp
+                <a href="https://wa.me/6251234567" target="_blank" rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg font-bold text-[13px] text-white transition-all hover:opacity-90"
+                  style={{ background: "#25D366" }}>
+                  💬 WhatsApp Sekretariat
                 </a>
-                <a
-                  href="mailto:sekretariat@katedral.id"
-                  className="inline-flex items-center gap-2 px-6 py-2.5 bg-white border-2 border-[#C0392B] text-[#C0392B] font-bold text-sm rounded-md hover:bg-red-50 transition-colors"
-                >
-                  ✉ Kirim Email Sekretariat
+                <a href="mailto:sekretariat@katedral.id"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg font-bold text-[13px] border transition-all hover:bg-[#FAEDED]"
+                  style={{ color: "#8B3A3A", borderColor: "#E8AAAA" }}>
+                  ✉ Email Sekretariat
                 </a>
               </div>
             </div>
@@ -235,231 +185,148 @@ export default async function BerandaDasborPage() {
         </div>
       )}
 
-      {/* Jadwal Pemberkatan Banner */}
+      {/* ── Jadwal Pemberkatan ── */}
       {!isCanceled && application.weddingDate && (
-        <div className="bg-gradient-to-r from-[#2D6A4F] to-[#1D4A35] text-white p-6 rounded-xl shadow-md flex flex-col md:flex-row items-center gap-4">
-          <div className="w-14 h-14 bg-white/10 rounded-full flex items-center justify-center flex-shrink-0 text-3xl">
-            🎊
-          </div>
+        <div className="rounded-xl p-6 flex flex-col md:flex-row items-center gap-4 text-white"
+          style={{ background: "linear-gradient(135deg, #2C4A3E 0%, #1D3228 100%)" }}>
+          <div className="w-14 h-14 rounded-full flex items-center justify-center text-2xl flex-shrink-0"
+               style={{ background: "rgba(255,255,255,0.1)" }}>🎊</div>
           <div className="flex-1 text-center md:text-left">
-            <p className="text-xs font-bold uppercase tracking-wider text-white/70 mb-1">Jadwal Pemberkatan Nikah</p>
+            <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: "rgba(255,255,255,0.6)" }}>
+              Jadwal Pemberkatan Nikah
+            </p>
             <h2 className="text-xl font-bold" style={{ fontFamily: "var(--font-cormorant)" }}>
-              {new Date(application.weddingDate).toLocaleDateString("id-ID", {
-                weekday: "long", day: "numeric", month: "long", year: "numeric",
-              })}
-              {application.weddingDate.includes("T") && (
-                <span className="text-white/80 ml-2 text-base font-semibold">
-                  · {application.weddingDate.substring(11, 16)} WIB
-                </span>
-              )}
+              {new Date(application.weddingDate).toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
             </h2>
-            <p className="text-sm text-white/70 mt-1">Katedral Santo Yosef Martapura</p>
-          </div>
-          <div className="px-4 py-2 bg-white/10 rounded-lg border border-white/20 text-center flex-shrink-0">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-white/70 mb-0.5">No. Registrasi</p>
-            <p className="font-bold">{profile.registrationNumber}</p>
+            <p className="text-[13px] mt-1" style={{ color: "rgba(255,255,255,0.6)" }}>Katedral Santo Yosef Martapura</p>
           </div>
         </div>
       )}
 
-      {/* ============ KONTEN BAWAH ============ */}
+      {/* ── KONTEN BAWAH ── */}
       {isCanceled ? (
-        /* Saat dibatalkan: hanya tampilkan kartu kontak sekretariat */
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="bg-white rounded-xl border border-[#DDD8D0] shadow-sm p-6">
-            <h3 className="font-bold text-[#3D2B1F] text-sm uppercase tracking-wide mb-4">📞 Kontak Sekretariat</h3>
-            <div className="space-y-3 text-sm">
-              <div className="flex items-center gap-3">
-                <span className="text-lg">📍</span>
-                <span className="text-[#6B6560]">Jl. Gereja No. 1, Martapura, Kalimantan Selatan</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <span className="text-lg">📞</span>
-                <a href="tel:0511-1234567" className="text-[#B8960C] font-bold hover:underline">0511-1234567</a>
-              </div>
-              <div className="flex items-center gap-3">
-                <span className="text-lg">✉</span>
-                <a href="mailto:sekretariat@katedral.id" className="text-[#B8960C] font-bold hover:underline">sekretariat@katedral.id</a>
-              </div>
-              <div className="flex items-center gap-3">
-                <span className="text-lg">🕐</span>
-                <span className="text-[#6B6560]">Senin–Jumat: 08.00–16.00 WIB</span>
-              </div>
+          <div className="card-sacred p-6">
+            <h3 className="font-bold text-[15px] mb-4" style={{ fontFamily: "var(--font-cormorant)", color: "#2C1F14" }}>Kontak Sekretariat</h3>
+            <div className="space-y-3 text-[13px]" style={{ color: "#6B5744" }}>
+              <div className="flex gap-3"><span>📍</span><span>Jl. Gereja No. 1, Martapura, Kalimantan Selatan</span></div>
+              <div className="flex gap-3"><span>📞</span><a href="tel:0511-1234567" className="font-bold hover:underline" style={{ color: "#B8960C" }}>0511-1234567</a></div>
+              <div className="flex gap-3"><span>✉</span><a href="mailto:sekretariat@katedral.id" className="font-bold hover:underline" style={{ color: "#B8960C" }}>sekretariat@katedral.id</a></div>
+              <div className="flex gap-3"><span>🕐</span><span>Senin–Jumat: 08.00–16.00 WIB</span></div>
             </div>
           </div>
-          <div className="bg-[#FFF8E1] rounded-xl border border-[#B8960C]/20 shadow-sm p-6">
-            <h3 className="font-bold text-[#3D2B1F] text-sm uppercase tracking-wide mb-3">ℹ Langkah Selanjutnya</h3>
-            <ul className="space-y-2 text-sm text-[#6B6560]">
-              <li className="flex items-start gap-2"><span className="text-[#B8960C] font-bold mt-0.5">1.</span> Hubungi sekretariat untuk klarifikasi alasan pembatalan.</li>
-              <li className="flex items-start gap-2"><span className="text-[#B8960C] font-bold mt-0.5">2.</span> Jika ingin mendaftar ulang, datangi kantor paroki secara langsung.</li>
-              <li className="flex items-start gap-2"><span className="text-[#B8960C] font-bold mt-0.5">3.</span> Siapkan dokumen yang diperlukan untuk proses baru.</li>
+          <div className="card-sacred p-6" style={{ background: "#FDF3D0", border: "1px solid #E8D070" }}>
+            <h3 className="font-bold text-[15px] mb-3" style={{ fontFamily: "var(--font-cormorant)", color: "#2C1F14" }}>Langkah Selanjutnya</h3>
+            <ul className="space-y-2 text-[13px]" style={{ color: "#6B5744" }}>
+              {["Hubungi sekretariat untuk klarifikasi alasan pembatalan.", "Datangi kantor paroki untuk mendaftar ulang.", "Siapkan dokumen untuk proses baru."].map((s, i) => (
+                <li key={i} className="flex gap-2"><span className="font-bold" style={{ color: "#B8960C" }}>{i + 1}.</span>{s}</li>
+              ))}
             </ul>
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        {/* Kolom Kiri: Status & Pesan */}
-        <div className="lg:col-span-1 space-y-6">
-          
-          {/* Kartu Tahap Aktif */}
-          <div className="bg-white rounded-xl border border-[#DDD8D0] shadow-sm overflow-hidden">
-            <div className="bg-[#FAF7F2] px-5 py-3 border-b border-[#EDE8DF]">
-              <h3 className="font-bold text-[#3D2B1F] text-sm uppercase tracking-wide">Status Saat Ini</h3>
-            </div>
-            <div className="p-5">
-              <h4 className="text-xl font-bold text-[#B8960C] mb-2" style={{ fontFamily: "var(--font-cormorant)" }}>
-                {isCanceled ? "DIBATALKAN" : `Tahap ${application.currentStage}: ${STAGE_NAMES[application.currentStage - 1]}`}
-              </h4>
-              <p className="text-sm text-[#6B6560]">
-                {isCanceled && "Status pendaftaran ini sudah tidak aktif."}
-                {!isCanceled && application.currentStage === 1 && "Profil Anda telah tersimpan. Silakan tunggu informasi jadwal KPP dari sekretariat."}
-                {!isCanceled && application.currentStage === 2 && "Anda berada di tahap Kursus Persiapan Pernikahan. Pastikan Anda menghadiri kursus sesuai jadwal."}
-                {!isCanceled && application.currentStage === 3 && "Silakan kumpulkan dokumen fisik ke sekretariat paroki."}
-                {!isCanceled && application.currentStage === 4 && "Penyelidikan Kanonik sedang dijadwalkan bersama Romo."}
-                {!isCanceled && application.currentStage === 5 && "Semua persiapan selesai! Menunggu hari pemberkatan."}
-              </p>
-            </div>
-          </div>
-
-          {/* Kartu Pesan Sekretariat */}
-          <div className="bg-white rounded-xl border border-[#DDD8D0] shadow-sm overflow-hidden">
-            <div className="px-5 py-3 border-b border-[#EDE8DF] flex items-center justify-between">
-              <h3 className="font-bold text-[#3D2B1F] text-sm uppercase tracking-wide">Pesan Sekretariat</h3>
-              <Clock size={16} className="text-[#A89880]" />
-            </div>
-            <div className="p-5 border-l-4 border-[#2D6A4F] bg-[#FAF7F2]">
-              <p className="text-sm text-[#3D2B1F] italic">&quot;{adminMessage}&quot;</p>
-            </div>
-          </div>
-
-        </div>
-
-        {/* Kolom Kanan: Dokumen */}
-        <div className="lg:col-span-2">
-          <div className="bg-white rounded-xl border border-[#DDD8D0] shadow-sm h-full">
-            <div className="px-5 py-4 border-b border-[#EDE8DF] flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <FileText size={18} className="text-[#B8960C]" />
-                <h3 className="font-bold text-[#3D2B1F] text-sm uppercase tracking-wide">Kelengkapan Dokumen</h3>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          {/* Status Card */}
+          <div className="space-y-4">
+            <div className="card-sacred overflow-hidden">
+              <div className="px-5 py-3" style={{ borderBottom: "1px solid #E8E0D0", background: "#FDFBF8" }}>
+                <h3 className="font-bold text-[13px] uppercase tracking-wider" style={{ color: "#9C8B7A" }}>Status Saat Ini</h3>
               </div>
-              <Link href="/dasbor/dokumen" className="text-sm text-[#B8960C] font-semibold flex items-center hover:underline">
-                Lihat Detail <ChevronRight size={16} />
+              <div className="p-5">
+                <h4 className="text-xl font-bold mb-2" style={{ fontFamily: "var(--font-cormorant)", color: "#B8960C" }}>
+                  Tahap {application.currentStage}: {STAGE_NAMES[(application.currentStage ?? 1) - 1]}
+                </h4>
+                <p className="text-[13px]" style={{ color: "#6B5744" }}>
+                  {STAGE_DESC[application.currentStage ?? 1]}
+                </p>
+              </div>
+            </div>
+
+            <div className="card-sacred overflow-hidden">
+              <div className="px-5 py-3 flex items-center justify-between" style={{ borderBottom: "1px solid #E8E0D0" }}>
+                <h3 className="font-bold text-[13px] uppercase tracking-wider" style={{ color: "#9C8B7A" }}>Pesan Sekretariat</h3>
+                <Clock size={14} style={{ color: "#D4CAC0" }} />
+              </div>
+              <div className="p-5" style={{ borderLeft: "3px solid #4A7C59" }}>
+                <p className="text-[13px] italic" style={{ color: "#2C1F14" }}>&quot;{adminMessage}&quot;</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Dokumen Column */}
+          <div className="lg:col-span-2 card-sacred overflow-hidden">
+            <div className="px-5 py-4 flex items-center justify-between" style={{ borderBottom: "1px solid #E8E0D0", background: "#FDFBF8" }}>
+              <div className="flex items-center gap-2">
+                <FileText size={16} style={{ color: "#B8960C" }} />
+                <h3 className="font-bold text-[15px]" style={{ fontFamily: "var(--font-cormorant)", color: "#2C1F14" }}>Kelengkapan Dokumen</h3>
+              </div>
+              <Link href="/dasbor/dokumen" className="text-[12px] font-bold flex items-center gap-0.5 hover:underline" style={{ color: "#B8960C" }}>
+                Detail <ChevronRight size={13} />
               </Link>
             </div>
-            
             <div className="p-5">
-              <div className="flex justify-between text-sm mb-2">
-                <span className="font-semibold text-[#6B6560]">Progres Berkas</span>
-                <span className="font-bold text-[#2D6A4F]">{receivedDocs} dari {totalDocs} diterima</span>
+              <div className="flex justify-between text-[13px] mb-2">
+                <span style={{ color: "#9C8B7A" }}>Progres Berkas</span>
+                <span className="font-bold" style={{ color: "#4A7C59" }}>{receivedDocs} dari {totalDocs} diterima</span>
               </div>
-              <div className="w-full h-2 bg-[#EDE8DF] rounded-full mb-6 overflow-hidden">
-                <div 
-                  className="h-full bg-[#2D6A4F] rounded-full transition-all duration-500" 
-                  style={{ width: `${(receivedDocs / totalDocs) * 100}%` }} 
-                />
+              <div className="w-full h-1.5 rounded-full mb-5 overflow-hidden" style={{ background: "#F0EBE3" }}>
+                <div className="h-full rounded-full transition-all duration-700"
+                  style={{ width: `${totalDocs > 0 ? (receivedDocs / totalDocs) * 100 : 0}%`, background: "#4A7C59" }} />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 {docs.slice(0, 8).map((doc) => (
-                  <div key={doc.id} className="flex items-start gap-3 p-3 rounded-lg border border-[#EDE8DF] bg-[#FAF7F2]">
-                    <div className="mt-0.5 flex-shrink-0">
-                      {doc.isReceived ? (
-                        <CheckCircle2 size={18} className="text-[#2D6A4F]" />
-                      ) : (
-                        <Circle size={18} className="text-[#A89880]" />
-                      )}
+                  <div key={doc.id} className="flex items-center gap-3 p-3 rounded-lg"
+                    style={{ background: "#FDFBF8", border: "1px solid #F0EBE3" }}>
+                    <div className="flex-shrink-0">
+                      {doc.isReceived ? <CheckCircle2 size={17} style={{ color: "#4A7C59" }} /> : <Circle size={17} style={{ color: "#D4CAC0" }} />}
                     </div>
                     <div>
-                      <p className={`text-sm font-medium leading-tight ${doc.isReceived ? "text-[#3D2B1F]" : "text-[#6B6560]"}`}>
-                        {doc.documentName}
-                      </p>
-                      {doc.isReceived && (
-                        <p className="text-[10px] text-[#2D6A4F] font-bold uppercase mt-1">DITERIMA</p>
-                      )}
+                      <p className="text-[12px] font-medium leading-tight" style={{ color: doc.isReceived ? "#2C1F14" : "#9C8B7A" }}>{doc.documentName}</p>
+                      {doc.isReceived && <p className="text-[10px] font-bold uppercase mt-0.5" style={{ color: "#4A7C59" }}>Diterima</p>}
                     </div>
                   </div>
                 ))}
               </div>
-              
-              {docs.length > 8 && (
-                <div className="mt-4 text-center">
-                  <span className="text-xs text-[#A89880] italic">
-                    + {docs.length - 8} dokumen lainnya. Lihat detail untuk daftar lengkap.
-                  </span>
-                </div>
-              )}
 
-              <div className="mt-6 p-3 rounded bg-[#EBF5FB] text-[#2471A3] text-xs flex gap-2">
-                <AlertCircle size={14} className="flex-shrink-0 mt-0.5" />
-                <p>Status dokumen diperbarui secara manual oleh sekretariat saat Anda menyerahkan berkas fisik ke kantor paroki.</p>
-              </div>
+              {docs.length > 8 && (
+                <p className="mt-3 text-[12px] text-center italic" style={{ color: "#9C8B7A" }}>
+                  +{docs.length - 8} dokumen lainnya. Lihat detail untuk daftar lengkap.
+                </p>
+              )}
             </div>
           </div>
         </div>
-
-        </div>
       )}
 
-      {/* Riwayat Tahap Timeline */}
+      {/* ── Riwayat Timeline ── */}
       {allHistory.length > 0 && (
-        <div className="bg-white rounded-xl border border-[#DDD8D0] shadow-sm overflow-hidden">
-          <div className="px-5 py-4 border-b border-[#EDE8DF] flex items-center gap-2">
-            <Clock size={16} className="text-[#B8960C]" />
-            <h3 className="font-bold text-[#3D2B1F] text-sm uppercase tracking-wide">Riwayat Perubahan Tahap</h3>
+        <div className="card-sacred overflow-hidden">
+          <div className="px-5 py-4 flex items-center gap-2" style={{ borderBottom: "1px solid #E8E0D0", background: "#FDFBF8" }}>
+            <Clock size={15} style={{ color: "#B8960C" }} />
+            <h3 className="font-bold text-[15px]" style={{ fontFamily: "var(--font-cormorant)", color: "#2C1F14" }}>Riwayat Perubahan Tahap</h3>
           </div>
           <div className="p-5">
-            <div className="relative">
-              {/* Vertical Line */}
-              <div className="absolute left-4 top-0 bottom-0 w-px bg-[#EDE8DF]" />
-              <div className="space-y-5">
-                {allHistory.map((h, i) => {
-                  const isLast = i === allHistory.length - 1;
-                  const date = h.changedAt
-                    ? new Date(h.changedAt).toLocaleDateString("id-ID", {
-                        day: "numeric", month: "long", year: "numeric",
-                      })
-                    : "—";
-                  const time = h.changedAt
-                    ? new Date(h.changedAt).toLocaleTimeString("id-ID", {
-                        hour: "2-digit", minute: "2-digit",
-                      })
-                    : "";
-                  const isCancelEntry = h.stageNumber === 99;
-                  return (
-                    <div key={i} className="flex gap-4 pl-2">
-                      {/* Dot */}
-                      <div className={`w-5 h-5 rounded-full border-2 flex-shrink-0 mt-0.5 z-10 flex items-center justify-center ${
-                        i === 0
-                          ? isCancelEntry
-                            ? "bg-[#C0392B] border-[#C0392B]"
-                            : "bg-[#B8960C] border-[#B8960C]"
-                          : isLast
-                          ? "bg-[#EDE8DF] border-[#DDD8D0]"
-                          : "bg-[#D8F3DC] border-[#2D6A4F]"
-                      }`}>
-                        {i === 0 && !isCancelEntry && (
-                          <div className="w-2 h-2 bg-white rounded-full" />
-                        )}
-                      </div>
-                      {/* Content */}
-                      <div className="flex-1 pb-2">
-                        <div className="flex items-center gap-2 mb-1 flex-wrap">
-                          <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
-                            isCancelEntry
-                              ? "bg-[#FDECEA] text-[#C0392B]"
-                              : "bg-[#FFF8E1] text-[#B8960C]"
-                          }`}>
-                            {isCancelEntry ? "Dibatalkan" : `Tahap ${h.stageNumber}`}
-                          </span>
-                          <span className="text-xs text-[#A89880]">{date} · {time}</span>
-                        </div>
-                        <p className="text-sm text-[#3D2B1F]">{h.note}</p>
-                      </div>
+            <div className="relative pl-5" style={{ borderLeft: "2px solid #E8E0D0" }}>
+              {allHistory.map((h, i) => {
+                const isCancel = h.stageNumber === 99;
+                const date = h.changedAt ? new Date(h.changedAt).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" }) : "—";
+                const time = h.changedAt ? new Date(h.changedAt).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }) : "";
+                return (
+                  <div key={i} className="relative mb-5 last:mb-0">
+                    <div className="absolute -left-[21px] top-1 w-3 h-3 rounded-full border-2"
+                      style={{ background: i === 0 ? (isCancel ? "#8B3A3A" : "#B8960C") : "#E8E0D0", borderColor: "#FFFFFF", boxShadow: "0 0 0 2px #E8E0D0" }} />
+                    <div className="flex items-center gap-2 mb-1 flex-wrap">
+                      <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full"
+                        style={isCancel ? { background: "#FAEDED", color: "#8B3A3A" } : { background: "#FDF3D0", color: "#9A7A0A" }}>
+                        {isCancel ? "Dibatalkan" : `Tahap ${h.stageNumber}`}
+                      </span>
+                      <span className="text-[11px]" style={{ color: "#9C8B7A" }}>{date} · {time}</span>
                     </div>
-                  );
-                })}
-              </div>
+                    <p className="text-[13px]" style={{ color: "#6B5744" }}>{h.note}</p>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>

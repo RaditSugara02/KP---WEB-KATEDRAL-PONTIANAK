@@ -2,7 +2,8 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
-import { CalendarDays, Church, ArrowLeft, ArrowRight } from "lucide-react";
+import { CalendarDays, Church, ArrowLeft, ArrowRight, Tag } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 type NewsItem = {
   id: string;
@@ -19,27 +20,26 @@ export default function BeritaListClient({ allNews }: { allNews: NewsItem[] }) {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  // Extract unique categories, ignoring null/empty
+  // Unique categories from DB
   const categories = useMemo(() => {
     const cats = new Set<string>();
-    allNews.forEach(news => {
+    allNews.forEach((news) => {
       if (news.category && news.category.trim() !== "") {
         cats.add(news.category.trim());
       }
     });
-    return ["Semua Berita", ...Array.from(cats)];
+    return ["Semua Berita", ...Array.from(cats).sort()];
   }, [allNews]);
 
-  // Filter and paginate news
+  // Filter + pagination
   const { filteredNews, totalPages } = useMemo(() => {
-    const filtered = allNews.filter(news => {
+    const filtered = allNews.filter((news) => {
       if (activeCategory === "Semua Berita") return true;
       return news.category?.trim() === activeCategory;
     });
-
     return {
       filteredNews: filtered,
-      totalPages: Math.ceil(filtered.length / itemsPerPage)
+      totalPages: Math.ceil(filtered.length / itemsPerPage),
     };
   }, [allNews, activeCategory]);
 
@@ -50,135 +50,263 @@ export default function BeritaListClient({ allNews }: { allNews: NewsItem[] }) {
 
   const handleCategoryClick = (category: string) => {
     setActiveCategory(category);
-    setCurrentPage(1); // Reset to first page on category change
+    setCurrentPage(1);
+    window.scrollTo({ top: 300, behavior: "smooth" });
   };
 
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
-      window.scrollTo({ top: 300, behavior: 'smooth' }); // Scroll to top of list
+      window.scrollTo({ top: 300, behavior: "smooth" });
     }
   };
 
   return (
     <>
-      {/* Filter Categories */}
-      <div className="flex flex-wrap gap-3 mb-12 border-b border-[#DDD8D0] pb-6">
-        {categories.map((category) => (
-          <button
-            key={category}
-            onClick={() => handleCategoryClick(category)}
-            className={`px-5 py-2 text-sm font-semibold rounded-full transition-colors ${
-              activeCategory === category
-                ? "bg-[#3D2B1F] text-white"
-                : "bg-white border border-[#DDD8D0] text-[#6B6560] hover:bg-[#F5F0E8]"
-            }`}
-          >
-            {category}
-          </button>
-        ))}
+      {/* ── Filter Category Tabs ── */}
+      <div className="flex flex-wrap gap-2 mb-10 pb-6" style={{ borderBottom: "1px solid #E8E0D0" }}>
+        {categories.map((category) => {
+          const isActive = activeCategory === category;
+          return (
+            <button
+              key={category}
+              onClick={() => handleCategoryClick(category)}
+              className={cn(
+                "px-5 py-2 text-[13px] font-semibold rounded-full transition-all duration-200",
+                isActive
+                  ? "text-white shadow-sm"
+                  : "border text-[#6B5744] hover:bg-[#F5F0E8] hover:border-[#B8960C]/40"
+              )}
+              style={{
+                background: isActive ? "#2C1F14" : "#FFFFFF",
+                borderColor: isActive ? "transparent" : "#E8E0D0",
+                border: isActive ? "none" : "1px solid #E8E0D0",
+              }}
+            >
+              {category}
+            </button>
+          );
+        })}
       </div>
 
-      {/* Grid Berita */}
+      {/* ── Result count ── */}
+      <div className="mb-8 flex items-center justify-between">
+        <p className="text-[13px]" style={{ color: "#9C8B7A" }}>
+          Menampilkan{" "}
+          <span className="font-semibold" style={{ color: "#2C1F14" }}>
+            {filteredNews.length}
+          </span>{" "}
+          berita
+          {activeCategory !== "Semua Berita" && (
+            <>
+              {" "}dalam kategori{" "}
+              <span className="font-semibold" style={{ color: "#B8960C" }}>
+                {activeCategory}
+              </span>
+            </>
+          )}
+        </p>
+        {totalPages > 1 && (
+          <p className="text-[12px]" style={{ color: "#9C8B7A" }}>
+            Halaman {currentPage} dari {totalPages}
+          </p>
+        )}
+      </div>
+
+      {/* ── News Grid ── */}
       {paginatedNews.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {paginatedNews.map((news) => (
-            <Link href={`/berita/${news.slug}`} key={news.id} className="group block h-full">
-              <div className="bg-white rounded-xl overflow-hidden border border-[#DDD8D0] hover:border-[#B8960C] transition-all hover:shadow-md h-full flex flex-col">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7">
+          {paginatedNews.map((news, idx) => (
+            <Link
+              href={`/berita/${news.slug}`}
+              key={news.id}
+              className="group block h-full"
+              style={{ animationDelay: `${idx * 40}ms` }}
+            >
+              <article className="card-sacred h-full flex flex-col overflow-hidden">
                 {/* Thumbnail */}
-                <div className="h-56 bg-[#EDE8DF] relative overflow-hidden">
-                  <div className="absolute inset-0 bg-[#3D2B1F] opacity-10 group-hover:opacity-0 transition-opacity" />
+                <div
+                  className="relative overflow-hidden flex-shrink-0"
+                  style={{ height: "200px", background: "#F5F0E8" }}
+                >
                   {news.imageUrl ? (
-                    <img src={news.imageUrl} alt={news.title} className="w-full h-full object-cover" />
+                    <img
+                      src={news.imageUrl}
+                      alt={news.title}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-[#A89880]">
-                      <Church size={48} opacity={0.5} />
+                    <div className="w-full h-full flex items-center justify-center">
+                      <Church size={40} style={{ color: "#E8E0D0" }} />
+                    </div>
+                  )}
+
+                  {/* Category Badge over image */}
+                  {news.category && (
+                    <div className="absolute top-3 left-3">
+                      <span
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider"
+                        style={{ background: "#B8960C", color: "#FFFFFF" }}
+                      >
+                        <Tag size={8} />
+                        {news.category}
+                      </span>
                     </div>
                   )}
                 </div>
-                
+
                 {/* Content */}
-                <div className="p-6 flex-1 flex flex-col">
-                  {news.category && (
-                    <span className="inline-block w-max px-2.5 py-1 bg-[#FFF8E1] text-[#B8960C] text-[10px] font-bold uppercase rounded-full tracking-wider mb-3">
-                      {news.category}
-                    </span>
-                  )}
-                  <h3 className="font-bold text-[#3D2B1F] text-xl mb-3 group-hover:text-[#B8960C] transition-colors leading-snug">
+                <div className="p-5 flex-1 flex flex-col">
+                  <h3
+                    className="font-bold text-[17px] mb-2.5 leading-snug transition-colors duration-200 group-hover:text-[#B8960C] line-clamp-2"
+                    style={{
+                      fontFamily: "var(--font-cormorant)",
+                      color: "#2C1F14",
+                    }}
+                  >
                     {news.title}
                   </h3>
-                  <p className="text-sm text-[#6B6560] line-clamp-3 mb-6 flex-1">
+                  <p
+                    className="text-[13px] leading-relaxed line-clamp-3 flex-1 mb-5"
+                    style={{ color: "#6B5744" }}
+                  >
                     {news.body}
                   </p>
-                  
+
                   {/* Footer */}
-                  <div className="flex items-center justify-between pt-4 border-t border-[#EDE8DF] mt-auto">
-                    <div className="flex items-center gap-2 text-xs text-[#A89880] font-medium">
-                      <CalendarDays size={14} />
-                      <span>{new Date(news.createdAt || new Date()).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+                  <div
+                    className="flex items-center justify-between pt-4 mt-auto"
+                    style={{ borderTop: "1px solid #E8E0D0" }}
+                  >
+                    <div
+                      className="flex items-center gap-1.5 text-[11px] font-medium"
+                      style={{ color: "#9C8B7A" }}
+                    >
+                      <CalendarDays size={12} />
+                      <span>
+                        {new Date(news.createdAt || new Date()).toLocaleDateString("id-ID", {
+                          day: "numeric",
+                          month: "long",
+                          year: "numeric",
+                        })}
+                      </span>
                     </div>
-                    <span className="text-[#B8960C] text-xs font-bold group-hover:underline">Baca →</span>
+                    <span
+                      className="text-[12px] font-bold transition-all group-hover:underline"
+                      style={{ color: "#B8960C" }}
+                    >
+                      Baca →
+                    </span>
                   </div>
                 </div>
-              </div>
+              </article>
             </Link>
           ))}
         </div>
       ) : (
-        <div className="text-center py-20 bg-white border border-[#DDD8D0] rounded-xl">
-          <Church size={48} className="mx-auto text-[#DDD8D0] mb-4" />
-          <h3 className="text-lg font-bold text-[#3D2B1F] mb-1">Tidak Ada Berita</h3>
-          <p className="text-[#6B6560]">Belum ada berita untuk kategori ini.</p>
+        /* Empty State */
+        <div
+          className="text-center py-24 rounded-xl"
+          style={{
+            background: "#FFFFFF",
+            border: "1px solid #E8E0D0",
+          }}
+        >
+          <div
+            className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-5"
+            style={{ background: "#F5F0E8" }}
+          >
+            <Church size={32} style={{ color: "#E8E0D0" }} />
+          </div>
+          <h3
+            className="text-xl font-bold mb-2"
+            style={{ fontFamily: "var(--font-cormorant)", color: "#2C1F14" }}
+          >
+            Belum Ada Berita
+          </h3>
+          <p className="text-[14px]" style={{ color: "#9C8B7A" }}>
+            Tidak ada berita untuk kategori{" "}
+            <strong style={{ color: "#B8960C" }}>{activeCategory}</strong>.
+          </p>
+          {activeCategory !== "Semua Berita" && (
+            <button
+              onClick={() => handleCategoryClick("Semua Berita")}
+              className="mt-6 px-6 py-2.5 text-[13px] font-semibold rounded-full text-white transition-colors hover:opacity-90"
+              style={{ background: "#B8960C" }}
+            >
+              Lihat Semua Berita
+            </button>
+          )}
         </div>
       )}
 
-      {/* Pagination Controls */}
+      {/* ── Pagination Controls ── */}
       {totalPages > 1 && (
-        <div className="mt-16 flex justify-center items-center gap-2">
-          <button 
+        <div className="mt-14 flex justify-center items-center gap-2">
+          {/* Prev */}
+          <button
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 1}
-            className="w-10 h-10 rounded-md bg-white border border-[#DDD8D0] text-[#6B6560] flex items-center justify-center hover:bg-[#F5F0E8] hover:border-[#B8960C] disabled:opacity-50 disabled:hover:bg-white disabled:hover:border-[#DDD8D0] transition-colors"
+            className="w-10 h-10 rounded-lg flex items-center justify-center border transition-all disabled:opacity-40"
+            style={{
+              background: "#FFFFFF",
+              borderColor: "#E8E0D0",
+              color: "#6B5744",
+            }}
           >
-            <ArrowLeft size={18} />
+            <ArrowLeft size={16} />
           </button>
-          
+
+          {/* Page Numbers */}
           {Array.from({ length: totalPages }).map((_, i) => {
-            const pageNumber = i + 1;
-            // Simplified pagination display for a reasonable number of pages
-            if (
-              pageNumber === 1 ||
-              pageNumber === totalPages ||
-              (pageNumber >= currentPage - 1 && pageNumber <= currentPage + 1)
-            ) {
+            const page = i + 1;
+            const isCurrentPage = currentPage === page;
+            const isVisible =
+              page === 1 ||
+              page === totalPages ||
+              (page >= currentPage - 1 && page <= currentPage + 1);
+            const isEllipsis =
+              (page === currentPage - 2 && page > 1) ||
+              (page === currentPage + 2 && page < totalPages);
+
+            if (isVisible) {
               return (
                 <button
-                  key={pageNumber}
-                  onClick={() => handlePageChange(pageNumber)}
-                  className={`w-10 h-10 rounded-md font-bold flex items-center justify-center transition-colors ${
-                    currentPage === pageNumber
-                      ? "bg-[#3D2B1F] text-white"
-                      : "bg-white border border-[#DDD8D0] text-[#6B6560] hover:bg-[#F5F0E8] hover:border-[#B8960C]"
-                  }`}
+                  key={page}
+                  onClick={() => handlePageChange(page)}
+                  className="w-10 h-10 rounded-lg font-semibold text-[14px] flex items-center justify-center border transition-all"
+                  style={{
+                    background: isCurrentPage ? "#2C1F14" : "#FFFFFF",
+                    color: isCurrentPage ? "#FFFFFF" : "#6B5744",
+                    borderColor: isCurrentPage ? "#2C1F14" : "#E8E0D0",
+                  }}
                 >
-                  {pageNumber}
+                  {page}
                 </button>
               );
-            } else if (
-              pageNumber === currentPage - 2 ||
-              pageNumber === currentPage + 2
-            ) {
-              return <span key={pageNumber} className="text-[#A89880]">...</span>;
+            }
+            if (isEllipsis) {
+              return (
+                <span key={page} className="w-10 text-center text-[14px]" style={{ color: "#9C8B7A" }}>
+                  …
+                </span>
+              );
             }
             return null;
           })}
 
-          <button 
+          {/* Next */}
+          <button
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
-            className="w-10 h-10 rounded-md bg-white border border-[#DDD8D0] text-[#6B6560] flex items-center justify-center hover:bg-[#F5F0E8] hover:border-[#B8960C] disabled:opacity-50 disabled:hover:bg-white disabled:hover:border-[#DDD8D0] transition-colors"
+            className="w-10 h-10 rounded-lg flex items-center justify-center border transition-all disabled:opacity-40"
+            style={{
+              background: "#FFFFFF",
+              borderColor: "#E8E0D0",
+              color: "#6B5744",
+            }}
           >
-            <ArrowRight size={18} />
+            <ArrowRight size={16} />
           </button>
         </div>
       )}

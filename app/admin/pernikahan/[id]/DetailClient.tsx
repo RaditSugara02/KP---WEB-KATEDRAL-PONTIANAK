@@ -2,7 +2,24 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Check, X, Send, ArrowUpCircle, Trash2, UserCheck, CalendarDays, History } from "lucide-react";
+import { Check, X, Send, ArrowUpCircle, Trash2, UserCheck, CalendarDays, History, Calendar as CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
+import { id as localeId } from "date-fns/locale";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type PreviousApp = {
   regNum: string | null;
@@ -35,9 +52,10 @@ export default function DetailClient({
   // Ceremony Date/Time State
   // weddingDate is stored as "YYYY-MM-DDTHH:mm" in the DB
   const existingDate = (application.weddingDate as string) || "";
-  const [ceremonyDate, setCeremonyDate] = useState(
-    existingDate ? existingDate.substring(0, 10) : ""
+  const [dateObj, setDateObj] = useState<Date | undefined>(
+    existingDate ? new Date(existingDate.substring(0, 10)) : undefined
   );
+  const ceremonyDate = dateObj ? format(dateObj, "yyyy-MM-dd") : "";
   const [ceremonyTime, setCeremonyTime] = useState(
     existingDate && existingDate.includes("T") ? existingDate.substring(11, 16) : ""
   );
@@ -242,19 +260,23 @@ export default function DetailClient({
             <p className="text-xs text-[#A89880]">Belum ada imam terdaftar di sistem.</p>
           ) : (
             <div className="space-y-3">
-              <select
-                value={selectedPriest}
-                onChange={(e) => setSelectedPriest(e.target.value)}
+              <Select
+                value={selectedPriest || "unassigned"}
+                onValueChange={(val: string | null) => val && setSelectedPriest(val === "unassigned" ? "" : val)}
                 disabled={loadingPriest || isCanceled}
-                className="w-full h-10 px-3 border border-[#DDD8D0] rounded-md text-sm focus:border-[#B8960C] outline-none disabled:opacity-50 bg-white"
               >
-                <option value="">— Belum Ditugaskan —</option>
-                {priests.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger className="w-full bg-white h-10 border-[#DDD8D0] focus:ring-[#B8960C]">
+                  <SelectValue placeholder="— Belum Ditugaskan —" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="unassigned">— Belum Ditugaskan —</SelectItem>
+                  {priests.map((p) => (
+                    <SelectItem key={p.id} value={p.id}>
+                      {p.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <button
                 onClick={handleAssignPriest}
                 disabled={loadingPriest || isCanceled}
@@ -290,13 +312,25 @@ export default function DetailClient({
           <div className="space-y-2">
             <div>
               <label className="block text-[10px] font-bold text-[#6B6560] uppercase tracking-wider mb-1">Tanggal</label>
-              <input
-                type="date"
-                value={ceremonyDate}
-                onChange={(e) => setCeremonyDate(e.target.value)}
-                disabled={isCanceled}
-                className="w-full h-10 px-3 border border-[#DDD8D0] rounded-md text-sm focus:border-[#B8960C] outline-none disabled:opacity-50 bg-white"
-              />
+              <Popover>
+                <PopoverTrigger
+                  disabled={isCanceled}
+                  className={cn(
+                    "flex items-center w-full justify-start text-left font-normal bg-white border border-[#DDD8D0] h-10 px-3 rounded-md text-sm outline-none focus:border-[#B8960C]",
+                    !dateObj && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {dateObj ? format(dateObj, "PPP", { locale: localeId }) : <span>Pilih Tanggal</span>}
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0 z-50" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={dateObj}
+                    onSelect={setDateObj}
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
             <div>
               <label className="block text-[10px] font-bold text-[#6B6560] uppercase tracking-wider mb-1">Jam (opsional)</label>

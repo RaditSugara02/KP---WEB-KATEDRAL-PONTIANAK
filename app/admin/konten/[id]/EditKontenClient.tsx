@@ -19,6 +19,7 @@ type ContentItem = {
   type: string | null;
   body: string | null;
   eventDate: string | null;
+  eventEndDate: string | null;
   location: string | null;
   imageUrl: string | null;
   category: string | null;
@@ -29,15 +30,21 @@ export default function EditKontenClient({ content }: { content: ContentItem }) 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const initMassDay = content.type === "MASS_SCHEDULE" && content.category ? content.category.split("::")[0] : "Minggu";
+  const initMassType = content.type === "MASS_SCHEDULE" && content.category ? content.category.split("::")[1] || "Indonesia" : "Indonesia";
+
   const [form, setForm] = useState({
     id: content.id,
     title: content.title || "",
     type: content.type || "NEWS",
     body: content.body || "",
     eventDate: content.eventDate || "",
+    eventEndDate: content.eventEndDate || "",
     location: content.location || "",
     imageUrl: content.imageUrl || "",
     category: content.category || "",
+    massDay: initMassDay,
+    massType: initMassType,
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -50,10 +57,15 @@ export default function EditKontenClient({ content }: { content: ContentItem }) 
     setLoading(true);
 
     try {
+      const payload = { ...form };
+      if (payload.type === "MASS_SCHEDULE") {
+        payload.category = `${payload.massDay}::${payload.massType}`;
+      }
+
       const res = await fetch("/api/admin/konten", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify(payload),
       });
 
       const data = await res.json();
@@ -115,6 +127,38 @@ export default function EditKontenClient({ content }: { content: ContentItem }) 
         </div>
       )}
 
+      {/* Pengumuman Fields */}
+      {form.type === "ANNOUNCEMENT" && (
+        <div className="space-y-5 p-5 bg-[#F5F0E8] rounded-lg border border-[#EDE8DF]">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+              <label className="block text-xs font-bold text-[#6B6560] uppercase tracking-wider mb-2">
+                Tanggal Acara <span className="text-[#A89880] font-normal">(Opsional)</span>
+              </label>
+              <input type="date" name="eventDate" value={form.eventDate} onChange={handleChange}
+                className="w-full h-11 px-4 border border-[#DDD8D0] rounded-md text-sm bg-white focus:border-[#B8960C] focus:ring-1 focus:ring-[#B8960C] outline-none" />
+              <p className="mt-1.5 text-xs text-[#A89880]">Tanggal acara akan ditampilkan di agenda.</p>
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-[#6B6560] uppercase tracking-wider mb-2">
+                Tampilkan Sampai <span className="text-red-500">*</span>
+              </label>
+              <input type="date" name="eventEndDate" value={form.eventEndDate} onChange={handleChange} required
+                className="w-full h-11 px-4 border border-[#DDD8D0] rounded-md text-sm bg-white focus:border-[#B8960C] focus:ring-1 focus:ring-[#B8960C] outline-none" />
+              <p className="mt-1.5 text-xs text-[#A89880]">Setelah tanggal ini, pengumuman tidak tampil di landing page tapi tetap ada di halaman berita.</p>
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-[#6B6560] uppercase tracking-wider mb-2">
+              Lokasi <span className="text-[#A89880] font-normal">(Opsional)</span>
+            </label>
+            <input type="text" name="location" value={form.location} onChange={handleChange}
+              placeholder="cth: Gereja Katedral, Aula Paroki"
+              className="w-full h-11 px-4 border border-[#DDD8D0] rounded-md text-sm bg-white focus:border-[#B8960C] focus:ring-1 focus:ring-[#B8960C] outline-none" />
+          </div>
+        </div>
+      )}
+
       {/* Judul */}
       <div>
         <label className="block text-xs font-bold text-[#6B6560] uppercase tracking-wider mb-2">Judul <span className="text-red-500">*</span></label>
@@ -124,16 +168,33 @@ export default function EditKontenClient({ content }: { content: ContentItem }) 
 
       {/* Jadwal Misa Fields */}
       {isMassSchedule && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 p-5 bg-[#F5F0E8] rounded-lg border border-[#EDE8DF]">
-          <div>
-            <label className="block text-xs font-bold text-[#6B6560] uppercase tracking-wider mb-2">Waktu (Jam)</label>
-            <input type="text" name="eventDate" value={form.eventDate} onChange={handleChange}
-              placeholder="cth: 07.00" className="w-full h-11 px-4 border border-[#DDD8D0] rounded-md text-sm bg-white focus:border-[#B8960C] focus:ring-1 focus:ring-[#B8960C] outline-none" />
+        <div className="space-y-5 p-5 bg-[#F5F0E8] rounded-lg border border-[#EDE8DF]">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+              <label className="block text-xs font-bold text-[#6B6560] uppercase tracking-wider mb-2">Tanggal</label>
+              <input type="date" name="massDay" value={form.massDay} onChange={handleChange}
+                className="w-full h-11 px-4 border border-[#DDD8D0] rounded-md text-sm bg-white focus:border-[#B8960C] focus:ring-1 focus:ring-[#B8960C] outline-none" />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-[#6B6560] uppercase tracking-wider mb-2">Jenis Misa</label>
+              <select name="massType" value={form.massType} onChange={handleChange}
+                className="w-full h-11 px-4 border border-[#DDD8D0] rounded-md text-sm bg-white focus:border-[#B8960C] focus:ring-1 focus:ring-[#B8960C] outline-none">
+                <option value="Harian">Misa Harian / Umum</option>
+                <option value="Khusus">Misa Khusus (Hari Raya / Acara Khusus)</option>
+              </select>
+            </div>
           </div>
-          <div>
-            <label className="block text-xs font-bold text-[#6B6560] uppercase tracking-wider mb-2">Lokasi</label>
-            <input type="text" name="location" value={form.location} onChange={handleChange}
-              placeholder="cth: Gereja Utama" className="w-full h-11 px-4 border border-[#DDD8D0] rounded-md text-sm bg-white focus:border-[#B8960C] focus:ring-1 focus:ring-[#B8960C] outline-none" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+              <label className="block text-xs font-bold text-[#6B6560] uppercase tracking-wider mb-2">Waktu (Jam)</label>
+              <input type="time" name="eventDate" value={form.eventDate} onChange={handleChange}
+                className="w-full h-11 px-4 border border-[#DDD8D0] rounded-md text-sm bg-white focus:border-[#B8960C] focus:ring-1 focus:ring-[#B8960C] outline-none" />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-[#6B6560] uppercase tracking-wider mb-2">Lokasi</label>
+              <input type="text" name="location" value={form.location} onChange={handleChange}
+                placeholder="cth: Gereja Utama" className="w-full h-11 px-4 border border-[#DDD8D0] rounded-md text-sm bg-white focus:border-[#B8960C] focus:ring-1 focus:ring-[#B8960C] outline-none" />
+            </div>
           </div>
         </div>
       )}
