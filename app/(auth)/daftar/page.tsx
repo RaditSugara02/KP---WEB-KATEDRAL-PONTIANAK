@@ -83,37 +83,57 @@ export default function DaftarPage() {
       {/* KOLOM KIRI (50%) */}
       <div
         className="hidden lg:flex lg:w-1/2 relative overflow-hidden items-center justify-center flex-col"
-        style={{ background: "#3D2B1F" }}
       >
-        <div className="relative z-10 flex flex-col items-center text-center px-8">
-          <svg
-            width="64"
-            height="64"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="white"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="mb-6"
-          >
-            <path d="M18 22V11c0-2.8-2.2-5-5-5H9" />
-            <path d="M12 22V2l-4 4" />
-            <path d="M12 2l4 4" />
-            <path d="M4 22v-6c0-1.7 1.3-3 3-3" />
-            <path d="M22 22H2" />
-          </svg>
+        {/* Background Image */}
+        <div
+          className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 hover:scale-105"
+          style={{ backgroundImage: 'url("/bg-katedral.jpg")' }}
+        />
+        {/* Dark Overlay for text readability */}
+        <div className="absolute inset-0 bg-[#2C1F14]/70 mix-blend-multiply" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#2C1F14]/90 via-transparent to-transparent" />
+
+        <div className="relative z-10 flex flex-col items-center text-center px-12 max-w-md">
+          {/* Logo */}
+          <div className="mb-8 drop-shadow-xl">
+            <img 
+              src="/logo-katedral.png" 
+              alt="Logo Katedral Santo Yosef" 
+              className="w-28 h-auto object-contain"
+            />
+          </div>
+
           <h1
-            className="text-white text-4xl lg:text-5xl mb-4"
-            style={{ fontFamily: "var(--font-cormorant)" }}
+            className="text-white mb-4 leading-tight drop-shadow-md"
+            style={{
+              fontFamily: "var(--font-cormorant)",
+              fontSize: "42px",
+              fontWeight: 700,
+            }}
           >
-            Katedral Santo Yosef Pontianak
+            Katedral Santo Yosef
           </h1>
+
           <p
-            className="text-white/80 italic text-lg"
-            style={{ fontFamily: "var(--font-cormorant)" }}
+            className="text-[17px] italic leading-relaxed mb-8 drop-shadow-md"
+            style={{
+              fontFamily: "var(--font-cormorant)",
+              color: "rgba(253,247,242,0.9)",
+            }}
           >
-            Melayani Umat dengan Kasih dan Ketulusan
+            Sistem Informasi Pendaftaran<br />Sakramen Perkawinan
+          </p>
+
+          <div
+            className="w-12 h-px mb-8"
+            style={{ background: "#B8960C", opacity: 0.8 }}
+          />
+
+          <p
+            className="text-[13px] leading-relaxed font-semibold drop-shadow-md"
+            style={{ color: "rgba(253,247,242,0.7)", letterSpacing: "0.08em" }}
+          >
+            KEUSKUPAN AGUNG PONTIANAK
           </p>
         </div>
       </div>
