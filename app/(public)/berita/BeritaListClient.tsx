@@ -129,21 +129,24 @@ export default function BeritaListClient({ allNews }: { allNews: NewsItem[] }) {
                   className="relative overflow-hidden flex-shrink-0"
                   style={{ height: "200px", background: "#F5F0E8" }}
                 >
-                  {news.imageUrl ? (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center p-4 bg-[#F5F0E8] z-0">
+                    <Church size={40} style={{ color: "#D5C6AF", marginBottom: "8px" }} />
+                    <span className="text-xs font-medium uppercase tracking-wider" style={{ color: "#A89880" }}>Katedral Santo Yosef</span>
+                  </div>
+                  {news.imageUrl && (
                     <img
                       src={news.imageUrl}
                       alt={news.title}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 z-10"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
                     />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <Church size={40} style={{ color: "#E8E0D0" }} />
-                    </div>
                   )}
 
                   {/* Category Badge over image */}
                   {news.category && (
-                    <div className="absolute top-3 left-3">
+                    <div className="absolute top-3 left-3 z-20">
                       <span
                         className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider"
                         style={{ background: "#B8960C", color: "#FFFFFF" }}
