@@ -10,16 +10,9 @@ import Link from "next/link";
 export default function CekEmailClient() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const email = searchParams.get("email") || "";
   const [loading, setLoading] = useState(false);
   const [cooldown, setCooldown] = useState(0);
-
-  useEffect(() => {
-    const emailParam = searchParams.get("email");
-    if (emailParam) {
-      setEmail(emailParam);
-    }
-  }, [searchParams]);
 
   const handleResend = async () => {
     if (!email) {
@@ -36,8 +29,9 @@ export default function CekEmailClient() {
       if (error) throw new Error(error.message);
       toast.success("Email verifikasi telah dikirim ulang!");
       setCooldown(60);
-    } catch (err: any) {
-      toast.error(err.message || "Gagal mengirim ulang email.");
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "Gagal mengirim ulang email.";
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -172,7 +166,7 @@ export default function CekEmailClient() {
               className="font-medium hover:underline mb-4 disabled:opacity-50 disabled:no-underline" 
               style={{ color: "#B8960C" }}
             >
-              {loading ? "Mengirim..." : cooldown > 0 ? \`Kirim ulang tersedia dalam \${cooldown}s\` : "Kirim ulang email aktivasi"}
+              {loading ? "Mengirim..." : cooldown > 0 ? `Kirim ulang tersedia dalam ${cooldown}s` : "Kirim ulang email aktivasi"}
             </button>
           </p>
           

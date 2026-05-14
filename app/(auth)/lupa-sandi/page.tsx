@@ -41,8 +41,9 @@ export default function LupaSandiPage() {
 
       setIsSent(true);
       toast.success("Tautan pemulihan telah dikirim ke email Anda.");
-    } catch (err: any) {
-      toast.error(err.message || "Terjadi kesalahan sistem.");
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "Terjadi kesalahan sistem.";
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
