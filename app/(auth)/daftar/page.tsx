@@ -4,8 +4,29 @@ import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff, ArrowLeft } from "lucide-react";
+import { Eye, EyeOff, ArrowLeft, Check } from "lucide-react";
 import { toast } from "sonner";
+
+// ── Password Strength Helpers ──────────────────────────────────────────────
+type StrengthLevel = 0 | 1 | 2 | 3 | 4;
+
+function calcStrength(pwd: string): StrengthLevel {
+  if (!pwd) return 0;
+  let score = 0;
+  if (pwd.length >= 8) score++;
+  if (/[A-Z]/.test(pwd)) score++;
+  if (/[0-9]/.test(pwd)) score++;
+  if (/[^A-Za-z0-9]/.test(pwd)) score++;
+  return score as StrengthLevel;
+}
+
+const STRENGTH_CONFIG = [
+  { label: "", color: "" },
+  { label: "Lemah",       color: "#E53935" },
+  { label: "Cukup",       color: "#FB8C00" },
+  { label: "Kuat",        color: "#43A047" },
+  { label: "Sangat Kuat", color: "#1E88E5" },
+];
 
 export default function DaftarPage() {
   const router = useRouter();
@@ -226,50 +247,119 @@ export default function DaftarPage() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-bold text-[#6B6560] mb-1.5 uppercase tracking-wide">Kata Sandi</label>
-                <div className="relative">
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full h-11 px-3 pr-10 rounded-md border border-[#DDD8D0] bg-white text-[#3D2B1F] focus:border-[#B8960C] focus:ring-1 focus:ring-[#B8960C] outline-none text-sm transition-shadow"
-                    placeholder="Min. 8 karakter"
-                    minLength={8}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A89880] hover:text-[#6B6560] transition-colors"
-                  >
-                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </button>
-                </div>
+            {/* ── Kata Sandi ── */}
+            <div>
+              <label className="block text-xs font-bold text-[#6B6560] mb-1.5 uppercase tracking-wide">Kata Sandi</label>
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full h-11 px-3 pr-10 rounded-md border border-[#DDD8D0] bg-white text-[#3D2B1F] focus:border-[#B8960C] focus:ring-1 focus:ring-[#B8960C] outline-none text-sm transition-shadow"
+                  placeholder="Min. 8 karakter"
+                  minLength={8}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A89880] hover:text-[#6B6560] transition-colors"
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
               </div>
 
-              <div>
-                <label className="block text-xs font-bold text-[#6B6560] mb-1.5 uppercase tracking-wide">Ulangi Sandi</label>
-                <div className="relative">
-                  <input
-                    type={showConfirmPassword ? "text" : "password"}
-                    required
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full h-11 px-3 pr-10 rounded-md border border-[#DDD8D0] bg-white text-[#3D2B1F] focus:border-[#B8960C] focus:ring-1 focus:ring-[#B8960C] outline-none text-sm transition-shadow"
-                    placeholder="Ulangi kata sandi"
-                    minLength={8}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A89880] hover:text-[#6B6560] transition-colors"
-                  >
-                    {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </button>
+              {/* ── Password Strength Indicator ── */}
+              {password.length > 0 && (
+                <div className="mt-2">
+                  {/* 4 progress bars */}
+                  <div className="flex gap-1 mb-1.5">
+                    {[1, 2, 3, 4].map((level) => {
+                      const strength = calcStrength(password);
+                      const active = strength >= level;
+                      const cfg = STRENGTH_CONFIG[strength];
+                      return (
+                        <div
+                          key={level}
+                          className="h-1 flex-1 rounded-full transition-all duration-300"
+                          style={{
+                            background: active ? cfg.color : "#E8E2DA",
+                            opacity: active ? 1 : 0.5,
+                          }}
+                        />
+                      );
+                    })}
+                  </div>
+
+                  {/* Label kekuatan */}
+                  <div className="flex items-center justify-between">
+                    <span
+                      className="text-[11px] font-semibold transition-colors duration-300"
+                      style={{ color: STRENGTH_CONFIG[calcStrength(password)].color }}
+                    >
+                      {STRENGTH_CONFIG[calcStrength(password)].label}
+                    </span>
+
+                    {/* Checklist kriteria */}
+                    <div className="flex gap-2">
+                      {[
+                        { ok: password.length >= 8,          tip: "8+ karakter" },
+                        { ok: /[A-Z]/.test(password),        tip: "Huruf besar" },
+                        { ok: /[0-9]/.test(password),        tip: "Angka" },
+                        { ok: /[^A-Za-z0-9]/.test(password), tip: "Simbol" },
+                      ].map(({ ok, tip }) => (
+                        <span
+                          key={tip}
+                          title={tip}
+                          className="flex items-center gap-0.5 text-[10px] font-medium transition-colors duration-200"
+                          style={{ color: ok ? "#43A047" : "#C4B8AD" }}
+                        >
+                          <Check size={10} strokeWidth={ok ? 3 : 1.5} />
+                          {tip}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
                 </div>
+              )}
+            </div>
+
+            {/* ── Ulangi Sandi ── */}
+            <div>
+              <label className="block text-xs font-bold text-[#6B6560] mb-1.5 uppercase tracking-wide">Ulangi Sandi</label>
+              <div className="relative">
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  required
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className={`w-full h-11 px-3 pr-10 rounded-md border bg-white text-[#3D2B1F] focus:ring-1 outline-none text-sm transition-shadow ${
+                    confirmPassword && confirmPassword !== password
+                      ? "border-[#E53935] focus:border-[#E53935] focus:ring-[#E53935]"
+                      : confirmPassword && confirmPassword === password
+                      ? "border-[#43A047] focus:border-[#43A047] focus:ring-[#43A047]"
+                      : "border-[#DDD8D0] focus:border-[#B8960C] focus:ring-[#B8960C]"
+                  }`}
+                  placeholder="Ulangi kata sandi"
+                  minLength={8}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A89880] hover:text-[#6B6560] transition-colors"
+                >
+                  {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
               </div>
+              {/* Match indicator */}
+              {confirmPassword.length > 0 && (
+                <p
+                  className="mt-1 text-[11px] font-medium transition-colors duration-200"
+                  style={{ color: confirmPassword === password ? "#43A047" : "#E53935" }}
+                >
+                  {confirmPassword === password ? "✓ Kata sandi cocok" : "✗ Kata sandi tidak cocok"}
+                </p>
+              )}
             </div>
 
             <button
