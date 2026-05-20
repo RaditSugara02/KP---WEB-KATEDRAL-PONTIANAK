@@ -144,6 +144,70 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true });
     }
 
+    if (action === "APPROVE_REREGISTRATION") {
+      // 1. Revert old app to 99 (Archived)
+      await db.update(marriageApplications)
+        .set({ currentStage: 99, updatedAt: now })
+        .where(eq(marriageApplications.id, applicationId));
+
+      // 2. Create new app at stage 1
+      const newAppId = nanoid();
+      await db.insert(marriageApplications).values({
+        id: newAppId,
+        coupleProfileId: app.coupleProfileId,
+        currentStage: 1,
+        isReregistration: true,
+        previousApplicationId: app.id,
+        createdAt: now,
+        updatedAt: now,
+      });
+
+      // 3. Create default documents
+      const DEFAULT_DOCUMENTS = [
+        "Surat Permohonan Menikah (dari Ketua Umat)",
+        "Fotokopi Surat Baptis Terbaru",
+        "Fotokopi KTP & KK",
+        "Pas Foto Berdampingan 4x6 (3 lembar)",
+        "Sertifikat Kursus Persiapan Perkawinan (KPP)",
+        "Fotokopi Akta Kelahiran",
+        "Surat Keterangan Belum Pernah Menikah (Kelurahan)",
+        "Surat Izin Orang Tua (jika di bawah umur)",
+        "Surat Keterangan Kematian/Cerai (jika pernah menikah)",
+        "Surat Keterangan Dokter (Bebas HIV/AIDS & Narkoba)",
+        "Fotokopi Surat Ganti Nama (jika ada)"
+      ];
+      const docValues = DEFAULT_DOCUMENTS.map((name) => ({
+        id: nanoid(),
+        applicationId: newAppId,
+        documentName: name,
+        isReceived: false,
+      }));
+      await db.insert(requiredDocuments).values(docValues);
+
+      // 4. Log history for new app
+      await db.insert(stageHistory).values({
+        id: nanoid(),
+        applicationId: newAppId,
+        stageNumber: 1,
+        note: "Pendaftaran ulang disetujui. Formulir baru telah dibuat.",
+        changedBy: adminId,
+        changedAt: now
+      });
+
+      // 5. Notify user
+      if (coupleUserId) {
+        await db.insert(notifications).values({
+          id: nanoid(),
+          userId: coupleUserId,
+          message: "Pengajuan daftar ulang Anda telah disetujui! Formulir pendaftaran baru telah dibuat, silakan lengkapi kembali dokumen Anda.",
+          isRead: false,
+          createdAt: now
+        });
+      }
+
+      return NextResponse.json({ success: true, newAppId });
+    }
+
     if (action === "CANCEL_APPLICATION") {
       const { note } = body;
       const cancelNote = `Pendaftaran dibatalkan: ${note}`;

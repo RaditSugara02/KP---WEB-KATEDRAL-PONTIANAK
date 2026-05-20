@@ -29,6 +29,7 @@ const STAGE_BADGE: Record<number, { bg: string; color: string; border: string }>
   3: { bg: "#FDF3D0", color: "#9A7A0A", border: "#E8D070" },
   4: { bg: "#F0EAF8", color: "#6A3D96", border: "#C8A8DE" },
   5: { bg: "#EAF4ED", color: "#2E6B41", border: "#A8D5B4" },
+  98: { bg: "#FFF8E1", color: "#B8960C", border: "#E8D070" },
 };
 
 type App = {
@@ -101,10 +102,15 @@ export const columns: ColumnDef<App>[] = [
       const badge = s === 99
         ? { bg: "#FAEDED", color: "#8B3A3A", border: "#E8AAAA" }
         : STAGE_BADGE[s] ?? STAGE_BADGE[1];
+      
+      let label = `Tahap ${s}: ${STAGE_NAMES[s - 1]}`;
+      if (s === 99) label = "Dibatalkan";
+      if (s === 98) label = "Daftar Ulang";
+      
       return (
         <span className="inline-flex px-2.5 py-1 text-[10px] font-bold uppercase rounded-full"
               style={{ background: badge.bg, color: badge.color, border: `1px solid ${badge.border}` }}>
-          {s === 99 ? "Dibatalkan" : `Tahap ${s}: ${STAGE_NAMES[s - 1]}`}
+          {label}
         </span>
       );
     }

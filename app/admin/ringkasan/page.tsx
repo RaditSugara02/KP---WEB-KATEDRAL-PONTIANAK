@@ -20,6 +20,7 @@ const STAGE_BADGE: Record<number, { label: string; bg: string; color: string; bo
   3: { label: "Tahap 3: Dokumen",  bg: "#FDF3D0", color: "#9A7A0A",  border: "#E8D070" },
   4: { label: "Tahap 4: Kanonik",  bg: "#F0EAF8", color: "#6A3D96",  border: "#C8A8DE" },
   5: { label: "Tahap 5: Selesai",  bg: "#EAF4ED", color: "#2E6B41",  border: "#A8D5B4" },
+  98: { label: "Daftar Ulang",     bg: "#FFF8E1", color: "#B8960C",  border: "#E8D070" },
 };
 
 export default async function AdminRingkasanPage() {

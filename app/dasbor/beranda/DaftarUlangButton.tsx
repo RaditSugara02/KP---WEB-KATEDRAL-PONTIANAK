@@ -34,8 +34,8 @@ export default function DaftarUlangButton() {
 
   if (done) {
     return (
-      <div className="inline-flex items-center gap-2 px-6 py-2.5 bg-green-600 text-white font-bold text-sm rounded-md">
-        ✅ Pendaftaran ulang berhasil! Memuat ulang...
+      <div className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#FDF3D0] text-[#B8960C] border border-[#E8D070] font-bold text-sm rounded-md">
+        ⏳ Pengajuan daftar ulang terkirim! Memuat ulang...
       </div>
     );
   }
@@ -76,7 +76,7 @@ export default function DaftarUlangButton() {
             
             <div className="p-5">
               <p className="text-[14px] text-[#6B5744] mb-5 leading-relaxed">
-                Anda akan mengajukan pendaftaran ulang. Proses ini akan mengarsipkan pendaftaran Anda saat ini dan membuat formulir pendaftaran baru dari awal.
+                Anda akan mengajukan pendaftaran ulang. Pengajuan ini akan dikirim ke Sekretariat Katedral untuk ditinjau. Setelah disetujui, Anda dapat mulai melengkapi dokumen dari awal.
               </p>
               
               {error && (

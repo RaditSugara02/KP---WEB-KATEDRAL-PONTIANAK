@@ -75,7 +75,7 @@ export default async function BerandaDasborPage() {
     );
   }
 
-  const appRecord = await db.select().from(marriageApplications).where(eq(marriageApplications.coupleProfileId, profile.id)).limit(1);
+  const appRecord = await db.select().from(marriageApplications).where(eq(marriageApplications.coupleProfileId, profile.id)).orderBy(desc(marriageApplications.createdAt)).limit(1);
   const application = appRecord[0];
   const allHistory = await db.select().from(stageHistory).where(eq(stageHistory.applicationId, application.id)).orderBy(desc(stageHistory.changedAt));
   const adminMessage = allHistory[0]?.note || "Berkas pendaftaran sedang ditinjau.";
@@ -83,6 +83,7 @@ export default async function BerandaDasborPage() {
   const receivedDocs = docs.filter((d) => d.isReceived).length;
   const totalDocs = docs.length;
   const isCanceled = application.currentStage === 99;
+  const isPendingDaftarUlang = application.currentStage === 98;
 
   // Fetch dynamic contact info
   const settingsRecord = await db.select({ body: contents.body }).from(contents).where(eq(contents.slug, "church-settings-v1")).limit(1);
@@ -119,42 +120,50 @@ export default async function BerandaDasborPage() {
           </Link>
         </div>
       </div>
-
-      {/* ── Progress Steps ── */}
+         {/* ── Progress Steps ── */}
       <div className="card-sacred p-6 overflow-x-auto">
         {isCanceled && (
           <div className="flex justify-center mb-5">
             <span className="px-5 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-widest"
                   style={{ background: "#FAEDED", color: "#8B3A3A", border: "1px solid #E8AAAA" }}>
-              ✕ Pendaftaran Dibatalkan
+              ❌ Pendaftaran Dibatalkan
+            </span>
+          </div>
+        )}
+        {isPendingDaftarUlang && (
+          <div className="flex justify-center mb-5">
+            <span className="px-5 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-widest"
+                  style={{ background: "#FFF8E1", color: "#B8960C", border: "1px solid #E8D070" }}>
+              ⏳ Menunggu Konfirmasi Daftar Ulang
             </span>
           </div>
         )}
         <div className="flex items-center min-w-max justify-between px-2">
           {STAGE_NAMES.map((name, i) => {
             const step = i + 1;
-            const done = !isCanceled && step < application.currentStage;
-            const current = !isCanceled && step === application.currentStage;
+            const done = (!isCanceled && !isPendingDaftarUlang) && step < application.currentStage;
+            const current = (!isCanceled && !isPendingDaftarUlang) && step === application.currentStage;
+            const dimmed = isCanceled || isPendingDaftarUlang;
             return (
               <div key={i} className="flex items-center">
                 <div className="flex flex-col items-center w-28">
                   <div className="w-10 h-10 rounded-full flex items-center justify-center border-2 mb-2 transition-all"
                     style={{
-                      background: isCanceled ? "#F0EDEB" : done ? "#EAF4ED" : current ? "#B8960C" : "#F5F0E8",
-                      borderColor: isCanceled ? "#D4CAC0" : done ? "#4A7C59" : current ? "#B8960C" : "#E8E0D0",
-                      color: isCanceled ? "#D4CAC0" : done ? "#4A7C59" : current ? "#FFFFFF" : "#9C8B7A",
-                      opacity: isCanceled ? 0.5 : 1,
+                      background: dimmed ? "#F0EDEB" : done ? "#EAF4ED" : current ? "#B8960C" : "#F5F0E8",
+                      borderColor: dimmed ? "#D4CAC0" : done ? "#4A7C59" : current ? "#B8960C" : "#E8E0D0",
+                      color: dimmed ? "#D4CAC0" : done ? "#4A7C59" : current ? "#FFFFFF" : "#9C8B7A",
+                      opacity: dimmed ? 0.5 : 1,
                     }}>
                     {done ? <CheckCircle2 size={18} /> : <span className="font-bold text-[14px]">{step}</span>}
                   </div>
                   <span className="text-[10px] font-semibold text-center uppercase tracking-wide leading-tight"
-                    style={{ color: isCanceled ? "#D4CAC0" : done ? "#4A7C59" : current ? "#B8960C" : "#9C8B7A" }}>
+                    style={{ color: dimmed ? "#D4CAC0" : done ? "#4A7C59" : current ? "#B8960C" : "#9C8B7A" }}>
                     {name}
                   </span>
                 </div>
                 {i < STAGE_NAMES.length - 1 && (
                   <div className="w-14 h-0.5 -mx-3 z-0 rounded-full"
-                    style={{ background: !isCanceled && step < application.currentStage ? "#4A7C59" : "#E8E0D0" }} />
+                    style={{ background: !dimmed && step < application.currentStage ? "#4A7C59" : "#E8E0D0" }} />
                 )}
               </div>
             );
@@ -197,8 +206,42 @@ export default async function BerandaDasborPage() {
         </div>
       )}
 
+      {/* ── BANNER PENDING DAFTAR ULANG ── */}
+      {isPendingDaftarUlang && (
+        <div className="rounded-xl p-8" style={{ background: "#FFF8E1", border: "2px solid #E8D070" }}>
+          <div className="flex flex-col md:flex-row items-center gap-6">
+            <div className="w-20 h-20 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "#FDF3D0" }}>
+              <Clock size={40} style={{ color: "#B8960C" }} />
+            </div>
+            <div className="flex-1 text-center md:text-left">
+              <p className="text-[10px] font-bold uppercase tracking-[4px] mb-1" style={{ color: "#9A7A0A" }}>Status Pendaftaran</p>
+              <h2 className="text-3xl font-bold mb-3" style={{ fontFamily: "var(--font-cormorant)", color: "#B8960C" }}>Menunggu Konfirmasi</h2>
+              <div className="p-4 rounded-lg mb-4" style={{ background: "#FFFFFF", border: "1px solid #E8D070" }}>
+                <p className="text-[11px] font-bold uppercase tracking-wider mb-1" style={{ color: "#9C8B7A" }}>Informasi:</p>
+                <p className="italic font-medium" style={{ color: "#2C1F14" }}>&ldquo;Pengajuan daftar ulang Anda telah dikirim dan sedang menunggu persetujuan dari Sekretariat Katedral.&rdquo;</p>
+              </div>
+              <p className="text-[13px] mb-5" style={{ color: "#6B5744" }}>
+                Jika Anda memiliki pertanyaan lebih lanjut, silakan hubungi kami.
+              </p>
+              <div className="flex flex-wrap gap-3 justify-center md:justify-start">
+                <a href={waLink} target="_blank" rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg font-bold text-[13px] text-white transition-all hover:opacity-90"
+                  style={{ background: "#25D366" }}>
+                  💬 WhatsApp Sekretariat
+                </a>
+                <a href={`mailto:${email}`}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg font-bold text-[13px] border transition-all hover:bg-[#FFF8E1]"
+                  style={{ color: "#B8960C", borderColor: "#E8D070" }}>
+                  ✉ Email Sekretariat
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── Jadwal Pemberkatan ── */}
-      {!isCanceled && application.weddingDate && (
+      {(!isCanceled && !isPendingDaftarUlang) && application.weddingDate && (
         <div className="rounded-xl p-6 flex flex-col md:flex-row items-center gap-5"
           style={{ background: "#FDFBF8", border: "1px solid #E8D070", boxShadow: "0 4px 12px rgba(184,150,12,0.08)" }}>
           <div className="w-16 h-16 rounded-full flex items-center justify-center text-2xl flex-shrink-0"
@@ -216,7 +259,7 @@ export default async function BerandaDasborPage() {
       )}
 
       {/* ── KONTEN BAWAH ── */}
-      {isCanceled ? (
+      {(isCanceled || isPendingDaftarUlang) ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="card-sacred p-6">
             <h3 className="font-bold text-[15px] mb-4" style={{ fontFamily: "var(--font-cormorant)", color: "#2C1F14" }}>Kontak Sekretariat</h3>
@@ -227,14 +270,16 @@ export default async function BerandaDasborPage() {
               <div className="flex gap-3"><span>🕐</span><span className="whitespace-pre-line">{operationalHours}</span></div>
             </div>
           </div>
-          <div className="card-sacred p-6" style={{ background: "#FDF3D0", border: "1px solid #E8D070" }}>
-            <h3 className="font-bold text-[15px] mb-3" style={{ fontFamily: "var(--font-cormorant)", color: "#2C1F14" }}>Langkah Selanjutnya</h3>
-            <ul className="space-y-2 text-[13px]" style={{ color: "#6B5744" }}>
-              {["Hubungi sekretariat untuk klarifikasi alasan pembatalan.", "Datangi kantor paroki untuk mendaftar ulang.", "Siapkan dokumen untuk proses baru."].map((s, i) => (
-                <li key={i} className="flex gap-2"><span className="font-bold" style={{ color: "#B8960C" }}>{i + 1}.</span>{s}</li>
-              ))}
-            </ul>
-          </div>
+          {isCanceled && (
+            <div className="card-sacred p-6" style={{ background: "#FDF3D0", border: "1px solid #E8D070" }}>
+              <h3 className="font-bold text-[15px] mb-3" style={{ fontFamily: "var(--font-cormorant)", color: "#2C1F14" }}>Langkah Selanjutnya</h3>
+              <ul className="space-y-2 text-[13px]" style={{ color: "#6B5744" }}>
+                {["Hubungi sekretariat untuk klarifikasi alasan pembatalan.", "Datangi kantor paroki untuk mendaftar ulang.", "Siapkan dokumen untuk proses baru."].map((s, i) => (
+                  <li key={i} className="flex gap-2"><span className="font-bold" style={{ color: "#B8960C" }}>{i + 1}.</span>{s}</li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">

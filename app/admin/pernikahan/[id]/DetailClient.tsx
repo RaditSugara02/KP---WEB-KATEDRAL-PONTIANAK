@@ -151,6 +151,19 @@ export default function DetailClient({
     setLoading(false);
   };
 
+  const handleApproveReregistration = async () => {
+    if (!confirm("Terima pengajuan daftar ulang? Ini akan membuat formulir pendaftaran baru di Tahap 1.")) return;
+    setLoading(true);
+    await fetch("/api/admin/pernikahan", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "APPROVE_REREGISTRATION", applicationId: application.id })
+    });
+    router.refresh();
+    setLoading(false);
+    toast.success("Daftar ulang disetujui! Formulir baru telah dibuat.");
+  };
+
   const handleAssignPriest = async () => {
     setLoadingPriest(true);
     await fetch("/api/admin/pernikahan", {
@@ -185,7 +198,7 @@ export default function DetailClient({
     setLoadingCeremony(false);
   };
 
-  const isCanceled = application.currentStage === 99;
+  const isCanceled = application.currentStage === 99 || application.currentStage === 98;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -289,11 +302,30 @@ export default function DetailClient({
       {/* Kolom Kanan: Aksi & Riwayat */}
       <div className="lg:col-span-1 space-y-6">
         
+        {/* Approve Daftar Ulang (Hanya muncul jika stage 98) */}
+        {application.currentStage === 98 && (
+          <div className="bg-[#FFF8E1] rounded-xl border border-[#E8D070] shadow-sm overflow-hidden p-6 text-center">
+            <h3 className="text-xs font-bold text-[#9A7A0A] uppercase tracking-wider mb-2">Persetujuan Daftar Ulang</h3>
+            <p className="text-[#3D2B1F] text-sm mb-6">
+              Pasangan ini telah mengajukan pendaftaran ulang. Setujui untuk mengarsipkan pendaftaran ini dan membuat formulir baru di Tahap 1.
+            </p>
+            
+            <button 
+              disabled={loading}
+              onClick={handleApproveReregistration}
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#B8960C] text-white font-bold rounded-md hover:bg-[#9A7A00] transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed mb-3"
+            >
+              <Check size={18} />
+              Terima & Buat Formulir Baru
+            </button>
+          </div>
+        )}
+        
         {/* Naikkan Tahap */}
         <div className="bg-white rounded-xl border border-[#DDD8D0] shadow-sm overflow-hidden p-6 text-center">
           <h3 className="text-xs font-bold text-[#6B6560] uppercase tracking-wider mb-2">Manajemen Tahap</h3>
           <p className="text-[#3D2B1F] text-sm mb-6">
-            Tahap saat ini: <strong>{isCanceled ? <span className="text-red-600">DIBATALKAN</span> : `Tahap ${application.currentStage}`}</strong>
+            Tahap saat ini: <strong>{application.currentStage === 99 ? <span className="text-red-600">DIBATALKAN</span> : application.currentStage === 98 ? <span className="text-[#B8960C]">MENUNGGU KONFIRMASI DAFTAR ULANG</span> : `Tahap ${application.currentStage}`}</strong>
           </p>
           
           <button 

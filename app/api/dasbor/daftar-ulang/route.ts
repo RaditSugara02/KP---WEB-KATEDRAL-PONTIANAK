@@ -64,33 +64,17 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Buat aplikasi baru dengan referensi ke aplikasi lama
-    const newAppId = nanoid();
-    await db.insert(marriageApplications).values({
-      id: newAppId,
-      coupleProfileId: profile.id,
-      currentStage: 1,
-      isReregistration: true,
-      previousApplicationId: canceledApp.id,
-      createdAt: now,
-      updatedAt: now,
-    });
-
-    // Buat 11 dokumen default untuk aplikasi baru
-    const docValues = DEFAULT_DOCUMENTS.map((name) => ({
-      id: nanoid(),
-      applicationId: newAppId,
-      documentName: name,
-      isReceived: false,
-    }));
-    await db.insert(requiredDocuments).values(docValues);
+    // Ubah status aplikasi lama menjadi 98 (Menunggu Konfirmasi Daftar Ulang)
+    await db.update(marriageApplications)
+      .set({ currentStage: 98, updatedAt: now })
+      .where(eq(marriageApplications.id, canceledApp.id));
 
     // Catat di riwayat tahap
     await db.insert(stageHistory).values({
       id: nanoid(),
-      applicationId: newAppId,
-      stageNumber: 1,
-      note: "Pendaftaran ulang berhasil diajukan. Sekretariat akan segera meninjau berkas Anda.",
+      applicationId: canceledApp.id,
+      stageNumber: 98,
+      note: "Pendaftaran ulang diajukan. Menunggu konfirmasi dari Sekretariat.",
       changedBy: userId,
       changedAt: now,
     });
@@ -100,12 +84,12 @@ export async function POST(req: NextRequest) {
       id: nanoid(),
       userId: userId,
       message:
-        "Pendaftaran ulang Anda telah berhasil diajukan. Anda kini berada di Tahap 1. Silakan lengkapi kembali dokumen persyaratan dan tunggu konfirmasi dari Sekretariat.",
+        "Pengajuan daftar ulang Anda telah terkirim. Harap menunggu konfirmasi dari Sekretariat Katedral.",
       isRead: false,
       createdAt: now,
     });
 
-    return NextResponse.json({ success: true, applicationId: newAppId });
+    return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Daftar ulang error:", error);
     return NextResponse.json({ error: "Terjadi kesalahan server." }, { status: 500 });
