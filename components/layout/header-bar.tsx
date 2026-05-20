@@ -30,9 +30,17 @@ export function HeaderBar({ title }: HeaderBarProps) {
   const [notifCount, setNotifCount] = useState(0);
 
   useEffect(() => {
-    fetch("/api/notifikasi/count")
-      .then((r) => r.json())
-      .then((data) => setNotifCount(data.count || 0));
+    const fetchCount = () => {
+      fetch("/api/notifikasi/count")
+        .then((r) => r.json())
+        .then((data) => setNotifCount(data.count || 0));
+    };
+
+    fetchCount();
+
+    const handleNotifRead = () => setNotifCount(0);
+    window.addEventListener("notif-read", handleNotifRead);
+    return () => window.removeEventListener("notif-read", handleNotifRead);
   }, []);
 
   const handleLogout = async () => {

@@ -1,7 +1,7 @@
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { coupleProfiles, marriageApplications, requiredDocuments, stageHistory } from "@/lib/db/schema";
+import { coupleProfiles, marriageApplications, requiredDocuments, stageHistory, contents } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
 import Link from "next/link";
 import { CheckCircle2, Circle, Clock, AlertCircle, FileText, ChevronRight, Printer, Church } from "lucide-react";
@@ -83,6 +83,18 @@ export default async function BerandaDasborPage() {
   const receivedDocs = docs.filter((d) => d.isReceived).length;
   const totalDocs = docs.length;
   const isCanceled = application.currentStage === 99;
+
+  // Fetch dynamic contact info
+  const settingsRecord = await db.select({ body: contents.body }).from(contents).where(eq(contents.slug, "church-settings-v1")).limit(1);
+  const settings = settingsRecord.length > 0 ? JSON.parse(settingsRecord[0].body ?? "{}") : {};
+  const phone = settings.phone || "0561-1234567";
+  const email = settings.email || "sekretariat@katedral.id";
+  const address = settings.address || "Jl. Gereja No. 1, Pontianak, Kalimantan Barat";
+  const operationalHours = settings.operationalHours || "Senin–Jumat: 08.00–12.00 dan 13.00–16.00\nSabtu: 08.00–12.00\nMinggu & Hari Raya: Tutup";
+
+  // helper for phone link
+  const cleanPhone = phone.replace(/\D/g, "");
+  const waLink = `https://wa.me/62${cleanPhone.startsWith("0") ? cleanPhone.slice(1) : cleanPhone}`;
 
   return (
     <div className="max-w-5xl mx-auto space-y-5 page-fade">
@@ -169,12 +181,12 @@ export default async function BerandaDasborPage() {
               </p>
               <div className="flex flex-wrap gap-3 justify-center md:justify-start">
                 <DaftarUlangButton />
-                <a href="https://wa.me/6251234567" target="_blank" rel="noopener noreferrer"
+                <a href={waLink} target="_blank" rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg font-bold text-[13px] text-white transition-all hover:opacity-90"
                   style={{ background: "#25D366" }}>
                   💬 WhatsApp Sekretariat
                 </a>
-                <a href="mailto:sekretariat@katedral.id"
+                <a href={`mailto:${email}`}
                   className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg font-bold text-[13px] border transition-all hover:bg-[#FAEDED]"
                   style={{ color: "#8B3A3A", borderColor: "#E8AAAA" }}>
                   ✉ Email Sekretariat
@@ -187,18 +199,18 @@ export default async function BerandaDasborPage() {
 
       {/* ── Jadwal Pemberkatan ── */}
       {!isCanceled && application.weddingDate && (
-        <div className="rounded-xl p-6 flex flex-col md:flex-row items-center gap-4 text-white"
-          style={{ background: "linear-gradient(135deg, #2C4A3E 0%, #1D3228 100%)" }}>
-          <div className="w-14 h-14 rounded-full flex items-center justify-center text-2xl flex-shrink-0"
-               style={{ background: "rgba(255,255,255,0.1)" }}>🎊</div>
+        <div className="rounded-xl p-6 flex flex-col md:flex-row items-center gap-5"
+          style={{ background: "#FDFBF8", border: "1px solid #E8D070", boxShadow: "0 4px 12px rgba(184,150,12,0.08)" }}>
+          <div className="w-16 h-16 rounded-full flex items-center justify-center text-2xl flex-shrink-0"
+               style={{ background: "#FDF3D0", border: "2px solid #E8D070" }}>⛪</div>
           <div className="flex-1 text-center md:text-left">
-            <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: "rgba(255,255,255,0.6)" }}>
+            <p className="text-[11px] font-bold uppercase tracking-[3px] mb-1.5" style={{ color: "#B8960C" }}>
               Jadwal Pemberkatan Nikah
             </p>
-            <h2 className="text-xl font-bold" style={{ fontFamily: "var(--font-cormorant)" }}>
+            <h2 className="text-2xl font-bold" style={{ fontFamily: "var(--font-cormorant)", color: "#2C1F14" }}>
               {new Date(application.weddingDate).toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
             </h2>
-            <p className="text-[13px] mt-1" style={{ color: "rgba(255,255,255,0.6)" }}>Katedral Santo Yosef Martapura</p>
+            <p className="text-[14px] mt-1 font-medium" style={{ color: "#6B5744" }}>Katedral Santo Yosef Pontianak</p>
           </div>
         </div>
       )}
@@ -209,10 +221,10 @@ export default async function BerandaDasborPage() {
           <div className="card-sacred p-6">
             <h3 className="font-bold text-[15px] mb-4" style={{ fontFamily: "var(--font-cormorant)", color: "#2C1F14" }}>Kontak Sekretariat</h3>
             <div className="space-y-3 text-[13px]" style={{ color: "#6B5744" }}>
-              <div className="flex gap-3"><span>📍</span><span>Jl. Gereja No. 1, Martapura, Kalimantan Selatan</span></div>
-              <div className="flex gap-3"><span>📞</span><a href="tel:0511-1234567" className="font-bold hover:underline" style={{ color: "#B8960C" }}>0511-1234567</a></div>
-              <div className="flex gap-3"><span>✉</span><a href="mailto:sekretariat@katedral.id" className="font-bold hover:underline" style={{ color: "#B8960C" }}>sekretariat@katedral.id</a></div>
-              <div className="flex gap-3"><span>🕐</span><span>Senin–Jumat: 08.00–16.00 WIB</span></div>
+              <div className="flex gap-3"><span>📍</span><span>{address}</span></div>
+              <div className="flex gap-3"><span>📞</span><a href={`tel:${phone}`} className="font-bold hover:underline" style={{ color: "#B8960C" }}>{phone}</a></div>
+              <div className="flex gap-3"><span>✉</span><a href={`mailto:${email}`} className="font-bold hover:underline" style={{ color: "#B8960C" }}>{email}</a></div>
+              <div className="flex gap-3"><span>🕐</span><span className="whitespace-pre-line">{operationalHours}</span></div>
             </div>
           </div>
           <div className="card-sacred p-6" style={{ background: "#FDF3D0", border: "1px solid #E8D070" }}>

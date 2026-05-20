@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Bell, Clock, RefreshCw, AlertCircle, CheckCheck, Church } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -46,6 +46,13 @@ export default function NotifikasiClient({ initialNotifications, initialUnreadCo
     setLastRefresh(new Date());
     setRefreshing(false);
   };
+
+  useEffect(() => {
+    if (initialUnreadCount > 0) {
+      // Trigger update for Sidebar and Header badge
+      window.dispatchEvent(new Event("notif-read"));
+    }
+  }, [initialUnreadCount]);
 
   return (
     <>

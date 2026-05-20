@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Check, X, Send, ArrowUpCircle, Trash2, UserCheck, CalendarDays, History, Calendar as CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
+import { toast } from "sonner";
 import { id as localeId } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -132,6 +133,7 @@ export default function DetailClient({
     setNote("");
     router.refresh();
     setLoading(false);
+    toast.success("Catatan berhasil dikirim ke dasbor pasangan!");
   };
 
   const handleCancelApplication = async () => {
