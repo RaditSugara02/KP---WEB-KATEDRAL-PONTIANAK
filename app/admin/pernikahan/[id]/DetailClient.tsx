@@ -65,6 +65,39 @@ export default function DetailClient({
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
 
+  // Download ZIP State
+  const [loadingZip, setLoadingZip] = useState(false);
+
+  const handleDownloadZip = async () => {
+    setLoadingZip(true);
+    try {
+      const JSZip = (await import("jszip")).default;
+      const { saveAs } = await import("file-saver");
+      
+      const zip = new JSZip();
+      
+      if (application.groomPhoto) {
+        const response = await fetch(application.groomPhoto as string);
+        const blob = await response.blob();
+        zip.file(`Foto_Pria_${application.groomName?.toString().replace(/\s+/g, '_') || 'TanpaNama'}.jpg`, blob);
+      }
+      
+      if (application.bridePhoto) {
+        const response = await fetch(application.bridePhoto as string);
+        const blob = await response.blob();
+        zip.file(`Foto_Wanita_${application.brideName?.toString().replace(/\s+/g, '_') || 'TanpaNama'}.jpg`, blob);
+      }
+      
+      const content = await zip.generateAsync({ type: "blob" });
+      saveAs(content, `Foto_Pernikahan_${application.groomName?.toString().replace(/\s+/g, '_')}_dan_${application.brideName?.toString().replace(/\s+/g, '_')}.zip`);
+    } catch (error) {
+      console.error("Gagal mendownload ZIP:", error);
+      alert("Terjadi kesalahan saat mengunduh foto ZIP. Mungkin masalah koneksi atau hak akses CORS.");
+    } finally {
+      setLoadingZip(false);
+    }
+  };
+
   const handleToggleDoc = async (docId: string, currentStatus: boolean) => {
     setLoading(true);
     await fetch("/api/admin/pernikahan", {
@@ -160,8 +193,17 @@ export default function DetailClient({
         
         {/* Kartu Data Pasangan */}
         <div className="bg-white rounded-xl border border-[#DDD8D0] shadow-sm overflow-hidden">
-          <div className="bg-[#FAF7F2] px-6 py-4 border-b border-[#EDE8DF]">
+          <div className="bg-[#FAF7F2] px-6 py-4 border-b border-[#EDE8DF] flex items-center justify-between">
             <h3 className="font-bold text-[#3D2B1F] uppercase tracking-wide text-sm">Data Mempelai</h3>
+            {(application.groomPhoto || application.bridePhoto) && (
+              <button
+                onClick={handleDownloadZip}
+                disabled={loadingZip}
+                className="flex items-center gap-2 text-xs font-bold text-white bg-[#2D6A4F] px-3 py-1.5 rounded hover:bg-[#1f4a37] transition-colors disabled:opacity-50"
+              >
+                {loadingZip ? "Menyiapkan ZIP..." : "⬇ Download ZIP Foto"}
+              </button>
+            )}
           </div>
           <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
             <div>
