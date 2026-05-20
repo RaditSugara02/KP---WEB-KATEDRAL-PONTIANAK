@@ -94,7 +94,7 @@ export default async function LandingPage() {
     <div className="flex flex-col bg-transparent">
 
       {/* ═══════════════════ HERO SECTION ═══════════════════ */}
-      <section className="relative min-h-[90vh] md:min-h-[85vh] w-full flex items-center justify-center overflow-hidden -mt-[72px]">
+      <section className="relative min-h-[100vh] w-full flex items-center justify-center overflow-hidden -mt-[72px]">
         <div className="absolute inset-0">
           <img
             alt="Eksterior Katedral Santo Yosef Pontianak"
@@ -148,7 +148,7 @@ export default async function LandingPage() {
       </section>
 
       {/* ═══════════════════ QUICK INFORMATION CARDS ═══════════════════ */}
-      <section className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto -mt-16 sm:-mt-24 md:-mt-32 relative z-20 w-full mb-16 md:mb-24">
+      <section className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto pt-12 sm:pt-16 md:pt-20 relative z-20 w-full mb-16 md:mb-24">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-12">
           {/* Card 1 */}
           <ScrollReveal delay={100} className="h-full">
