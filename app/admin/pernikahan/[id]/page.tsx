@@ -35,10 +35,12 @@ export default async function AdminPernikahanDetailPage({ params }: { params: { 
     groomBirthdate: coupleProfiles.groomBirthdate,
     groomPhone: coupleProfiles.groomPhone,
     groomBaptismChurch: coupleProfiles.groomBaptismChurch,
+    groomPhoto: coupleProfiles.groomPhoto,
     brideName: coupleProfiles.brideName,
     brideBirthdate: coupleProfiles.brideBirthdate,
     bridePhone: coupleProfiles.bridePhone,
     brideBaptismChurch: coupleProfiles.brideBaptismChurch,
+    bridePhoto: coupleProfiles.bridePhoto,
   })
   .from(marriageApplications)
   .leftJoin(coupleProfiles, eq(marriageApplications.coupleProfileId, coupleProfiles.id))
