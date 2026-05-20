@@ -211,7 +211,7 @@ export default function PernikahanTableClient({ apps }: { apps: App[] }) {
   return (
     <>
       {/* Toolbar */}
-      <div className="card-sacred p-4 flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between mb-4">
+      <div className="card-sacred relative z-20 p-4 flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between mb-4">
         {/* Search */}
         <div className="relative flex-1 md:max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2" size={15} style={{ color: "#9C8B7A" }} />
