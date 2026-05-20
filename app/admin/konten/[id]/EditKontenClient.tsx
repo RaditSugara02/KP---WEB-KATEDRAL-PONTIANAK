@@ -206,6 +206,8 @@ export default function EditKontenClient({ content }: { content: ContentItem }) 
             required
             value={form.imageUrl}
             onChange={(url) => setForm(prev => ({ ...prev, imageUrl: url }))}
+            aspectRatio={4/3}
+            helpText="Disarankan rasio 4:3 (standar foto lanskap). Geser dan perbesar untuk menyesuaikan area gambar."
           />
           <div>
             <label className="block text-xs text-[#6B6560] mb-1">Keterangan Foto (Opsional)</label>
@@ -219,6 +221,8 @@ export default function EditKontenClient({ content }: { content: ContentItem }) 
           label="Gambar Cover (Opsional)"
           value={form.imageUrl}
           onChange={(url) => setForm(prev => ({ ...prev, imageUrl: url }))}
+          aspectRatio={16/9}
+          helpText="Disarankan resolusi 1280x720 px (Rasio 16:9) agar gambar sampul tidak terpotong saat ditampilkan."
         />
       )}
 

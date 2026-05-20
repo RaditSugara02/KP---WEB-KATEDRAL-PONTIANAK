@@ -1,7 +1,9 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { Upload, X, Image as ImageIcon, Loader2, Link } from "lucide-react";
+import { useRef, useState, useCallback } from "react";
+import { Upload, X, Image as ImageIcon, Loader2, Link, Check } from "lucide-react";
+import Cropper from "react-easy-crop";
+import getCroppedImg from "@/lib/cropImage";
 
 interface ImageUploadProps {
   value: string;
@@ -9,6 +11,8 @@ interface ImageUploadProps {
   label?: string;
   required?: boolean;
   placeholder?: string;
+  aspectRatio?: number;
+  helpText?: string;
 }
 
 export default function ImageUpload({
@@ -17,12 +21,21 @@ export default function ImageUpload({
   label = "Gambar",
   required = false,
   placeholder = "https://example.com/gambar.jpg",
+  aspectRatio,
+  helpText,
 }: ImageUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
   const [mode, setMode] = useState<"upload" | "url">("upload");
   const [dragging, setDragging] = useState(false);
+
+  // Cropper states
+  const [cropModalOpen, setCropModalOpen] = useState(false);
+  const [imageSrc, setImageSrc] = useState<string | null>(null);
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
 
   const handleFile = async (file: File) => {
     setError("");
@@ -41,19 +54,48 @@ export default function ImageUpload({
       setError(err instanceof Error ? err.message : "Upload gagal");
     } finally {
       setUploading(false);
+      setCropModalOpen(false);
+      setImageSrc(null);
+    }
+  };
+
+  const readFile = (file: File) => {
+    return new Promise<string>((resolve) => {
+      const reader = new FileReader();
+      reader.addEventListener("load", () => resolve(reader.result as string), false);
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const processFileSelection = async (file: File) => {
+    // If no aspect ratio is provided, we can upload directly without cropping
+    if (!aspectRatio) {
+      handleFile(file);
+      return;
+    }
+
+    // Otherwise, open crop modal
+    try {
+      const imageDataUrl = await readFile(file);
+      setImageSrc(imageDataUrl);
+      setCropModalOpen(true);
+    } catch (e) {
+      setError("Gagal membaca file gambar.");
     }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) handleFile(file);
+    if (file) processFileSelection(file);
+    // Reset input so the same file can be selected again if needed
+    e.target.value = '';
   };
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setDragging(false);
     const file = e.dataTransfer.files?.[0];
-    if (file) handleFile(file);
+    if (file) processFileSelection(file);
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -68,12 +110,40 @@ export default function ImageUpload({
     if (inputRef.current) inputRef.current.value = "";
   };
 
+  const onCropComplete = useCallback((croppedArea: any, croppedAreaPixels: any) => {
+    setCroppedAreaPixels(croppedAreaPixels);
+  }, []);
+
+  const handleApplyCrop = async () => {
+    if (!imageSrc || !croppedAreaPixels) return;
+    
+    setUploading(true);
+    try {
+      const croppedFile = await getCroppedImg(imageSrc, croppedAreaPixels, 0);
+      if (!croppedFile) throw new Error("Gagal memproses gambar");
+      await handleFile(croppedFile);
+    } catch (e) {
+      console.error(e);
+      setError("Gagal memotong gambar");
+      setUploading(false);
+    }
+  };
+
+  const handleCancelCrop = () => {
+    setCropModalOpen(false);
+    setImageSrc(null);
+  };
+
   return (
     <div>
       {/* Label */}
-      <label className="block text-xs font-bold text-[#6B6560] uppercase tracking-wider mb-2">
+      <label className="block text-xs font-bold text-[#6B6560] uppercase tracking-wider mb-1">
         {label} {required && <span className="text-red-500">*</span>}
       </label>
+      
+      {helpText && (
+        <p className="text-xs text-[#A89880] mb-3 leading-relaxed">{helpText}</p>
+      )}
 
       {/* Mode Toggle */}
       <div className="flex gap-2 mb-3">
@@ -114,9 +184,9 @@ export default function ImageUpload({
               dragging
                 ? "border-[#B8960C] bg-[#FFF8E1]"
                 : "border-[#DDD8D0] bg-[#FAF7F2] hover:border-[#B8960C] hover:bg-[#FFF8E1]"
-            } ${uploading ? "opacity-60 cursor-not-allowed" : ""}`}
+            } ${uploading && !cropModalOpen ? "opacity-60 cursor-not-allowed" : ""}`}
           >
-            {uploading ? (
+            {uploading && !cropModalOpen ? (
               <>
                 <Loader2 size={32} className="text-[#B8960C] animate-spin" />
                 <p className="text-sm font-semibold text-[#6B6560]">Mengupload...</p>
@@ -186,6 +256,74 @@ export default function ImageUpload({
             >
               <X size={14} />
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Crop Modal */}
+      {cropModalOpen && imageSrc && aspectRatio && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col">
+            <div className="px-6 py-4 border-b border-[#E8E0D0] flex justify-between items-center bg-[#FAF7F2]">
+              <h3 className="font-bold text-[#3D2B1F]">Sesuaikan Gambar</h3>
+              <button 
+                onClick={handleCancelCrop}
+                disabled={uploading}
+                className="text-[#9C8B7A] hover:text-[#C0392B] transition-colors disabled:opacity-50"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div className="relative w-full h-[60vh] bg-black">
+              <Cropper
+                image={imageSrc}
+                crop={crop}
+                zoom={zoom}
+                aspect={aspectRatio}
+                onCropChange={setCrop}
+                onCropComplete={onCropComplete}
+                onZoomChange={setZoom}
+              />
+            </div>
+            
+            <div className="p-6 bg-white flex flex-col sm:flex-row gap-4 items-center justify-between border-t border-[#E8E0D0]">
+              <div className="w-full sm:w-1/2 flex items-center gap-3">
+                <span className="text-xs font-bold text-[#6B6560]">Zoom</span>
+                <input
+                  type="range"
+                  value={zoom}
+                  min={1}
+                  max={3}
+                  step={0.1}
+                  aria-labelledby="Zoom"
+                  onChange={(e) => setZoom(Number(e.target.value))}
+                  className="w-full accent-[#B8960C]"
+                />
+              </div>
+              <div className="flex items-center gap-3 w-full sm:w-auto">
+                <button
+                  type="button"
+                  onClick={handleCancelCrop}
+                  disabled={uploading}
+                  className="flex-1 sm:flex-none px-4 py-2 text-sm font-bold text-[#6B6560] bg-[#F5F0E8] hover:bg-[#E8E0D0] rounded-lg transition-colors disabled:opacity-50"
+                >
+                  Batal
+                </button>
+                <button
+                  type="button"
+                  onClick={handleApplyCrop}
+                  disabled={uploading}
+                  className="flex-1 sm:flex-none px-6 py-2 text-sm font-bold text-white bg-[#2D6A4F] hover:bg-[#1f4a37] rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {uploading ? (
+                    <><Loader2 size={16} className="animate-spin" /> Memproses...</>
+                  ) : (
+                    <><Check size={16} /> Terapkan & Upload</>
+                  )}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

@@ -118,8 +118,13 @@ export function ProfileForm() {
               />
             </div>
             <div className="md:col-span-2">
-              <label className="block mb-2 text-xs font-bold text-[#6B6560] uppercase tracking-wider">Pas Foto Berdampingan Pria (Boleh Pas Foto Sendiri)</label>
-              <ImageUpload value={groomPhoto} onChange={setGroomPhoto} />
+              <ImageUpload 
+                label="Pas Foto Berdampingan Pria (Boleh Pas Foto Sendiri)"
+                value={groomPhoto} 
+                onChange={setGroomPhoto} 
+                aspectRatio={3/4}
+                helpText="Disarankan rasio 3:4 (contoh: 300x400 px, standar pas foto resmi). Geser dan perbesar foto agar wajah terlihat jelas di tengah bingkai."
+              />
             </div>
           </div>
         </div>
@@ -165,8 +170,13 @@ export function ProfileForm() {
               />
             </div>
             <div className="md:col-span-2">
-              <label className="block mb-2 text-xs font-bold text-[#6B6560] uppercase tracking-wider">Pas Foto Berdampingan Wanita (Boleh Pas Foto Sendiri)</label>
-              <ImageUpload value={bridePhoto} onChange={setBridePhoto} />
+              <ImageUpload 
+                label="Pas Foto Berdampingan Wanita (Boleh Pas Foto Sendiri)"
+                value={bridePhoto} 
+                onChange={setBridePhoto} 
+                aspectRatio={3/4}
+                helpText="Disarankan rasio 3:4 (contoh: 300x400 px, standar pas foto resmi). Geser dan perbesar foto agar wajah terlihat jelas di tengah bingkai."
+              />
             </div>
           </div>
         </div>

@@ -271,6 +271,8 @@ export default function TambahKontenPage() {
               value={form.imageUrl}
               onChange={(url) => setForm(prev => ({ ...prev, imageUrl: url }))}
               placeholder="https://example.com/foto-gereja.jpg"
+              aspectRatio={4/3}
+              helpText="Disarankan rasio 4:3 (standar foto lanskap). Geser dan perbesar untuk menyesuaikan area gambar."
             />
             <div>
               <label className="block text-xs text-[#6B6560] mb-1">Keterangan Foto (Opsional)</label>
@@ -290,6 +292,8 @@ export default function TambahKontenPage() {
             value={form.imageUrl}
             onChange={(url) => setForm(prev => ({ ...prev, imageUrl: url }))}
             placeholder="https://example.com/gambar.jpg"
+            aspectRatio={16/9}
+            helpText="Disarankan resolusi 1280x720 px (Rasio 16:9) agar gambar sampul tidak terpotong saat ditampilkan."
           />
         )}
 
