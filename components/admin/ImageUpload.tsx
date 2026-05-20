@@ -172,7 +172,7 @@ export default function ImageUpload({
       </div>
 
       {/* Upload Mode */}
-      {mode === "upload" && (
+      {mode === "upload" && !value && (
         <>
           {/* Drop Zone */}
           <div
@@ -237,26 +237,49 @@ export default function ImageUpload({
       {/* Preview */}
       {value && (
         <div className="mt-3 relative group">
-          <p className="text-xs text-[#A89880] mb-1 font-medium">Preview:</p>
-          <div className="relative inline-block w-full">
+          <p className="text-xs text-[#A89880] mb-2 font-medium">Preview Gambar:</p>
+          <div className="relative inline-block w-full rounded-xl overflow-hidden border border-[#DDD8D0] shadow-sm">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={value}
               alt="preview"
-              className="w-full max-h-56 object-cover rounded-lg border border-[#DDD8D0] shadow-sm"
+              className="w-full max-h-64 object-cover"
               onError={(e) => {
                 (e.target as HTMLImageElement).style.display = "none";
               }}
             />
-            <button
-              type="button"
-              onClick={handleClear}
-              className="absolute top-2 right-2 w-7 h-7 bg-black/60 hover:bg-red-600 text-white rounded-full flex items-center justify-center transition-colors opacity-0 group-hover:opacity-100"
-              title="Hapus gambar"
-            >
-              <X size={14} />
-            </button>
+            {/* Overlay Actions */}
+            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setMode("upload");
+                  setTimeout(() => inputRef.current?.click(), 0);
+                }}
+                className="px-4 py-2 bg-white text-[#3D2B1F] hover:bg-[#FDF3D0] rounded-lg text-sm font-bold flex items-center gap-2 transition-transform hover:scale-105"
+              >
+                <Upload size={16} /> Ganti Gambar
+              </button>
+              <button
+                type="button"
+                onClick={handleClear}
+                className="px-4 py-2 bg-[#C0392B] text-white hover:bg-[#A93226] rounded-lg text-sm font-bold flex items-center gap-2 transition-transform hover:scale-105"
+              >
+                <X size={16} /> Hapus
+              </button>
+            </div>
           </div>
+          
+          {/* File input kept here so 'Ganti Gambar' can trigger it even if dropzone is hidden */}
+          {mode === "upload" && (
+            <input
+              ref={inputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              className="hidden"
+              onChange={handleInputChange}
+            />
+          )}
         </div>
       )}
 
