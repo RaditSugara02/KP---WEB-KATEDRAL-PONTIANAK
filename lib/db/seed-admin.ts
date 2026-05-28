@@ -3,15 +3,14 @@
  * Jalankan: npx tsx lib/db/seed-admin.ts
  */
 
-import { loadEnvConfig } from "@next/env";
-const projectDir = process.cwd();
-loadEnvConfig(projectDir);
+import { config } from "dotenv";
+config({ path: ".env.local" });
 
-import { db } from "./index";
-import { auth } from "../auth";
-import { users, accounts } from "./schema";
-import { nanoid } from "nanoid";
-import { eq } from "drizzle-orm";
+const { db } = require("./index");
+const { auth } = require("../auth");
+const { users, accounts } = require("./schema");
+const { nanoid } = require("nanoid");
+const { eq } = require("drizzle-orm");
 
 async function seedAdmin() {
   console.log("🌱 Membuat akun admin di database production...\n");
@@ -94,6 +93,6 @@ async function seedAdmin() {
 }
 
 seedAdmin().catch((err) => {
-  console.error("❌ Gagal:", err.message || err);
+  console.error("❌ Gagal:", err);
   process.exit(1);
 });
