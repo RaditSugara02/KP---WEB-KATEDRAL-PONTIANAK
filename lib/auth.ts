@@ -17,13 +17,15 @@ export const auth = betterAuth({
   }),
   emailAndPassword: {
     enabled: true,
-    requireEmailVerification: true,
+    requireEmailVerification: false, // Dinonaktifkan: user langsung bisa login setelah daftar
     sendResetPassword: async ({ user, url }) => {
       try {
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+        const fixedUrl = url.replace(/^https?:\/\/localhost(:\d+)?/, appUrl.replace(/\/$/, ""));
         await sendMail({
           to: user.email,
           subject: "Reset Kata Sandi Akun Anda – Katedral Santo Yosef",
-          html: templateResetSandi(user.name, url),
+          html: templateResetSandi(user.name, fixedUrl),
         });
       } catch (error) {
         console.error("Gagal mengirim email reset password:", error);
@@ -31,22 +33,8 @@ export const auth = betterAuth({
     },
   },
   emailVerification: {
-    sendOnSignUp: true,
+    sendOnSignUp: false, // Tidak wajib verifikasi untuk bisa login
     autoSignInAfterVerification: true,
-    sendVerificationEmail: async ({ user, url }) => {
-      try {
-        // Replace localhost with actual production URL if needed
-        const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-        const fixedUrl = url.replace(/^https?:\/\/localhost(:\d+)?/, appUrl.replace(/\/$/, ""));
-        await sendMail({
-          to: user.email,
-          subject: "Verifikasi Alamat Email Anda – Katedral Santo Yosef",
-          html: templateVerifikasi(user.name, fixedUrl),
-        });
-      } catch (error) {
-        console.error("Gagal mengirim email verifikasi:", error);
-      }
-    },
   },
   socialProviders: {
     google: {
