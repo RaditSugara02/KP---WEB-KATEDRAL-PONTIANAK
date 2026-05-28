@@ -35,10 +35,13 @@ export const auth = betterAuth({
     autoSignInAfterVerification: true,
     sendVerificationEmail: async ({ user, url }) => {
       try {
+        // Replace localhost with actual production URL if needed
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+        const fixedUrl = url.replace(/^https?:\/\/localhost(:\d+)?/, appUrl.replace(/\/$/, ""));
         await sendMail({
           to: user.email,
           subject: "Verifikasi Alamat Email Anda – Katedral Santo Yosef",
-          html: templateVerifikasi(user.name, url),
+          html: templateVerifikasi(user.name, fixedUrl),
         });
       } catch (error) {
         console.error("Gagal mengirim email verifikasi:", error);

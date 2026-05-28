@@ -88,7 +88,7 @@ export default function ResetSandiPage() {
             </svg>
           </div>
           <h1 className="text-4xl font-bold text-[#FDFBF7] mb-4" style={{ fontFamily: "var(--font-cormorant)" }}>
-            Katedral Santo Yosef Martapura
+            Katedral Santo Yosef Pontianak
           </h1>
         </div>
       </div>

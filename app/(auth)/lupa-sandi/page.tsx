@@ -66,7 +66,7 @@ export default function LupaSandiPage() {
             </svg>
           </div>
           <h1 className="text-4xl font-bold text-[#FDFBF7] mb-4" style={{ fontFamily: "var(--font-cormorant)" }}>
-            Katedral Santo Yosef Martapura
+            Katedral Santo Yosef Pontianak
           </h1>
           <p className="text-[#DDD8D0] text-lg font-medium italic" style={{ fontFamily: "var(--font-cormorant)" }}>
             Melayani Umat dengan Kasih dan Ketulusan
