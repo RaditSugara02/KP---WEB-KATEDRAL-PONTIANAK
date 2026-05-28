@@ -1,6 +1,11 @@
 import type { Metadata } from "next";
 import { MapPin, Phone, Mail, Clock } from "lucide-react";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
+import { db } from "@/lib/db";
+import { contents } from "@/lib/db/schema";
+import { eq } from "drizzle-orm";
+
+export const dynamic = "force-dynamic"; // always fetch fresh from DB
 
 export const metadata: Metadata = {
   title: "Kontak & Lokasi",
@@ -8,25 +13,27 @@ export const metadata: Metadata = {
     "Informasi kontak, alamat, jam operasional sekretariat, dan jadwal misa Paroki Katedral Santo Yosef Pontianak.",
 };
 
+const SETTINGS_SLUG = "church-settings-v1";
+
 const DEFAULT_INFO = {
   name: "Katedral Santo Yosef Pontianak",
-  address: "Jl. Gereja No. 1, Pontianak, Kalimantan Barat",
-  phone: "0561-1234567",
-  email: "sekretariat@katedral.id",
+  address: "Jl. Pattimura Indah No. 195, Darat Sekip, Kec. Pontianak Kota, Kota Pontianak, Kalimantan Barat 78011",
+  phone: "+62 851-7544-7819",
+  email: "skrt.kat.ptk@gmail.com",
   operationalHours: "Senin–Jumat: 08.00–12.00 dan 13.00–16.00\nSabtu: 08.00–12.00\nMinggu & Hari Raya: Tutup",
 };
 
 async function getChurchInfo() {
   try {
-    const APP_URL =
-      process.env.NEXT_PUBLIC_APP_URL ||
-      "https://kp-web-katedral-pontianak.vercel.app";
-    const res = await fetch(`${APP_URL}/api/public/church-info`, {
-      next: { revalidate: 3600 }, // cache 1 jam
-    });
-    if (!res.ok) return DEFAULT_INFO;
-    const data = await res.json();
-    return { ...DEFAULT_INFO, ...(data.settings || {}) };
+    const record = await db
+      .select({ body: contents.body })
+      .from(contents)
+      .where(eq(contents.slug, SETTINGS_SLUG))
+      .limit(1);
+
+    if (record.length === 0) return DEFAULT_INFO;
+    const settings = JSON.parse(record[0].body ?? "{}");
+    return { ...DEFAULT_INFO, ...settings };
   } catch {
     return DEFAULT_INFO;
   }

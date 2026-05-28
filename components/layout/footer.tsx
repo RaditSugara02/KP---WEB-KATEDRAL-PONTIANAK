@@ -8,9 +8,9 @@ const SETTINGS_SLUG = "church-settings-v1";
 
 const DEFAULT_INFO = {
   name: "Katedral Santo Yosef Pontianak",
-  address: "Jl. Gereja No. 1, Pontianak, Kalimantan Barat",
-  phone: "0561-1234567",
-  email: "sekretariat@katedral.id",
+  address: "Jl. Pattimura Indah No. 195, Darat Sekip, Kec. Pontianak Kota, Kota Pontianak, Kalimantan Barat 78011",
+  phone: "+62 851-7544-7819",
+  email: "skrt.kat.ptk@gmail.com",
 };
 
 async function getChurchInfo() {
