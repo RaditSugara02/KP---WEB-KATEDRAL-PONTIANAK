@@ -384,23 +384,26 @@ export default async function LandingPage() {
 
                 return (
                   <ScrollReveal key={agenda.id} delay={i * 150}>
-                    <div className="bg-white rounded-xl p-6 flex items-start gap-6 shadow-sm border border-transparent hover:border-[#B8960C]/30 hover:shadow-elegant transition-all duration-300 group min-h-[120px]">
-                      <div className="text-center min-w-[70px] shrink-0 flex flex-col items-center justify-center pt-1">
-                        <span className="block font-sans text-xs text-[#B8960C] font-bold uppercase tracking-wider mb-1">{bulan}</span>
-                        <span className="block text-4xl text-[#3D2B1F] font-bold" style={{ fontFamily: "var(--font-cormorant)" }}>
-                          {tanggal}
-                        </span>
+                    <Link href={`/berita/${agenda.slug}`} className="block group">
+                      <div className="bg-white rounded-xl p-6 flex items-start gap-6 shadow-sm border border-transparent hover:border-[#B8960C]/30 hover:shadow-elegant transition-all duration-300 cursor-pointer min-h-[120px]">
+                        <div className="text-center min-w-[70px] shrink-0 flex flex-col items-center justify-center pt-1">
+                          <span className="block font-sans text-xs text-[#B8960C] font-bold uppercase tracking-wider mb-1">{bulan}</span>
+                          <span className="block text-4xl text-[#3D2B1F] font-bold" style={{ fontFamily: "var(--font-cormorant)" }}>
+                            {tanggal}
+                          </span>
+                        </div>
+                        <div className="w-px self-stretch bg-[#EDE8DF]" />
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-lg font-bold text-[#3D2B1F] mb-2 group-hover:text-[#B8960C] transition-colors line-clamp-2" style={{ fontFamily: "var(--font-cormorant)" }}>
+                            {agenda.title}
+                          </h4>
+                          <p className="text-sm text-[#6B6560] font-light flex items-center gap-2">
+                            <MapPin className="h-3.5 w-3.5 text-[#B8960C] shrink-0" /> {agenda.location || "Gereja Katedral"}
+                          </p>
+                        </div>
+                        <ArrowUpRight className="h-4 w-4 text-[#B8960C]/40 group-hover:text-[#B8960C] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all shrink-0 mt-1" />
                       </div>
-                      <div className="w-px self-stretch bg-[#EDE8DF]" />
-                      <div className="flex-1 min-w-0">
-                        <h4 className="text-lg font-bold text-[#3D2B1F] mb-2 group-hover:text-[#B8960C] transition-colors line-clamp-2" style={{ fontFamily: "var(--font-cormorant)" }}>
-                          {agenda.title}
-                        </h4>
-                        <p className="text-sm text-[#6B6560] font-light flex items-center gap-2">
-                          <MapPin className="h-3.5 w-3.5 text-[#B8960C] shrink-0" /> {agenda.location || "Gereja Katedral"}
-                        </p>
-                      </div>
-                    </div>
+                    </Link>
                   </ScrollReveal>
                 );
               })
