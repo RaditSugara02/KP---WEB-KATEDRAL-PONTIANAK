@@ -22,66 +22,71 @@ export default async function LandingPage() {
     .from(contents)
     .where(eq(contents.type, "MASS_SCHEDULE"));
 
-  const HARI_ORDER = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"];
-  const harianDays = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat"];
-  const mingguanDays = ["Sabtu", "Minggu"];
+  const HARI_ORDER = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat"];
+  const weekdays = HARI_ORDER;
 
-  const regularMasses = allMasses.filter(m => m.category?.endsWith("::Harian"));
-
-  const getDayName = (rawStr: string | undefined | null) => {
+  const getDayName = (rawStr: string | undefined | null): string => {
     if (!rawStr) return "";
     const prefix = rawStr.split("::")[0];
     const dateObj = new Date(prefix);
     if (!isNaN(dateObj.getTime())) {
-      const HARI_NAMES = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
-      return HARI_NAMES[dateObj.getDay()];
+      return ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"][dateObj.getDay()];
     }
     return prefix;
   };
 
-  const misaHarian = regularMasses.filter(m => {
-    const hari = getDayName(m.category);
-    return hari && harianDays.includes(hari);
-  });
+  const massesHarian = allMasses.filter(m => m.category?.endsWith("::Harian"));
 
-  const misaMingguan = regularMasses.filter(m => {
-    const hari = getDayName(m.category);
-    return hari && mingguanDays.includes(hari);
-  });
+  // All harian rows
+  const harianRows = massesHarian.map(m => ({
+    day: getDayName(m.category),
+    time: m.eventDate || "",
+    title: m.title || "",
+  }));
 
-  function groupMasses(masses: typeof allMasses, dayOrder: string[]) {
-    const groups: { [key: string]: { days: Set<string>, title: string, time: string } } = {};
-    
-    masses.forEach(m => {
-      const hari = getDayName(m.category);
-      if (!hari) return;
-      const key = `${m.title}||${m.eventDate}||${m.location}`;
-      if (!groups[key]) {
-        groups[key] = { days: new Set(), title: m.title, time: m.eventDate || "" };
-      }
-      groups[key].days.add(hari);
-    });
-
-    return Object.values(groups).map(g => {
-      const sortedDays = Array.from(g.days).sort((a, b) => dayOrder.indexOf(a) - dayOrder.indexOf(b));
-      let dayLabel = sortedDays.join(", ");
-      
-      const isSeninToJumat = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat"].every(d => sortedDays.includes(d));
-      if (isSeninToJumat && sortedDays.length === 5) {
-        dayLabel = "Senin - Jumat";
-      }
-
-      return {
-        label: dayLabel,
-        title: g.title,
-        time: g.time,
-        key: g.title + g.time + dayLabel
-      };
-    });
+  // === Misa Harian (Senin–Jumat) ===
+  const weekdayRows = harianRows.filter(r => weekdays.includes(r.day));
+  const weekdayByTime = new Map<string, { days: string[]; titles: Set<string> }>();
+  for (const r of weekdayRows) {
+    const existing = weekdayByTime.get(r.time);
+    if (existing) {
+      if (!existing.days.includes(r.day)) existing.days.push(r.day);
+      existing.titles.add(r.title);
+    } else {
+      weekdayByTime.set(r.time, { days: [r.day], titles: new Set([r.title]) });
+    }
   }
 
-  const groupedHarian = groupMasses(misaHarian, HARI_ORDER);
-  const groupedMingguan = groupMasses(misaMingguan, HARI_ORDER);
+  type ScheduleRow = { label: string; time: string; subtitle?: string; key: string };
+
+  const groupedHarian: ScheduleRow[] = [];
+  for (const [time, { days, titles }] of weekdayByTime) {
+    days.sort((a, b) => weekdays.indexOf(a) - weekdays.indexOf(b));
+    const label = days.length === 5 ? "Senin – Jumat" : days.length > 1 ? days.join(", ") : days[0];
+    const titleArr = Array.from(titles).filter(t => t !== "Misa Harian");
+    const subtitle = titleArr.length > 0 ? titleArr.join(", ") : undefined;
+    groupedHarian.push({ label, time: `${time} WIB`, subtitle, key: `h-${time}-${label}` });
+  }
+
+  // === Misa Mingguan (Sabtu & Minggu) ===
+  const weekendRows = harianRows.filter(r => ["Sabtu", "Minggu"].includes(r.day));
+  const groupedMingguan: ScheduleRow[] = [];
+
+  const sabtuMasses = weekendRows.filter(r => r.day === "Sabtu");
+  if (sabtuMasses.length > 0) {
+    const time = sabtuMasses.map(r => r.time).join(" & ");
+    groupedMingguan.push({ label: "Sabtu", time: `${time} WIB`, key: "sabtu" });
+  }
+
+  const mingguMasses = weekendRows.filter(r => r.day === "Minggu");
+  if (mingguMasses.length > 0) {
+    const pagi = mingguMasses.filter(r => parseInt(r.time.split(/[:.]/)[0]) < 12);
+    const sore = mingguMasses.filter(r => parseInt(r.time.split(/[:.]/)[0]) >= 12);
+    if (pagi.length > 0) groupedMingguan.push({ label: "Minggu Pagi", time: `${pagi.map(r => r.time).join(" & ")} WIB`, key: "minggu-pagi" });
+    if (sore.length > 0) groupedMingguan.push({ label: "Minggu Sore", time: `${sore.map(r => r.time).join(" & ")} WIB`, key: "minggu-sore" });
+    if (pagi.length === 0 && sore.length === 0) groupedMingguan.push({ label: "Minggu", time: `${mingguMasses.map(r => r.time).join(" & ")} WIB`, key: "minggu" });
+  }
+
 
   return (
     <div className="flex flex-col bg-transparent">
@@ -227,7 +232,7 @@ export default async function LandingPage() {
                     <li key={g.key} className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 group">
                       <div className="flex flex-col">
                         <span className="font-medium text-[#6B6560] group-hover:text-[#3D2B1F] transition-colors">{g.label}</span>
-                        {g.title && <span className="text-xs text-[#9C8B7A]">{g.title}</span>}
+                        {g.subtitle && <span className="text-xs text-[#9C8B7A]">{g.subtitle}</span>}
                       </div>
                       <span className="font-semibold text-[#B8960C] bg-[#FFF8E1] px-4 py-1.5 rounded-full text-sm w-fit whitespace-nowrap">{g.time}</span>
                     </li>
@@ -248,7 +253,7 @@ export default async function LandingPage() {
                     <li key={g.key} className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 group">
                       <div className="flex flex-col">
                         <span className="font-medium text-[#6B6560] group-hover:text-[#3D2B1F] transition-colors">{g.label}</span>
-                        {g.title && <span className="text-xs text-[#9C8B7A]">{g.title}</span>}
+                        {g.subtitle && <span className="text-xs text-[#9C8B7A]">{g.subtitle}</span>}
                       </div>
                       <span className="font-semibold text-[#B8960C] bg-[#FFF8E1] px-4 py-1.5 rounded-full text-sm w-fit whitespace-nowrap">{g.time}</span>
                     </li>
