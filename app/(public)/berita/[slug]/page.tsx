@@ -58,12 +58,10 @@ export default async function BeritaDetailPage({ params }: { params: { slug: str
             {news.title}
           </h1>
 
-          <div className="prose prose-stone max-w-none text-[#6B6560] prose-p:leading-relaxed prose-p:mb-6 prose-a:text-[#B8960C] prose-headings:font-bold prose-headings:text-[#3D2B1F]">
-            {/* Split body by newlines to render simple paragraphs since we don't have a rich text HTML yet */}
-            {news.body?.split('\n').map((paragraph, idx) => (
-              paragraph.trim() && <p key={idx}>{paragraph}</p>
-            ))}
-          </div>
+          <div
+            className="prose prose-stone max-w-none text-[#4A3728] prose-p:leading-relaxed prose-p:mb-5 prose-a:text-[#B8960C] prose-a:font-semibold prose-headings:font-bold prose-headings:text-[#3D2B1F] prose-strong:text-[#3D2B1F] prose-li:mb-1"
+            dangerouslySetInnerHTML={{ __html: news.body || "" }}
+          />
 
           {/* Share & Footer */}
           <div className="mt-12 pt-8 border-t border-[#EDE8DF] flex justify-between items-center">

@@ -30,6 +30,21 @@ function SafeImage({ src, alt, className }: { src: string; alt: string; classNam
   );
 }
 
+/** Strip HTML tags and decode common entities for plain-text card preview */
+function stripHtml(html: string | null): string {
+  if (!html) return "";
+  return html
+    .replace(/<[^>]+>/g, " ")       // remove all HTML tags
+    .replace(/&nbsp;/g, " ")         // decode &nbsp;
+    .replace(/&amp;/g, "&")          // decode &amp;
+    .replace(/&lt;/g, "<")           // decode &lt;
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/\s+/g, " ")            // collapse extra whitespace
+    .trim();
+}
+
 export default function BeritaListClient({ allNews }: { allNews: NewsItem[] }) {
   const [activeCategory, setActiveCategory] = useState<string>("Semua Berita");
   const [currentPage, setCurrentPage] = useState(1);
@@ -177,7 +192,7 @@ export default function BeritaListClient({ allNews }: { allNews: NewsItem[] }) {
                     className="text-[13px] leading-relaxed line-clamp-3 flex-1 mb-5"
                     style={{ color: "#6B5744" }}
                   >
-                    {news.body}
+                    {stripHtml(news.body)}
                   </p>
 
                   {/* Footer */}
