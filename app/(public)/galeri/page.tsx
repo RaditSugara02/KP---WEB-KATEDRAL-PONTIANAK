@@ -117,6 +117,11 @@ function GalleryCard({ photo }: { photo: GalleryPhoto }) {
       })
     : null;
 
+  const filename = (photo.title || "foto-katedral")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+
   return (
     <div className="group relative bg-white rounded-xl overflow-hidden border border-[#EDE8DF] shadow-sm hover:shadow-md transition-all duration-300">
       {photo.imageUrl ? (
@@ -128,12 +133,28 @@ function GalleryCard({ photo }: { photo: GalleryPhoto }) {
             className="w-full object-cover transition-transform duration-500 group-hover:scale-105"
             loading="lazy"
           />
-          {/* Hover overlay */}
+          {/* Hover overlay with description */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
             {photo.body && (
               <p className="text-white text-sm font-medium line-clamp-2">{photo.body}</p>
             )}
           </div>
+
+          {/* Download button — top right on hover */}
+          <a
+            href={`/api/public/galeri/download?url=${encodeURIComponent(photo.imageUrl)}&filename=${encodeURIComponent(filename)}`}
+            download={`${filename}.jpg`}
+            title="Unduh foto"
+            onClick={(e) => e.stopPropagation()}
+            className="absolute top-3 right-3 z-10 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/90 backdrop-blur-sm text-[#3D2B1F] text-xs font-bold shadow-md border border-white/60 opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-[#B8960C] hover:text-white hover:border-[#B8960C] hover:-translate-y-0.5"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Unduh
+          </a>
         </div>
       ) : (
         <div className="w-full h-48 bg-[#F5F0E8] flex items-center justify-center">
@@ -143,12 +164,30 @@ function GalleryCard({ photo }: { photo: GalleryPhoto }) {
 
       {/* Caption area — show if title exists */}
       {(photo.title || dateStr) && (
-        <div className="px-4 py-3">
-          {photo.title && (
-            <p className="text-sm font-semibold text-[#3D2B1F] line-clamp-1">{photo.title}</p>
-          )}
-          {dateStr && (
-            <p className="text-xs text-[#A89880] mt-0.5">{dateStr}</p>
+        <div className="px-4 py-3 flex items-center justify-between gap-2">
+          <div className="min-w-0">
+            {photo.title && (
+              <p className="text-sm font-semibold text-[#3D2B1F] line-clamp-1">{photo.title}</p>
+            )}
+            {dateStr && (
+              <p className="text-xs text-[#A89880] mt-0.5">{dateStr}</p>
+            )}
+          </div>
+          {/* Download button in caption bar (always visible, smaller) */}
+          {photo.imageUrl && (
+            <a
+              href={`/api/public/galeri/download?url=${encodeURIComponent(photo.imageUrl)}&filename=${encodeURIComponent(filename)}`}
+              download={`${filename}.jpg`}
+              title="Unduh foto"
+              className="shrink-0 flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[#FAF7F2] border border-[#EDE8DF] text-[#B8960C] text-xs font-bold hover:bg-[#B8960C] hover:text-white hover:border-[#B8960C] transition-all duration-200"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              Unduh
+            </a>
           )}
         </div>
       )}
