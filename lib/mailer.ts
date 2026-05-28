@@ -1,13 +1,8 @@
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 
-// ── Gmail SMTP Transporter ─────────────────────────────────────────────────
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.GMAIL_USER,
-    pass: process.env.GMAIL_APP_PASSWORD,
-  },
-});
+// ── Resend Client ───────────────────────────────────────────────────────────
+const resend = new Resend(process.env.RESEND_API_KEY);
+const FROM_EMAIL = "Katedral Santo Yosef <onboarding@resend.dev>";
 
 // ── Generic send helper ────────────────────────────────────────────────────
 export async function sendMail({
@@ -19,9 +14,17 @@ export async function sendMail({
   subject: string;
   html: string;
 }) {
-  const from = `"Katedral Santo Yosef" <${process.env.GMAIL_USER}>`;
-  await transporter.sendMail({ from, to, subject, html });
+  const { error } = await resend.emails.send({
+    from: FROM_EMAIL,
+    to,
+    subject,
+    html,
+  });
+  if (error) {
+    throw new Error(`Resend error: ${error.message}`);
+  }
 }
+
 
 // ── Email Templates ────────────────────────────────────────────────────────
 
