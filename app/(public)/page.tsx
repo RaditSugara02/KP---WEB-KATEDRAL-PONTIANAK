@@ -12,18 +12,11 @@ export default async function LandingPage() {
     .orderBy(desc(contents.createdAt))
     .limit(3);
 
-  const allAgendas = await db.select()
+  const upcomingAgendas = await db.select()
     .from(contents)
-    .where(eq(contents.type, "ANNOUNCEMENT"))
+    .where(eq(contents.category, "Pengumuman"))
     .orderBy(desc(contents.createdAt))
-    .limit(20);
-
-  // Filter: only show agendas where eventEndDate >= today (not expired)
-  const todayStr = new Date().toISOString().split("T")[0]; // "YYYY-MM-DD"
-  const upcomingAgendas = allAgendas.filter(a => {
-    if (!a.eventEndDate) return false; // no expiry set = don't show on landing
-    return a.eventEndDate >= todayStr;
-  }).slice(0, 3);
+    .limit(3);
 
   const allMasses = await db.select()
     .from(contents)
