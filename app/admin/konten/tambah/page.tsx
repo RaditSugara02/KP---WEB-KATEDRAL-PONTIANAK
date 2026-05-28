@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Loader2, Save } from "lucide-react";
+import { ArrowLeft, Loader2, Save, Plus, Trash2, Images } from "lucide-react";
 import ImageUpload from "@/components/admin/ImageUpload";
 
 const CONTENT_TYPES = [
@@ -31,6 +31,12 @@ export default function TambahKontenPage() {
     imageUrl: "",
   });
 
+  // Gallery: multiple images
+  const [galleryImages, setGalleryImages] = useState<string[]>([]);
+  const [galleryCaption, setGalleryCaption] = useState("");
+  const [showAddPhoto, setShowAddPhoto] = useState(false);
+  const [tempPhotoUrl, setTempPhotoUrl] = useState("");
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
@@ -41,13 +47,20 @@ export default function TambahKontenPage() {
     setLoading(true);
 
     try {
-      const payload = { ...form };
+      const payload: Record<string, string> = { ...form };
       if (payload.type === "MASS_SCHEDULE") {
         payload.category = `${payload.massDay}::${payload.massType}`;
       } else if (payload.type === "NEWS") {
         payload.category = "Berita Paroki";
       } else if (payload.type === "ANNOUNCEMENT") {
         payload.category = "Pengumuman";
+      } else if (payload.type === "GALLERY") {
+        // Store multiple images in body as JSON; first image is primary imageUrl
+        payload.imageUrl = galleryImages[0] || "";
+        payload.body = JSON.stringify({
+          images: galleryImages,
+          caption: galleryCaption,
+        });
       }
 
       const res = await fetch("/api/admin/konten", {
@@ -265,23 +278,92 @@ export default function TambahKontenPage() {
         {/* URL Gambar (News) atau Upload Foto (Gallery) */}
         {isGallery ? (
           <div className="p-5 bg-[#F5F0E8] rounded-lg border border-[#EDE8DF] space-y-4">
-            <ImageUpload
-              label="Foto Galeri"
-              required
-              value={form.imageUrl}
-              onChange={(url) => setForm(prev => ({ ...prev, imageUrl: url }))}
-              placeholder="https://example.com/foto-gereja.jpg"
-              aspectRatio={4/3}
-              helpText="Disarankan rasio 4:3 (standar foto lanskap). Geser dan perbesar untuk menyesuaikan area gambar."
-            />
+            <div className="flex items-center gap-2 mb-2">
+              <Images size={16} className="text-[#B8960C]" />
+              <h3 className="text-xs font-bold text-[#6B6560] uppercase tracking-wider">
+                Foto Album ({galleryImages.length}/10)
+              </h3>
+            </div>
+
+            {/* Thumbnail grid of added photos */}
+            {galleryImages.length > 0 && (
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2 mb-3">
+                {galleryImages.map((url, idx) => (
+                  <div key={idx} className="relative group aspect-square rounded-lg overflow-hidden border-2 border-[#DDD8D0] bg-[#FAF7F2]">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={url} alt={`foto ${idx + 1}`} className="w-full h-full object-cover" />
+                    {idx === 0 && (
+                      <span className="absolute top-1 left-1 px-1.5 py-0.5 bg-[#B8960C] text-white text-[9px] font-bold rounded">Utama</span>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => setGalleryImages(prev => prev.filter((_, i) => i !== idx))}
+                      className="absolute top-1 right-1 w-5 h-5 rounded-full bg-red-600 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <Trash2 size={10} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Add photo button / upload form */}
+            {galleryImages.length < 10 && (
+              <div>
+                {!showAddPhoto ? (
+                  <button
+                    type="button"
+                    onClick={() => setShowAddPhoto(true)}
+                    className="flex items-center gap-2 px-4 py-2 border-2 border-dashed border-[#B8960C]/40 rounded-lg text-[#B8960C] text-sm font-semibold hover:border-[#B8960C] hover:bg-[#FFF8E1] transition-colors"
+                  >
+                    <Plus size={16} /> Tambah Foto
+                  </button>
+                ) : (
+                  <div className="space-y-3 p-4 bg-white rounded-lg border border-[#DDD8D0]">
+                    <ImageUpload
+                      label="Upload Foto"
+                      value={tempPhotoUrl}
+                      onChange={setTempPhotoUrl}
+                      placeholder="https://example.com/foto.jpg"
+                      aspectRatio={4/3}
+                      helpText="Rasio 4:3 disarankan. Setelah upload, klik Tambahkan."
+                    />
+                    <div className="flex gap-2 justify-end">
+                      <button
+                        type="button"
+                        onClick={() => { setShowAddPhoto(false); setTempPhotoUrl(""); }}
+                        className="px-3 py-1.5 text-xs font-bold text-[#6B6560] bg-[#F5F0E8] rounded-md hover:bg-[#EDE8DF] transition-colors"
+                      >
+                        Batal
+                      </button>
+                      <button
+                        type="button"
+                        disabled={!tempPhotoUrl}
+                        onClick={() => {
+                          if (tempPhotoUrl) {
+                            setGalleryImages(prev => [...prev, tempPhotoUrl]);
+                            setTempPhotoUrl("");
+                            setShowAddPhoto(false);
+                          }
+                        }}
+                        className="px-3 py-1.5 text-xs font-bold text-white bg-[#B8960C] rounded-md hover:bg-[#9A7A00] transition-colors disabled:opacity-40"
+                      >
+                        ✓ Tambahkan ke Album
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Caption */}
             <div>
-              <label className="block text-xs text-[#6B6560] mb-1">Keterangan Foto (Opsional)</label>
+              <label className="block text-xs text-[#6B6560] mb-1">Keterangan Album (Opsional)</label>
               <input
                 type="text"
-                name="body"
-                value={form.body}
-                onChange={handleChange}
-                placeholder="cth: Perayaan Misa Natal 2024"
+                value={galleryCaption}
+                onChange={(e) => setGalleryCaption(e.target.value)}
+                placeholder="cth: Perayaan Natal 2024"
                 className="w-full h-11 px-4 border border-[#DDD8D0] rounded-md text-sm bg-white focus:border-[#B8960C] focus:ring-1 focus:ring-[#B8960C] outline-none"
               />
             </div>
