@@ -137,30 +137,35 @@ export async function Footer() {
             <ul className="space-y-4">
               <li className="flex items-start gap-3.5">
                 <MapPin size={16} className="flex-shrink-0 mt-0.5" style={{ color: "#B8960C" }} />
-                <span
-                  className="text-[14px] leading-relaxed font-light"
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(info.address)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[14px] leading-relaxed font-light transition-colors hover:text-[#B8960C]"
                   style={{ color: "rgba(253,247,242,0.65)" }}
                 >
                   {info.address}
-                </span>
+                </a>
               </li>
               <li className="flex items-center gap-3.5">
                 <Phone size={16} className="flex-shrink-0" style={{ color: "#B8960C" }} />
-                <span
-                  className="text-[14px] font-light tracking-wide"
+                <a
+                  href={`tel:${info.phone?.replace(/\s|-/g, "")}`}
+                  className="text-[14px] font-light tracking-wide transition-colors hover:text-[#B8960C]"
                   style={{ color: "rgba(253,247,242,0.65)" }}
                 >
                   {info.phone}
-                </span>
+                </a>
               </li>
               <li className="flex items-center gap-3.5">
                 <Mail size={16} className="flex-shrink-0" style={{ color: "#B8960C" }} />
-                <span
-                  className="text-[14px] font-light"
+                <a
+                  href={`mailto:${info.email}`}
+                  className="text-[14px] font-light transition-colors hover:text-[#B8960C]"
                   style={{ color: "rgba(253,247,242,0.65)" }}
                 >
                   {info.email}
-                </span>
+                </a>
               </li>
             </ul>
           </div>
