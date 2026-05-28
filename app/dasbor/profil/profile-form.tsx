@@ -12,12 +12,12 @@ export function ProfileForm() {
   const [groomName, setGroomName] = useState("");
   const [groomBirthdate, setGroomBirthdate] = useState("");
   const [groomPhone, setGroomPhone] = useState("");
-  const [groomBaptismChurch, setGroomBaptismChurch] = useState("Katedral Santo Yosef Martapura");
+  const [groomBaptismChurch, setGroomBaptismChurch] = useState("");
   
   const [brideName, setBrideName] = useState("");
   const [brideBirthdate, setBrideBirthdate] = useState("");
   const [bridePhone, setBridePhone] = useState("");
-  const [brideBaptismChurch, setBrideBaptismChurch] = useState("Katedral Santo Yosef Martapura");
+  const [brideBaptismChurch, setBrideBaptismChurch] = useState("");
   
   const [groomPhoto, setGroomPhoto] = useState("");
   const [bridePhoto, setBridePhoto] = useState("");
@@ -114,6 +114,7 @@ export function ProfileForm() {
               <input 
                 type="text" required
                 value={groomBaptismChurch} onChange={e => setGroomBaptismChurch(e.target.value)}
+                placeholder="contoh: Katedral Santo Yosef Pontianak"
                 className="w-full h-11 px-4 rounded-md border border-[#DDD8D0] focus:border-[#B8960C] focus:ring-1 focus:ring-[#B8960C] outline-none" 
               />
             </div>
@@ -166,6 +167,7 @@ export function ProfileForm() {
               <input 
                 type="text" required
                 value={brideBaptismChurch} onChange={e => setBrideBaptismChurch(e.target.value)}
+                placeholder="contoh: Katedral Santo Yosef Pontianak"
                 className="w-full h-11 px-4 rounded-md border border-[#DDD8D0] focus:border-[#B8960C] focus:ring-1 focus:ring-[#B8960C] outline-none" 
               />
             </div>

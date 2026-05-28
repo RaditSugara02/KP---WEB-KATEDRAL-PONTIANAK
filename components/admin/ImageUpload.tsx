@@ -236,40 +236,59 @@ export default function ImageUpload({
 
       {/* Preview */}
       {value && (
-        <div className="mt-3 relative group">
+        <div className="mt-3">
           <p className="text-xs text-[#A89880] mb-2 font-medium">Preview Gambar:</p>
-          <div className="relative inline-block w-full rounded-xl overflow-hidden border border-[#DDD8D0] shadow-sm">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={value}
-              alt="preview"
-              className="w-full max-h-64 object-cover"
-              onError={(e) => {
-                (e.target as HTMLImageElement).style.display = "none";
-              }}
-            />
-            {/* Overlay Actions */}
-            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
-              <button
-                type="button"
-                onClick={() => {
-                  setMode("upload");
-                  setTimeout(() => inputRef.current?.click(), 0);
+          <div className="flex items-start gap-4">
+            {/* Photo preview — portrait 3:4 if aspectRatio given */}
+            <div
+              className="relative group shrink-0 rounded-xl overflow-hidden border border-[#DDD8D0] shadow-sm bg-[#F5F0E8]"
+              style={
+                aspectRatio
+                  ? { width: "120px", height: `${Math.round(120 / aspectRatio)}px` }
+                  : { width: "100%", maxHeight: "256px" }
+              }
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={value}
+                alt="preview"
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = "none";
                 }}
-                className="px-4 py-2 bg-white text-[#3D2B1F] hover:bg-[#FDF3D0] rounded-lg text-sm font-bold flex items-center gap-2 transition-transform hover:scale-105"
-              >
-                <Upload size={16} /> Ganti Gambar
-              </button>
-              <button
-                type="button"
-                onClick={handleClear}
-                className="px-4 py-2 bg-[#C0392B] text-white hover:bg-[#A93226] rounded-lg text-sm font-bold flex items-center gap-2 transition-transform hover:scale-105"
-              >
-                <X size={16} /> Hapus
-              </button>
+              />
+              {/* Overlay Actions */}
+              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 p-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMode("upload");
+                    setTimeout(() => inputRef.current?.click(), 0);
+                  }}
+                  className="w-full px-2 py-1 bg-white text-[#3D2B1F] hover:bg-[#FDF3D0] rounded text-[10px] font-bold flex items-center justify-center gap-1 transition-colors"
+                >
+                  <Upload size={10} /> Ganti
+                </button>
+                <button
+                  type="button"
+                  onClick={handleClear}
+                  className="w-full px-2 py-1 bg-[#C0392B] text-white hover:bg-[#A93226] rounded text-[10px] font-bold flex items-center justify-center gap-1 transition-colors"
+                >
+                  <X size={10} /> Hapus
+                </button>
+              </div>
             </div>
+
+            {/* Info text next to photo */}
+            {aspectRatio && (
+              <div className="flex flex-col justify-center gap-1 text-xs text-[#6B6560]">
+                <p className="font-semibold text-[#3D2B1F]">Foto berhasil dipilih ✓</p>
+                <p>Rasio: 3:4 (pas foto)</p>
+                <p className="text-[#A89880]">Hover foto untuk<br/>ganti atau hapus</p>
+              </div>
+            )}
           </div>
-          
+
           {/* File input kept here so 'Ganti Gambar' can trigger it even if dropzone is hidden */}
           {mode === "upload" && (
             <input
@@ -282,6 +301,7 @@ export default function ImageUpload({
           )}
         </div>
       )}
+
 
       {/* Crop Modal */}
       {cropModalOpen && imageSrc && aspectRatio && (
