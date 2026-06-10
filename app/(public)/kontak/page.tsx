@@ -152,33 +152,6 @@ export default async function KontakPage() {
           </ScrollReveal>
         </div>
       </div>
-
-      {/* CTA Bottom */}
-      <ScrollReveal direction="none" duration={900}>
-        <div className="bg-gradient-to-br from-[#EAE0D1] to-[#D5C6AF] text-[#3D2B1F] py-16 px-4 text-center relative overflow-hidden group border border-[#D5C6AF]/50 rounded-lg">
-          {/* Decorative */}
-          <div className="absolute top-[-20px] left-[-20px] opacity-10 group-hover:opacity-20 group-hover:scale-110 transition-all duration-700 pointer-events-none">
-            <svg width="200" height="200" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="text-[#B8960C]">
-              <circle cx="9" cy="12" r="5" />
-              <circle cx="15" cy="12" r="5" />
-            </svg>
-          </div>
-          <h2 className="text-3xl font-bold mb-3 relative z-10" style={{ fontFamily: "var(--font-cormorant)" }}>
-            Ingin Mendaftarkan Pernikahan?
-          </h2>
-          <p className="text-[#6B5744] text-sm mb-8 max-w-md mx-auto relative z-10 font-light">
-            Gunakan sistem pendaftaran online kami untuk memulai proses pernikahan di Katedral Santo Yosef.
-          </p>
-          <div className="relative z-10">
-            <a
-              href="/daftar"
-              className="inline-flex items-center gap-2 px-8 py-3.5 bg-[#B8960C] text-white font-bold rounded-xl shadow-lg hover:bg-[#9A7A00] hover:-translate-y-1 hover:shadow-xl transition-all duration-300"
-            >
-              Mulai Pendaftaran →
-            </a>
-          </div>
-        </div>
-      </ScrollReveal>
     </div>
   );
 }
