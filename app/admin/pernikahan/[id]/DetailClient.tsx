@@ -385,7 +385,11 @@ export default function DetailClient({
                 disabled={loadingPriest || isCanceled}
               >
                 <SelectTrigger className="w-full bg-white h-10 border-[#DDD8D0] focus:ring-[#B8960C]">
-                  <SelectValue placeholder="— Belum Ditugaskan —" />
+                  <SelectValue>
+                    {selectedPriest
+                      ? priests.find((p) => p.id === selectedPriest)?.name || "— Belum Ditugaskan —"
+                      : "— Belum Ditugaskan —"}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="unassigned">— Belum Ditugaskan —</SelectItem>
