@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { User, Heart, Camera, Info } from "lucide-react";
 import ImageUpload from "@/components/admin/ImageUpload";
 
-const AGAMA_OPTIONS = ["Katolik", "Protestan", "Islam", "Hindu", "Buddha", "Konghucu", "Lainnya"];
+const AGAMA_OPTIONS = ["Katolik", "Kristen Protestan", "Islam", "Hindu", "Buddha", "Konghucu", "Lainnya"];
 
 const inputClass =
   "w-full h-11 px-4 rounded-md border border-[#DDD8D0] focus:border-[#B8960C] focus:ring-1 focus:ring-[#B8960C] outline-none text-[#3D2B1F] bg-white";
@@ -119,11 +119,12 @@ export function ProfileForm() {
               <input type="date" required value={groomBirthdate} onChange={e => setGroomBirthdate(e.target.value)} className={inputClass} />
             </div>
             <div>
-              <label className={labelClass}>Agama <span className="text-red-400">*</span></label>
+              <label className={labelClass}>Agama Sesuai Dokumen Resmi <span className="text-red-400">*</span></label>
               <select required value={groomReligion} onChange={e => setGroomReligion(e.target.value)} className={inputClass}>
                 <option value="">— Pilih Agama —</option>
                 {AGAMA_OPTIONS.map(a => <option key={a} value={a}>{a}</option>)}
               </select>
+              <p className="text-[11px] text-[#9C8B7A] mt-1">Data agama diisi sesuai dokumen resmi. Jika salah satu calon pengantin bukan Katolik, proses administrasi akan diverifikasi lebih lanjut oleh Admin Sekretariat.</p>
             </div>
             <div>
               <label className={labelClass}>Pekerjaan <span className="text-red-400">*</span></label>
@@ -165,11 +166,12 @@ export function ProfileForm() {
               <input type="date" required value={brideBirthdate} onChange={e => setBrideBirthdate(e.target.value)} className={inputClass} />
             </div>
             <div>
-              <label className={labelClass}>Agama <span className="text-red-400">*</span></label>
+              <label className={labelClass}>Agama Sesuai Dokumen Resmi <span className="text-red-400">*</span></label>
               <select required value={brideReligion} onChange={e => setBrideReligion(e.target.value)} className={inputClass}>
                 <option value="">— Pilih Agama —</option>
                 {AGAMA_OPTIONS.map(a => <option key={a} value={a}>{a}</option>)}
               </select>
+              <p className="text-[11px] text-[#9C8B7A] mt-1">Data agama diisi sesuai dokumen resmi. Jika salah satu calon pengantin bukan Katolik, proses administrasi akan diverifikasi lebih lanjut oleh Admin Sekretariat.</p>
             </div>
             <div>
               <label className={labelClass}>Pekerjaan <span className="text-red-400">*</span></label>
