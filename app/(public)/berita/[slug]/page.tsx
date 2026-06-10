@@ -5,6 +5,8 @@ import Link from "next/link";
 import { CalendarDays, Church, ArrowLeft, Share2 } from "lucide-react";
 import { notFound } from "next/navigation";
 
+export const dynamic = "force-dynamic";
+
 export default async function BeritaDetailPage({ params }: { params: { slug: string } }) {
   const { slug } = await params;
 

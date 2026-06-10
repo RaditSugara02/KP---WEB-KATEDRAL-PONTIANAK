@@ -5,6 +5,8 @@ import { AlertCircle } from "lucide-react";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import JadwalMisaClient from "./JadwalMisaClient";
 
+export const dynamic = "force-dynamic";
+
 export default async function JadwalMisaPage() {
   const allMasses = await db.select().from(contents).where(eq(contents.type, "MASS_SCHEDULE"));
 

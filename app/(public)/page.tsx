@@ -5,6 +5,8 @@ import Link from "next/link";
 import { ArrowRight, Calendar, Newspaper, BookOpen, MapPin, CalendarDays, ArrowUpRight } from "lucide-react";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 
+export const dynamic = "force-dynamic";
+
 export default async function LandingPage() {
   const latestNews = await db.select()
     .from(contents)

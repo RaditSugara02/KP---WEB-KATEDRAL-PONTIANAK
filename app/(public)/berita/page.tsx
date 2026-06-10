@@ -6,6 +6,8 @@ import { CalendarDays, Church } from "lucide-react";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import BeritaListClient from "./BeritaListClient";
 
+export const dynamic = "force-dynamic";
+
 export default async function BeritaPage() {
   const allNews = await db.select()
     .from(contents)
