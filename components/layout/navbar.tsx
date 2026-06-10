@@ -34,7 +34,6 @@ export function Navbar() {
     { name: "Jadwal Misa",          href: "/jadwal-misa" },
     { name: "Galeri",               href: "/galeri" },
     { name: "Sakramen Perkawinan",  href: "/sakramen-perkawinan" },
-    { name: "Kontak",               href: "/kontak" },
   ];
 
   const isTransparent = isLandingPage && !scrolled && !mobileMenuOpen;

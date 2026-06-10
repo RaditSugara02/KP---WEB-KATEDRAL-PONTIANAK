@@ -9,7 +9,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: "*",
-        allow: ["/", "/berita", "/jadwal-misa", "/sakramen-perkawinan", "/kontak"],
+        allow: ["/", "/berita", "/jadwal-misa", "/sakramen-perkawinan"],
         disallow: ["/admin/", "/dasbor/", "/api/"],
       },
     ],
