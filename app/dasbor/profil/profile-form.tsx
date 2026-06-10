@@ -203,9 +203,9 @@ export function ProfileForm() {
           </div>
           <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className={labelClass}>Preferensi Tanggal Berkat <span className="text-[#9C8B7A] normal-case font-normal">(opsional)</span></label>
+              <label className={labelClass}>Preferensi Tanggal Pemberkatan <span className="text-[#9C8B7A] normal-case font-normal">(opsional)</span></label>
               <input type="date" value={preferredWeddingDate} onChange={e => setPreferredWeddingDate(e.target.value)} className={inputClass} />
-              <p className="text-[11px] text-[#9C8B7A] mt-1">Tanggal final akan ditentukan oleh Admin Sekretariat.</p>
+              <p className="text-[11px] text-[#9C8B7A] mt-1">Tanggal pemberkatan final akan ditentukan oleh Admin Sekretariat.</p>
             </div>
             <div>
               <label className={labelClass}>Preferensi Jam Pemberkatan <span className="text-[#9C8B7A] normal-case font-normal">(opsional)</span></label>
@@ -251,7 +251,7 @@ export function ProfileForm() {
                 <Info size={16} className="text-[#9C8B7A] flex-shrink-0" />
                 <p className="text-sm text-[#9C8B7A] italic">Belum ditentukan oleh Admin Sekretariat</p>
               </div>
-              <p className="text-[11px] text-[#9C8B7A] mt-1">Pastor Pemberkat akan ditugaskan oleh Admin Sekretariat setelah data diverifikasi.</p>
+              <p className="text-[11px] text-[#9C8B7A] mt-1">Pastor Pemberkat akan ditugaskan oleh Admin Sekretariat setelah data pendaftaran diverifikasi.</p>
             </div>
           </div>
         </div>

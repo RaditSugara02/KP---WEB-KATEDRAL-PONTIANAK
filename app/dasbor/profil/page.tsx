@@ -140,7 +140,7 @@ export default async function ProfilPage() {
           <FieldIcon icon={Home} label="Alamat Sesudah Perkawinan" value={profile.postMarriageAddress} />
           <Field label="Pilihan Misa" value={profile.ceremonyType} />
           {profile.preferredWeddingDate && (
-            <Field label="Preferensi Tanggal Berkat" value={formatDate(profile.preferredWeddingDate)} />
+            <Field label="Preferensi Tanggal Pemberkatan" value={formatDate(profile.preferredWeddingDate)} />
           )}
           {profile.preferredWeddingTime && (
             <Field label="Preferensi Jam Pemberkatan" value={`${profile.preferredWeddingTime} WIB`} />

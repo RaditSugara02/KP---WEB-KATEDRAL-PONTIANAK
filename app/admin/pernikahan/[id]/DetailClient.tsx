@@ -266,7 +266,7 @@ export default function DetailClient({
             <div><span className="block text-xs text-[#A89880] uppercase">Alamat Sesudah Perkawinan</span> <span className="font-medium text-[#3D2B1F]">{application.postMarriageAddress || "—"}</span></div>
             <div><span className="block text-xs text-[#A89880] uppercase">Pilihan Misa</span> <span className="font-medium text-[#3D2B1F]">{application.ceremonyType || "—"}</span></div>
             {application.preferredWeddingDate && (
-              <div><span className="block text-xs text-[#A89880] uppercase">Preferensi Tanggal Berkat</span> <span className="font-medium text-[#3D2B1F]">{new Date(application.preferredWeddingDate as string).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}</span></div>
+              <div><span className="block text-xs text-[#A89880] uppercase">Preferensi Tanggal Pemberkatan</span> <span className="font-medium text-[#3D2B1F]">{new Date(application.preferredWeddingDate as string).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}</span></div>
             )}
             {application.preferredWeddingTime && (
               <div><span className="block text-xs text-[#A89880] uppercase">Preferensi Jam</span> <span className="font-medium text-[#3D2B1F]">{application.preferredWeddingTime} WIB</span></div>

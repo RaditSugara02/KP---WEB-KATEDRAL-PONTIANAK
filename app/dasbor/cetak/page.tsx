@@ -135,7 +135,7 @@ export default async function CetakPage() {
             </div>
             {profile.preferredWeddingDate && (
               <div>
-                <p className="text-xs text-[#A89880] uppercase font-bold tracking-wider mb-1">Preferensi Tanggal Berkat</p>
+                <p className="text-xs text-[#A89880] uppercase font-bold tracking-wider mb-1">Preferensi Tanggal Pemberkatan</p>
                 <p className="text-[#3D2B1F]">{formatDate(profile.preferredWeddingDate)}</p>
               </div>
             )}
