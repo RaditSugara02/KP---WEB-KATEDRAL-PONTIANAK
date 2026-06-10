@@ -205,7 +205,7 @@ export default function SakramenPerkawinanPage() {
                 href="/daftar"
                 className="bg-[#B8960C] text-white px-8 py-4 rounded-xl font-bold flex items-center justify-center gap-3 hover:bg-[#9A7A00] hover:-translate-y-1 hover:shadow-lg transition-all duration-300"
               >
-                Daftar Pernikahan Sekarang →
+                Daftar Pernikahan Sekarang
               </Link>
               <Link
                 href="/masuk"

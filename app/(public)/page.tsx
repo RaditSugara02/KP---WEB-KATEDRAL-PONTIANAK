@@ -132,7 +132,6 @@ export default async function LandingPage() {
                 className="group relative w-full sm:w-auto inline-flex items-center justify-center bg-[#B8960C] text-white px-8 md:px-10 py-3.5 md:py-4 rounded-sm font-sans text-sm tracking-wide font-semibold hover:bg-[#9A7A00] transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-1"
               >
                 Lihat Jadwal Misa
-                <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
               </Link>
               <Link
                 href="/sakramen-perkawinan"
