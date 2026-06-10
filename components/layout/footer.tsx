@@ -111,6 +111,7 @@ export async function Footer() {
                 { label: "Jadwal Misa",          href: "/jadwal-misa" },
                 { label: "Berita Paroki",        href: "/berita" },
                 { label: "Sakramen Perkawinan",  href: "/sakramen-perkawinan" },
+                { label: "Kontak",               href: "/kontak" },
               ].map((link) => (
                 <li key={link.href}>
                   <Link

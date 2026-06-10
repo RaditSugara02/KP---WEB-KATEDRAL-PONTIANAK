@@ -520,7 +520,7 @@ export default async function LandingPage() {
           
           <ScrollReveal direction="up" delay={400}>
             <Link
-              href="/sakramen-perkawinan"
+              href="/kontak"
               className="inline-flex items-center justify-center bg-[#B8960C] border border-[#B8960C] text-white px-10 py-4 rounded-sm font-sans text-sm tracking-wide font-semibold hover:bg-transparent hover:text-[#B8960C] transition-all duration-300"
             >
               Pelajari Lebih Lanjut
