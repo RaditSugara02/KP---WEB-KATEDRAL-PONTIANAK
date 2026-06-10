@@ -62,7 +62,7 @@ export function DeleteContentButton({ id }: { id: string }) {
 
           {/* Modal Content */}
           <div
-            className="relative bg-white rounded-2xl shadow-2xl w-full max-w-[420px] overflow-hidden animate-[scaleIn_200ms_ease-out]"
+            className="relative bg-white rounded-2xl shadow-2xl w-full max-w-[460px] animate-[scaleIn_200ms_ease-out]"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Close Button */}
