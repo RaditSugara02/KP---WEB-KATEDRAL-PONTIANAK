@@ -76,21 +76,28 @@ export default function DetailClient({
       const { saveAs } = await import("file-saver");
       
       const zip = new JSZip();
+      const coupleName = `${application.groomName?.toString().replace(/\s+/g, '_') || 'Pria'}_dan_${application.brideName?.toString().replace(/\s+/g, '_') || 'Wanita'}`;
       
-      if (application.groomPhoto) {
-        const response = await fetch(application.groomPhoto as string);
+      // Prioritize couplePhoto, fallback to legacy photos
+      if (application.couplePhoto) {
+        const response = await fetch(application.couplePhoto as string);
         const blob = await response.blob();
-        zip.file(`Foto_Pria_${application.groomName?.toString().replace(/\s+/g, '_') || 'TanpaNama'}.jpg`, blob);
-      }
-      
-      if (application.bridePhoto) {
-        const response = await fetch(application.bridePhoto as string);
-        const blob = await response.blob();
-        zip.file(`Foto_Wanita_${application.brideName?.toString().replace(/\s+/g, '_') || 'TanpaNama'}.jpg`, blob);
+        zip.file(`Foto_Pasangan_${coupleName}.jpg`, blob);
+      } else {
+        if (application.groomPhoto) {
+          const response = await fetch(application.groomPhoto as string);
+          const blob = await response.blob();
+          zip.file(`Foto_Pria_${application.groomName?.toString().replace(/\s+/g, '_') || 'TanpaNama'}.jpg`, blob);
+        }
+        if (application.bridePhoto) {
+          const response = await fetch(application.bridePhoto as string);
+          const blob = await response.blob();
+          zip.file(`Foto_Wanita_${application.brideName?.toString().replace(/\s+/g, '_') || 'TanpaNama'}.jpg`, blob);
+        }
       }
       
       const content = await zip.generateAsync({ type: "blob" });
-      saveAs(content, `Foto_Pernikahan_${application.groomName?.toString().replace(/\s+/g, '_')}_dan_${application.brideName?.toString().replace(/\s+/g, '_')}.zip`);
+      saveAs(content, `Foto_Pernikahan_${coupleName}.zip`);
     } catch (error) {
       console.error("Gagal mendownload ZIP:", error);
       alert("Terjadi kesalahan saat mengunduh foto ZIP. Mungkin masalah koneksi atau hak akses CORS.");
@@ -210,7 +217,7 @@ export default function DetailClient({
         <div className="bg-white rounded-xl border border-[#DDD8D0] shadow-sm overflow-hidden">
           <div className="bg-[#FAF7F2] px-6 py-4 border-b border-[#EDE8DF] flex items-center justify-between">
             <h3 className="font-bold text-[#3D2B1F] uppercase tracking-wide text-sm">Data Mempelai</h3>
-            {(application.groomPhoto || application.bridePhoto) && (
+            {(application.couplePhoto || application.groomPhoto || application.bridePhoto) && (
               <button
                 onClick={handleDownloadZip}
                 disabled={loadingZip}
@@ -222,44 +229,60 @@ export default function DetailClient({
           </div>
           <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
             <div>
-              <h4 className="font-bold text-[#B8960C] mb-4 border-b border-[#EDE8DF] pb-2">Mempelai Pria</h4>
+              <h4 className="font-bold text-[#B8960C] mb-4 border-b border-[#EDE8DF] pb-2">Calon Suami</h4>
               <div className="space-y-3 text-sm">
                 <div><span className="block text-xs text-[#A89880] uppercase">Nama</span> <span className="font-medium text-[#3D2B1F]">{application.groomName}</span></div>
                 <div><span className="block text-xs text-[#A89880] uppercase">Tgl Lahir</span> <span className="font-medium text-[#3D2B1F]">{application.groomBirthdate || "—"}</span></div>
+                <div><span className="block text-xs text-[#A89880] uppercase">Agama</span> <span className="font-medium text-[#3D2B1F]">{application.groomReligion || "—"}</span></div>
+                <div><span className="block text-xs text-[#A89880] uppercase">Pekerjaan</span> <span className="font-medium text-[#3D2B1F]">{application.groomOccupation || "—"}</span></div>
                 <div><span className="block text-xs text-[#A89880] uppercase">Telepon</span> <span className="font-medium text-[#3D2B1F]">{application.groomPhone || "—"}</span></div>
                 <div><span className="block text-xs text-[#A89880] uppercase">Paroki Asal</span> <span className="font-medium text-[#3D2B1F]">{application.groomBaptismChurch || "—"}</span></div>
-                {application.groomPhoto && (
-                  <div>
-                    <span className="block text-xs text-[#A89880] uppercase mb-1">Pas Foto</span>
-                    <a href={application.groomPhoto as string} target="_blank" rel="noreferrer">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={application.groomPhoto as string} alt="Pas Foto Pria" className="w-24 h-32 object-cover rounded border border-[#DDD8D0]" />
-                    </a>
-                    <a href={application.groomPhoto as string} download className="text-xs text-[#2D6A4F] hover:underline mt-1 block">⬇ Download</a>
-                  </div>
-                )}
+                <div><span className="block text-xs text-[#A89880] uppercase">Nama Ayah</span> <span className="font-medium text-[#3D2B1F]">{application.groomFatherName || "—"}</span></div>
+                <div><span className="block text-xs text-[#A89880] uppercase">Nama Ibu</span> <span className="font-medium text-[#3D2B1F]">{application.groomMotherName || "—"}</span></div>
               </div>
             </div>
             <div>
-              <h4 className="font-bold text-[#B8960C] mb-4 border-b border-[#EDE8DF] pb-2">Mempelai Wanita</h4>
+              <h4 className="font-bold text-[#B8960C] mb-4 border-b border-[#EDE8DF] pb-2">Calon Isteri</h4>
               <div className="space-y-3 text-sm">
                 <div><span className="block text-xs text-[#A89880] uppercase">Nama</span> <span className="font-medium text-[#3D2B1F]">{application.brideName}</span></div>
                 <div><span className="block text-xs text-[#A89880] uppercase">Tgl Lahir</span> <span className="font-medium text-[#3D2B1F]">{application.brideBirthdate || "—"}</span></div>
+                <div><span className="block text-xs text-[#A89880] uppercase">Agama</span> <span className="font-medium text-[#3D2B1F]">{application.brideReligion || "—"}</span></div>
+                <div><span className="block text-xs text-[#A89880] uppercase">Pekerjaan</span> <span className="font-medium text-[#3D2B1F]">{application.brideOccupation || "—"}</span></div>
                 <div><span className="block text-xs text-[#A89880] uppercase">Telepon</span> <span className="font-medium text-[#3D2B1F]">{application.bridePhone || "—"}</span></div>
                 <div><span className="block text-xs text-[#A89880] uppercase">Paroki Asal</span> <span className="font-medium text-[#3D2B1F]">{application.brideBaptismChurch || "—"}</span></div>
-                {application.bridePhoto && (
-                  <div>
-                    <span className="block text-xs text-[#A89880] uppercase mb-1">Pas Foto</span>
-                    <a href={application.bridePhoto as string} target="_blank" rel="noreferrer">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={application.bridePhoto as string} alt="Pas Foto Wanita" className="w-24 h-32 object-cover rounded border border-[#DDD8D0]" />
-                    </a>
-                    <a href={application.bridePhoto as string} download className="text-xs text-[#2D6A4F] hover:underline mt-1 block">⬇ Download</a>
-                  </div>
-                )}
+                <div><span className="block text-xs text-[#A89880] uppercase">Nama Ayah</span> <span className="font-medium text-[#3D2B1F]">{application.brideFatherName || "—"}</span></div>
+                <div><span className="block text-xs text-[#A89880] uppercase">Nama Ibu</span> <span className="font-medium text-[#3D2B1F]">{application.brideMotherName || "—"}</span></div>
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Kartu Informasi Perkawinan */}
+        <div className="bg-white rounded-xl border border-[#DDD8D0] shadow-sm overflow-hidden">
+          <div className="bg-[#FAF7F2] px-6 py-4 border-b border-[#EDE8DF]">
+            <h3 className="font-bold text-[#3D2B1F] uppercase tracking-wide text-sm">Informasi Perkawinan</h3>
+          </div>
+          <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+            <div><span className="block text-xs text-[#A89880] uppercase">Alamat Sesudah Perkawinan</span> <span className="font-medium text-[#3D2B1F]">{application.postMarriageAddress || "—"}</span></div>
+            <div><span className="block text-xs text-[#A89880] uppercase">Pilihan Misa</span> <span className="font-medium text-[#3D2B1F]">{application.ceremonyType || "—"}</span></div>
+            {application.preferredWeddingDate && (
+              <div><span className="block text-xs text-[#A89880] uppercase">Preferensi Tanggal Berkat</span> <span className="font-medium text-[#3D2B1F]">{new Date(application.preferredWeddingDate as string).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}</span></div>
+            )}
+            {application.preferredWeddingTime && (
+              <div><span className="block text-xs text-[#A89880] uppercase">Preferensi Jam</span> <span className="font-medium text-[#3D2B1F]">{application.preferredWeddingTime} WIB</span></div>
+            )}
+          </div>
+          {/* Foto Pasangan */}
+          {(application.couplePhoto || application.groomPhoto) && (
+            <div className="px-6 pb-6">
+              <span className="block text-xs text-[#A89880] uppercase mb-2">Foto Pasangan</span>
+              <a href={(application.couplePhoto || application.groomPhoto) as string} target="_blank" rel="noreferrer">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={(application.couplePhoto || application.groomPhoto) as string} alt="Foto Pasangan" className="max-w-xs rounded-lg border border-[#DDD8D0] shadow-sm" />
+              </a>
+              <a href={(application.couplePhoto || application.groomPhoto) as string} download className="text-xs text-[#2D6A4F] hover:underline mt-1 block">⬇ Download</a>
+            </div>
+          )}
         </div>
 
         {/* Kartu Dokumen */}

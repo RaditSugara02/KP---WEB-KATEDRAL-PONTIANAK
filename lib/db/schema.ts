@@ -83,16 +83,33 @@ export const coupleProfiles = pgTable("couple_profiles", {
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   registrationNumber: varchar("registrationNumber", { length: 50 }).unique(), // KP-2026-0001
+  // === Data Calon Suami ===
   groomName: text("groomName"),
   groomBirthdate: text("groomBirthdate"), // ISO date string
   groomPhone: varchar("groomPhone", { length: 20 }),
   groomBaptismChurch: text("groomBaptismChurch"),
+  groomReligion: varchar("groomReligion", { length: 50 }),
+  groomOccupation: text("groomOccupation"),
+  groomFatherName: text("groomFatherName"),
+  groomMotherName: text("groomMotherName"),
+  // === Data Calon Isteri ===
   brideName: text("brideName"),
   brideBirthdate: text("brideBirthdate"), // ISO date string
   bridePhone: varchar("bridePhone", { length: 20 }),
   brideBaptismChurch: text("brideBaptismChurch"),
-  groomPhoto: text("groomPhoto"),
-  bridePhoto: text("bridePhoto"),
+  brideReligion: varchar("brideReligion", { length: 50 }),
+  brideOccupation: text("brideOccupation"),
+  brideFatherName: text("brideFatherName"),
+  brideMotherName: text("brideMotherName"),
+  // === Informasi Perkawinan ===
+  postMarriageAddress: text("postMarriageAddress"),
+  ceremonyType: varchar("ceremonyType", { length: 20 }), // "Misa" | "Tanpa Misa"
+  preferredWeddingDate: text("preferredWeddingDate"), // ISO date string (preferensi calon)
+  preferredWeddingTime: text("preferredWeddingTime"), // HH:mm
+  // === Foto ===
+  couplePhoto: text("couplePhoto"), // Foto pasangan tunggal
+  groomPhoto: text("groomPhoto"),   // Legacy — backward compat
+  bridePhoto: text("bridePhoto"),   // Legacy — backward compat
   createdAt: timestamp("createdAt").defaultNow(),
 });
 

@@ -1,10 +1,10 @@
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { coupleProfiles } from "@/lib/db/schema";
+import { coupleProfiles, marriageApplications, users } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { ProfileForm } from "./profile-form";
-import { User, Calendar, Phone, Church, Info, ArrowLeft } from "lucide-react";
+import { User, Calendar, Phone, Church, Info, ArrowLeft, Briefcase, BookOpen, Home, Heart } from "lucide-react";
 import Link from "next/link";
 
 const formatDate = (d: string | null) => {
@@ -45,6 +45,20 @@ export default async function ProfilPage() {
     return <div className="max-w-4xl mx-auto"><ProfileForm /></div>;
   }
 
+  // Fetch priest info if assigned
+  const appRecord = await db.select().from(marriageApplications)
+    .where(eq(marriageApplications.coupleProfileId, profile.id)).limit(1);
+  const application = appRecord[0];
+  let priestName: string | null = null;
+  if (application?.priestId) {
+    const priestRecord = await db.select({ name: users.name }).from(users)
+      .where(eq(users.id, application.priestId)).limit(1);
+    priestName = priestRecord[0]?.name || null;
+  }
+
+  // Pick best photo: couplePhoto > groomPhoto (legacy)
+  const photo = profile.couplePhoto || profile.groomPhoto || profile.bridePhoto;
+
   return (
     <div className="max-w-4xl mx-auto space-y-5 page-fade">
       {/* Header */}
@@ -71,7 +85,7 @@ export default async function ProfilPage() {
         </p>
       </div>
 
-      {/* Cards Grid */}
+      {/* Cards Grid — Mempelai */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {/* Mempelai Pria */}
         <div className="card-sacred overflow-hidden">
@@ -79,20 +93,17 @@ export default async function ProfilPage() {
             <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: "#FDF3D0" }}>
               <User size={15} style={{ color: "#B8960C" }} />
             </div>
-            <h2 className="font-bold text-[13px] uppercase tracking-wider" style={{ color: "#2C1F14" }}>Mempelai Pria</h2>
+            <h2 className="font-bold text-[13px] uppercase tracking-wider" style={{ color: "#2C1F14" }}>Calon Suami</h2>
           </div>
           <div className="p-6 space-y-5">
             <Field label="Nama Lengkap" value={profile.groomName} />
             <FieldIcon icon={Calendar} label="Tanggal Lahir" value={formatDate(profile.groomBirthdate)} />
+            <FieldIcon icon={BookOpen} label="Agama" value={profile.groomReligion} />
+            <FieldIcon icon={Briefcase} label="Pekerjaan" value={profile.groomOccupation} />
             <FieldIcon icon={Phone} label="No. Telepon / WhatsApp" value={profile.groomPhone} />
-            <FieldIcon icon={Church} label="Paroki Tempat Baptis" value={profile.groomBaptismChurch} />
-            {profile.groomPhoto && (
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-wider mb-2" style={{ color: "#9C8B7A" }}>Pas Foto</p>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={profile.groomPhoto} alt="Pas Foto Pria" className="w-24 h-32 object-cover rounded border border-[#DDD8D0]" />
-              </div>
-            )}
+            <FieldIcon icon={Church} label="Paroki Asal / Tempat Baptis" value={profile.groomBaptismChurch} />
+            <Field label="Nama Ayah" value={profile.groomFatherName} />
+            <Field label="Nama Ibu" value={profile.groomMotherName} />
           </div>
         </div>
 
@@ -102,24 +113,61 @@ export default async function ProfilPage() {
             <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: "#FDF3D0" }}>
               <User size={15} style={{ color: "#B8960C" }} />
             </div>
-            <h2 className="font-bold text-[13px] uppercase tracking-wider" style={{ color: "#2C1F14" }}>Mempelai Wanita</h2>
+            <h2 className="font-bold text-[13px] uppercase tracking-wider" style={{ color: "#2C1F14" }}>Calon Isteri</h2>
           </div>
           <div className="p-6 space-y-5">
             <Field label="Nama Lengkap" value={profile.brideName} />
             <FieldIcon icon={Calendar} label="Tanggal Lahir" value={formatDate(profile.brideBirthdate)} />
+            <FieldIcon icon={BookOpen} label="Agama" value={profile.brideReligion} />
+            <FieldIcon icon={Briefcase} label="Pekerjaan" value={profile.brideOccupation} />
             <FieldIcon icon={Phone} label="No. Telepon / WhatsApp" value={profile.bridePhone} />
-            <FieldIcon icon={Church} label="Paroki Tempat Baptis" value={profile.brideBaptismChurch} />
-            {profile.bridePhoto && (
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-wider mb-2" style={{ color: "#9C8B7A" }}>Pas Foto</p>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={profile.bridePhoto} alt="Pas Foto Wanita" className="w-24 h-32 object-cover rounded border border-[#DDD8D0]" />
-              </div>
-            )}
+            <FieldIcon icon={Church} label="Paroki Asal / Tempat Baptis" value={profile.brideBaptismChurch} />
+            <Field label="Nama Ayah" value={profile.brideFatherName} />
+            <Field label="Nama Ibu" value={profile.brideMotherName} />
           </div>
         </div>
       </div>
 
+      {/* Informasi Perkawinan */}
+      <div className="card-sacred overflow-hidden">
+        <div className="px-6 py-4 flex items-center gap-2.5" style={{ borderBottom: "1px solid #E8E0D0", background: "#FDFBF8" }}>
+          <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: "#FDF3D0" }}>
+            <Heart size={15} style={{ color: "#B8960C" }} />
+          </div>
+          <h2 className="font-bold text-[13px] uppercase tracking-wider" style={{ color: "#2C1F14" }}>Informasi Perkawinan</h2>
+        </div>
+        <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-5">
+          <FieldIcon icon={Home} label="Alamat Sesudah Perkawinan" value={profile.postMarriageAddress} />
+          <Field label="Pilihan Misa" value={profile.ceremonyType} />
+          {profile.preferredWeddingDate && (
+            <Field label="Preferensi Tanggal Berkat" value={formatDate(profile.preferredWeddingDate)} />
+          )}
+          {profile.preferredWeddingTime && (
+            <Field label="Preferensi Jam Pemberkatan" value={`${profile.preferredWeddingTime} WIB`} />
+          )}
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: "#9C8B7A" }}>Pastor Pemberkat</p>
+            <p className="text-[15px] font-semibold" style={{ color: priestName ? "#2C1F14" : "#9C8B7A", fontStyle: priestName ? "normal" : "italic" }}>
+              {priestName || "Belum ditentukan oleh Admin Sekretariat"}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Foto Pasangan */}
+      {photo && (
+        <div className="card-sacred overflow-hidden">
+          <div className="px-6 py-4" style={{ borderBottom: "1px solid #E8E0D0", background: "#FDFBF8" }}>
+            <h2 className="font-bold text-[13px] uppercase tracking-wider" style={{ color: "#2C1F14" }}>Foto Pasangan</h2>
+          </div>
+          <div className="p-6">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={photo} alt="Foto Pasangan Calon Pengantin" className="max-w-sm w-full rounded-lg border border-[#DDD8D0] shadow-sm" />
+          </div>
+        </div>
+      )}
+
+      {/* Registration Number */}
       <div className="card-sacred p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="px-5 py-3 rounded-xl text-center" style={{ background: "#FDF3D0", border: "1px solid #E8D070" }}>
           <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: "#B8960C" }}>

@@ -31,16 +31,33 @@ export default async function AdminPernikahanDetailPage({ params }: { params: { 
     isReregistration: marriageApplications.isReregistration,
     previousApplicationId: marriageApplications.previousApplicationId,
     regNum: coupleProfiles.registrationNumber,
+    // Calon Suami
     groomName: coupleProfiles.groomName,
     groomBirthdate: coupleProfiles.groomBirthdate,
     groomPhone: coupleProfiles.groomPhone,
     groomBaptismChurch: coupleProfiles.groomBaptismChurch,
+    groomReligion: coupleProfiles.groomReligion,
+    groomOccupation: coupleProfiles.groomOccupation,
+    groomFatherName: coupleProfiles.groomFatherName,
+    groomMotherName: coupleProfiles.groomMotherName,
     groomPhoto: coupleProfiles.groomPhoto,
+    // Calon Isteri
     brideName: coupleProfiles.brideName,
     brideBirthdate: coupleProfiles.brideBirthdate,
     bridePhone: coupleProfiles.bridePhone,
     brideBaptismChurch: coupleProfiles.brideBaptismChurch,
+    brideReligion: coupleProfiles.brideReligion,
+    brideOccupation: coupleProfiles.brideOccupation,
+    brideFatherName: coupleProfiles.brideFatherName,
+    brideMotherName: coupleProfiles.brideMotherName,
     bridePhoto: coupleProfiles.bridePhoto,
+    // Informasi Perkawinan
+    postMarriageAddress: coupleProfiles.postMarriageAddress,
+    ceremonyType: coupleProfiles.ceremonyType,
+    preferredWeddingDate: coupleProfiles.preferredWeddingDate,
+    preferredWeddingTime: coupleProfiles.preferredWeddingTime,
+    // Foto
+    couplePhoto: coupleProfiles.couplePhoto,
   })
   .from(marriageApplications)
   .leftJoin(coupleProfiles, eq(marriageApplications.coupleProfileId, coupleProfiles.id))

@@ -21,7 +21,7 @@ const DEFAULT_DOCUMENTS = [
   "Surat Keterangan Belum Menikah Wanita",
   "Akta Kelahiran Pria",
   "Akta Kelahiran Wanita",
-  "Pas Foto (Berdampingan)",
+  "Foto Pasangan Calon Pengantin",
   "Surat Izin Orang Tua",
 ];
 
@@ -37,22 +37,37 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const {
+      // Calon Suami
       groomName,
       groomBirthdate,
+      groomReligion,
+      groomOccupation,
       groomPhone,
       groomBaptismChurch,
+      groomFatherName,
+      groomMotherName,
+      // Calon Isteri
       brideName,
       brideBirthdate,
+      brideReligion,
+      brideOccupation,
       bridePhone,
       brideBaptismChurch,
-      groomPhoto,
-      bridePhoto,
+      brideFatherName,
+      brideMotherName,
+      // Informasi Perkawinan
+      postMarriageAddress,
+      ceremonyType,
+      preferredWeddingDate,
+      preferredWeddingTime,
+      // Foto
+      couplePhoto,
     } = body;
 
-    // Validate minimal fields
-    if (!groomName || !brideName) {
+    // Validate required fields
+    if (!groomName || !brideName || !groomReligion || !brideReligion) {
       return NextResponse.json(
-        { error: "Data tidak lengkap" },
+        { error: "Data tidak lengkap. Nama dan agama mempelai wajib diisi." },
         { status: 400 }
       );
     }
@@ -70,16 +85,31 @@ export async function POST(req: Request) {
         id: profileId,
         userId: session.user.id,
         registrationNumber,
+        // Calon Suami
         groomName,
         groomBirthdate,
+        groomReligion,
+        groomOccupation,
         groomPhone,
         groomBaptismChurch,
+        groomFatherName,
+        groomMotherName,
+        // Calon Isteri
         brideName,
         brideBirthdate,
+        brideReligion,
+        brideOccupation,
         bridePhone,
         brideBaptismChurch,
-        groomPhoto,
-        bridePhoto,
+        brideFatherName,
+        brideMotherName,
+        // Informasi Perkawinan
+        postMarriageAddress,
+        ceremonyType,
+        preferredWeddingDate: preferredWeddingDate || null,
+        preferredWeddingTime: preferredWeddingTime || null,
+        // Foto
+        couplePhoto: couplePhoto || null,
       });
 
       // 2. Create Application

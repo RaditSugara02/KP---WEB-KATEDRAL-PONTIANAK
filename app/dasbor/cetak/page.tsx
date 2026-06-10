@@ -38,6 +38,12 @@ export default async function CetakPage() {
     day: "numeric", month: "long", year: "numeric",
   });
 
+  const formatDate = (d: string | null) => {
+    if (!d) return "—";
+    try { return new Date(d).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" }); }
+    catch { return d; }
+  };
+
   return (
     <>
       {/* Print Trigger — hanya muncul di browser, bukan di print */}
@@ -70,7 +76,7 @@ export default async function CetakPage() {
           <h1 className="text-2xl font-bold text-[#3D2B1F] uppercase tracking-wide">
             Bukti Pendaftaran Pernikahan
           </h1>
-          <p className="text-sm text-[#6B6560] mt-1">Paroki Katedral Santo Yosef Martapura</p>
+          <p className="text-sm text-[#6B6560] mt-1">Paroki Katedral Santo Yosef Pontianak</p>
           <p className="text-xs text-[#A89880] mt-1">Dicetak pada: {printDate}</p>
         </div>
 
@@ -87,25 +93,58 @@ export default async function CetakPage() {
           </h2>
           <div className="grid grid-cols-2 gap-6">
             <div>
-              <p className="text-xs text-[#A89880] uppercase font-bold tracking-wider mb-1">Mempelai Pria</p>
+              <p className="text-xs text-[#A89880] uppercase font-bold tracking-wider mb-1">Calon Suami</p>
               <p className="font-bold text-[#3D2B1F]">{profile.groomName || "—"}</p>
               {profile.groomBirthdate && (
-                <p className="text-sm text-[#6B6560]">
-                  {new Date(profile.groomBirthdate).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}
-                </p>
+                <p className="text-sm text-[#6B6560]">{formatDate(profile.groomBirthdate)}</p>
               )}
-              {profile.groomBaptismChurch && <p className="text-xs text-[#A89880] mt-1">Baptis: {profile.groomBaptismChurch}</p>}
+              {profile.groomReligion && <p className="text-xs text-[#6B6560] mt-1">Agama: {profile.groomReligion}</p>}
+              {profile.groomOccupation && <p className="text-xs text-[#6B6560]">Pekerjaan: {profile.groomOccupation}</p>}
+              {profile.groomBaptismChurch && <p className="text-xs text-[#A89880] mt-1">Paroki: {profile.groomBaptismChurch}</p>}
+              {profile.groomFatherName && <p className="text-xs text-[#6B6560] mt-1">Ayah: {profile.groomFatherName}</p>}
+              {profile.groomMotherName && <p className="text-xs text-[#6B6560]">Ibu: {profile.groomMotherName}</p>}
             </div>
             <div>
-              <p className="text-xs text-[#A89880] uppercase font-bold tracking-wider mb-1">Mempelai Wanita</p>
+              <p className="text-xs text-[#A89880] uppercase font-bold tracking-wider mb-1">Calon Isteri</p>
               <p className="font-bold text-[#3D2B1F]">{profile.brideName || "—"}</p>
               {profile.brideBirthdate && (
-                <p className="text-sm text-[#6B6560]">
-                  {new Date(profile.brideBirthdate).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}
-                </p>
+                <p className="text-sm text-[#6B6560]">{formatDate(profile.brideBirthdate)}</p>
               )}
-              {profile.brideBaptismChurch && <p className="text-xs text-[#A89880] mt-1">Baptis: {profile.brideBaptismChurch}</p>}
+              {profile.brideReligion && <p className="text-xs text-[#6B6560] mt-1">Agama: {profile.brideReligion}</p>}
+              {profile.brideOccupation && <p className="text-xs text-[#6B6560]">Pekerjaan: {profile.brideOccupation}</p>}
+              {profile.brideBaptismChurch && <p className="text-xs text-[#A89880] mt-1">Paroki: {profile.brideBaptismChurch}</p>}
+              {profile.brideFatherName && <p className="text-xs text-[#6B6560] mt-1">Ayah: {profile.brideFatherName}</p>}
+              {profile.brideMotherName && <p className="text-xs text-[#6B6560]">Ibu: {profile.brideMotherName}</p>}
             </div>
+          </div>
+        </div>
+
+        {/* Informasi Perkawinan */}
+        <div className="mb-6">
+          <h2 className="text-sm font-bold text-[#3D2B1F] uppercase tracking-wider border-b border-[#EDE8DF] pb-2 mb-4">
+            Informasi Perkawinan
+          </h2>
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <p className="text-xs text-[#A89880] uppercase font-bold tracking-wider mb-1">Alamat Sesudah Perkawinan</p>
+              <p className="text-[#3D2B1F]">{profile.postMarriageAddress || "—"}</p>
+            </div>
+            <div>
+              <p className="text-xs text-[#A89880] uppercase font-bold tracking-wider mb-1">Pilihan Misa</p>
+              <p className="font-bold text-[#3D2B1F]">{profile.ceremonyType || "—"}</p>
+            </div>
+            {profile.preferredWeddingDate && (
+              <div>
+                <p className="text-xs text-[#A89880] uppercase font-bold tracking-wider mb-1">Preferensi Tanggal Berkat</p>
+                <p className="text-[#3D2B1F]">{formatDate(profile.preferredWeddingDate)}</p>
+              </div>
+            )}
+            {profile.preferredWeddingTime && (
+              <div>
+                <p className="text-xs text-[#A89880] uppercase font-bold tracking-wider mb-1">Preferensi Jam</p>
+                <p className="text-[#3D2B1F]">{profile.preferredWeddingTime} WIB</p>
+              </div>
+            )}
           </div>
         </div>
 
@@ -160,14 +199,14 @@ export default async function CetakPage() {
 
         {/* Footer */}
         <div className="border-t-2 border-[#3D2B1F] pt-6 text-center text-xs text-[#A89880]">
-          <p className="mb-4">Dokumen ini merupakan bukti resmi pendaftaran pernikahan di Paroki Katedral Santo Yosef Martapura.</p>
+          <p className="mb-4">Dokumen ini merupakan bukti resmi pendaftaran pernikahan di Paroki Katedral Santo Yosef Pontianak.</p>
           <div className="flex justify-between items-end">
             <div className="text-left">
               <p>Sekretariat Paroki</p>
               <p className="mt-12 border-t border-[#A89880] pt-1 w-40">Tanda Tangan &amp; Cap</p>
             </div>
             <div className="text-right">
-              <p>Martapura, {printDate}</p>
+              <p>Pontianak, {printDate}</p>
               <p className="mt-12 border-t border-[#A89880] pt-1 w-40">Mempelai</p>
             </div>
           </div>
@@ -184,7 +223,8 @@ export default async function CetakPage() {
         @media screen {
           .print-area { border: 1px solid #EDE8DF; }
         }
-      `}</style>
+      `}
+      </style>
 
       {/* Auto-trigger print button on click via inline script */}
       <script dangerouslySetInnerHTML={{
