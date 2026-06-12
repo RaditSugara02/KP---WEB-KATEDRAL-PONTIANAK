@@ -79,7 +79,10 @@ export async function POST(req: NextRequest) {
         .set({ currentStage: newStage, updatedAt: now })
         .where(eq(marriageApplications.id, applicationId));
 
-      const note = `Pendaftaran Anda telah dinaikkan ke Tahap ${newStage}: ${STAGE_NAMES[newStage - 1]}.`;
+      let note = `Pendaftaran Anda telah dinaikkan ke Tahap ${newStage}: ${STAGE_NAMES[newStage - 1]}.`;
+      if (newStage === 5) {
+        note = "Selamat! Semua dokumen sudah lengkap dan tahap sudah selesai. Silakan bersiap untuk pemberkatan nikah. Tuhan memberkati.";
+      }
 
       // Log history
       await db.insert(stageHistory).values({
