@@ -2,7 +2,7 @@ import { Resend } from "resend";
 
 // ── Resend Client ───────────────────────────────────────────────────────────
 const resend = new Resend(process.env.RESEND_API_KEY);
-const FROM_EMAIL = "Katedral Santo Yosef <onboarding@resend.dev>";
+const FROM_EMAIL = "Katedral Santo Yosef <noreply@katedral-pontianak.vercel.app>";
 
 // ── Generic send helper ────────────────────────────────────────────────────
 export async function sendMail({

@@ -17,7 +17,7 @@ export const auth = betterAuth({
   }),
   emailAndPassword: {
     enabled: true,
-    requireEmailVerification: false, // Dinonaktifkan: user langsung bisa login setelah daftar
+    requireEmailVerification: true, // User wajib verifikasi email sebelum bisa login
     sendResetPassword: async ({ user, url }) => {
       try {
         const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
@@ -33,8 +33,22 @@ export const auth = betterAuth({
     },
   },
   emailVerification: {
-    sendOnSignUp: false, // Tidak wajib verifikasi untuk bisa login
+    sendOnSignUp: true, // Kirim email verifikasi otomatis saat user mendaftar
     autoSignInAfterVerification: true,
+    sendVerificationEmail: async ({ user, url, token }) => {
+      try {
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+        // Ganti localhost di URL dengan APP_URL agar link bisa diklik di email
+        const fixedUrl = url.replace(/^https?:\/\/localhost(:\d+)?/, appUrl.replace(/\/$/, ""));
+        await sendMail({
+          to: user.email,
+          subject: "Verifikasi Email Anda – Katedral Santo Yosef",
+          html: templateVerifikasi(user.name, fixedUrl),
+        });
+      } catch (error) {
+        console.error("Gagal mengirim email verifikasi:", error);
+      }
+    },
   },
   socialProviders: {
     google: {
