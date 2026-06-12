@@ -16,6 +16,7 @@ import {
   sendStageAdvanceEmail,
   sendCancellationEmail,
   sendCeremonyScheduleEmail,
+  sendStage4AdminSopEmail,
 } from "@/lib/email";
 
 const STAGE_NAMES = [
@@ -103,6 +104,17 @@ export async function POST(req: NextRequest) {
           isRead: false,
           createdAt: now
         });
+
+        // Stage 4 specific notification
+        if (newStage === 4) {
+          await db.insert(notifications).values({
+            id: nanoid(),
+            userId: coupleUserId,
+            message: "Penyelidikan Kanonik sedang berlangsung. Setelah tahap ini dinyatakan selesai oleh pihak gereja, calon pengantin akan diarahkan untuk mengikuti proses administratif berikut: Pembayaran Administrasi, Pengumuman Gereja (3 Minggu), dan Gladi Bersih. Informasi jadwal dan ketentuan akan disampaikan oleh Admin Sekretariat.",
+            isRead: false,
+            createdAt: now
+          });
+        }
       }
 
       // Send email
@@ -115,6 +127,14 @@ export async function POST(req: NextRequest) {
           stageName: STAGE_NAMES[newStage - 1],
           note,
         }).catch(console.error);
+
+        if (newStage === 4) {
+          sendStage4AdminSopEmail({
+            to: coupleEmail,
+            name: coupleName,
+            regNum: coupleProfile.registrationNumber || "",
+          }).catch(console.error);
+        }
       }
 
       return NextResponse.json({ success: true, newStage });

@@ -84,6 +84,49 @@ export async function sendStageAdvanceEmail({
   });
 }
 
+/** Kirim informasi SOP saat naik ke Tahap 4 (Kanonik) */
+export async function sendStage4AdminSopEmail({
+  to,
+  name,
+  regNum,
+}: {
+  to: string;
+  name: string;
+  regNum: string;
+}) {
+  if (!process.env.RESEND_API_KEY) return;
+  const body = `
+    <p>Yth. <strong>${name}</strong>,</p>
+    <p>Kami informasikan bahwa status pendaftaran pernikahan Anda saat ini adalah <strong>Tahap 4: Penyelidikan Kanonik</strong>.</p>
+    <div class="reg-box">
+      <div class="label">No. Registrasi</div>
+      <div class="value">${regNum}</div>
+    </div>
+    <div style="background:#FDF3D0; border:1px solid #E8D070; padding:16px; border-radius:8px; margin-bottom:16px;">
+      <p style="margin-top:0; color:#9A7A0A; font-weight:bold;">Informasi Proses Administratif</p>
+      <p style="color:#3D2B1F; margin-bottom:8px;">
+        Penyelidikan Kanonik sedang berlangsung. Setelah tahap ini dinyatakan selesai oleh pihak gereja, calon pengantin akan diarahkan untuk mengikuti proses administratif berikut:
+      </p>
+      <ul style="color:#3D2B1F; margin-top:0; padding-left:20px; margin-bottom:12px;">
+        <li>Pembayaran Administrasi</li>
+        <li>Pengumuman Gereja (3 Minggu)</li>
+        <li>Gladi Bersih</li>
+      </ul>
+      <p style="color:#3D2B1F; margin-bottom:0; font-style:italic;">
+        Informasi jadwal dan ketentuan akan disampaikan oleh Admin Sekretariat.
+      </p>
+    </div>
+    <p>Silakan masuk ke portal untuk melihat status pendaftaran Anda.</p>
+    <a href="${process.env.NEXT_PUBLIC_APP_URL}/dasbor/beranda" class="cta">Lihat Dasbor Saya →</a>
+  `;
+  await resend.emails.send({
+    from: FROM,
+    to,
+    subject: `[Katedral] Informasi Tahapan Administratif Perkawinan | ${regNum}`,
+    html: baseTemplate("Informasi Tahapan Administratif", body),
+  });
+}
+
 /** Kirim saat pendaftaran dibatalkan */
 export async function sendCancellationEmail({
   to,

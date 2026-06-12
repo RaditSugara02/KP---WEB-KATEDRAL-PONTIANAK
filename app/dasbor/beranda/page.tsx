@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 import { coupleProfiles, marriageApplications, requiredDocuments, stageHistory, contents } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
 import Link from "next/link";
-import { CheckCircle2, Circle, Clock, AlertCircle, FileText, ChevronRight, Printer, Church } from "lucide-react";
+import { CheckCircle2, Circle, Clock, AlertCircle, FileText, ChevronRight, Printer, Church, Info } from "lucide-react";
 import DaftarUlangButton from "./DaftarUlangButton";
 
 const STAGE_NAMES = ["Pengisian Profil", "Kursus KPP", "Pemberkasan Dokumen", "Penyelidikan Kanonik", "Pemberkatan Nikah"];
@@ -283,8 +283,30 @@ export default async function BerandaDasborPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-          {/* Status Card */}
+          {/* Status Card & Informasi Tahap 4 */}
           <div className="space-y-4">
+            {application.currentStage === 4 && (
+              <div className="card-sacred overflow-hidden" style={{ background: "#FDF3D0", border: "1px solid #E8D070" }}>
+                <div className="px-5 py-3 flex items-center gap-2" style={{ borderBottom: "1px solid #E8D070", background: "#FDFBF8" }}>
+                  <Info size={16} style={{ color: "#B8960C" }} />
+                  <h3 className="font-bold text-[13px] uppercase tracking-wider" style={{ color: "#9A7A0A" }}>Informasi Administratif</h3>
+                </div>
+                <div className="p-5 text-[13px]" style={{ color: "#3D2B1F" }}>
+                  <p className="mb-2">
+                    Penyelidikan Kanonik sedang berlangsung. Setelah tahap ini dinyatakan selesai oleh pihak gereja, calon pengantin akan diarahkan untuk mengikuti proses administratif berikut:
+                  </p>
+                  <ul className="list-disc pl-5 mb-3 space-y-1 font-medium">
+                    <li>Pembayaran Administrasi</li>
+                    <li>Pengumuman Gereja (3 Minggu)</li>
+                    <li>Gladi Bersih</li>
+                  </ul>
+                  <p className="italic" style={{ color: "#6B5744" }}>
+                    Informasi jadwal dan ketentuan akan disampaikan oleh Admin Sekretariat.
+                  </p>
+                </div>
+              </div>
+            )}
+
             <div className="card-sacred overflow-hidden">
               <div className="px-5 py-3" style={{ borderBottom: "1px solid #E8E0D0", background: "#FDFBF8" }}>
                 <h3 className="font-bold text-[13px] uppercase tracking-wider" style={{ color: "#9C8B7A" }}>Status Saat Ini</h3>
