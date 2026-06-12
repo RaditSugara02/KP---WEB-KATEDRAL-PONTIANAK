@@ -16,7 +16,11 @@ export async function middleware(request: NextRequest) {
   // ============================================
   // Auth pages: redirect to dashboard if already logged in
   // ============================================
-  if (pathname.startsWith("/masuk") || pathname.startsWith("/daftar")) {
+  if (
+    pathname.startsWith("/masuk") ||
+    pathname.startsWith("/daftar") ||
+    pathname.startsWith("/cek-email")
+  ) {
     if (isLoggedIn) {
       return redirectToDashboard(request, userRole);
     }
@@ -89,5 +93,6 @@ export const config = {
     "/romo/:path*",
     "/masuk",
     "/daftar",
+    "/cek-email",
   ],
 };
