@@ -1,7 +1,7 @@
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { coupleProfiles, marriageApplications, requiredDocuments, stageHistory, contents } from "@/lib/db/schema";
+import { coupleProfiles, marriageApplications, requiredDocuments, stageHistory, contents, users } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
 import Link from "next/link";
 import { CheckCircle2, Circle, Clock, AlertCircle, FileText, ChevronRight, Printer, Church, Info } from "lucide-react";
@@ -96,6 +96,12 @@ export default async function BerandaDasborPage() {
   // helper for phone link
   const cleanPhone = phone.replace(/\D/g, "");
   const waLink = `https://wa.me/62${cleanPhone.startsWith("0") ? cleanPhone.slice(1) : cleanPhone}`;
+
+  let priestName = null;
+  if (application.priestId) {
+    const priestRecord = await db.select({ name: users.name }).from(users).where(eq(users.id, application.priestId)).limit(1);
+    priestName = priestRecord[0]?.name;
+  }
 
   return (
     <div className="max-w-5xl mx-auto space-y-5 page-fade">
@@ -240,20 +246,37 @@ export default async function BerandaDasborPage() {
         </div>
       )}
 
-      {/* ── Jadwal Pemberkatan ── */}
-      {(!isCanceled && !isPendingDaftarUlang) && application.weddingDate && (
+      {/* ── Jadwal & Romo Pemberkatan ── */}
+      {(!isCanceled && !isPendingDaftarUlang) && (application.weddingDate || priestName) && (
         <div className="rounded-xl p-6 flex flex-col md:flex-row items-center gap-5"
           style={{ background: "#FDFBF8", border: "1px solid #E8D070", boxShadow: "0 4px 12px rgba(184,150,12,0.08)" }}>
           <div className="w-16 h-16 rounded-full flex items-center justify-center text-2xl flex-shrink-0"
                style={{ background: "#FDF3D0", border: "2px solid #E8D070" }}>⛪</div>
-          <div className="flex-1 text-center md:text-left">
-            <p className="text-[11px] font-bold uppercase tracking-[3px] mb-1.5" style={{ color: "#B8960C" }}>
-              Jadwal Pemberkatan Nikah
-            </p>
-            <h2 className="text-2xl font-bold" style={{ fontFamily: "var(--font-cormorant)", color: "#2C1F14" }}>
-              {new Date(application.weddingDate).toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
-            </h2>
-            <p className="text-[14px] mt-1 font-medium" style={{ color: "#6B5744" }}>Katedral Santo Yosef Pontianak</p>
+          <div className="flex-1 flex flex-col md:flex-row gap-6 md:gap-12 text-center md:text-left">
+            {application.weddingDate && (
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-[3px] mb-1.5" style={{ color: "#B8960C" }}>
+                  Jadwal Pemberkatan
+                </p>
+                <h2 className="text-2xl font-bold" style={{ fontFamily: "var(--font-cormorant)", color: "#2C1F14" }}>
+                  {new Date(application.weddingDate).toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+                </h2>
+                <p className="text-[14px] mt-1 font-medium" style={{ color: "#6B5744" }}>
+                  {(application.weddingDate as string).includes("T") ? `${(application.weddingDate as string).substring(11, 16)} WIB · ` : ""}Katedral Santo Yosef
+                </p>
+              </div>
+            )}
+            {priestName && (
+              <div className={application.weddingDate ? "pt-4 md:pt-0 md:pl-12 md:border-l border-[#E8D070]" : ""}>
+                <p className="text-[11px] font-bold uppercase tracking-[3px] mb-1.5" style={{ color: "#B8960C" }}>
+                  Romo yang Ditugaskan
+                </p>
+                <h2 className="text-2xl font-bold" style={{ fontFamily: "var(--font-cormorant)", color: "#2C1F14" }}>
+                  {priestName}
+                </h2>
+                <p className="text-[14px] mt-1 font-medium" style={{ color: "#6B5744" }}>Memimpin Misa Pemberkatan</p>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -354,7 +377,7 @@ export default async function BerandaDasborPage() {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                {docs.slice(0, 8).map((doc) => (
+                {docs.map((doc) => (
                   <div key={doc.id} className="flex items-center gap-3 p-3 rounded-lg"
                     style={{ background: "#FDFBF8", border: "1px solid #F0EBE3" }}>
                     <div className="flex-shrink-0">
@@ -367,12 +390,6 @@ export default async function BerandaDasborPage() {
                   </div>
                 ))}
               </div>
-
-              {docs.length > 8 && (
-                <p className="mt-3 text-[12px] text-center italic" style={{ color: "#9C8B7A" }}>
-                  +{docs.length - 8} dokumen lainnya. Lihat detail untuk daftar lengkap.
-                </p>
-              )}
             </div>
           </div>
         </div>
