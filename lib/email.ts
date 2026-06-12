@@ -1,7 +1,7 @@
 import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
-const FROM = "Katedral Santo Yosef <noreply@katedral-pontianak.vercel.app>";
+const FROM = "Katedral Santo Yosef <noreply@katedralpontianak.my.id>";
 
 // ── Template helper ──────────────────────────────────────────
 function baseTemplate(title: string, body: string) {
