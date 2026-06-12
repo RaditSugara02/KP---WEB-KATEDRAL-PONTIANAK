@@ -11,6 +11,7 @@ import {
 import { desc, eq, and, inArray } from "drizzle-orm";
 import { Users, AlertCircle, CalendarHeart, FileCheck, ArrowRight, ChevronRight } from "lucide-react";
 import Link from "next/link";
+import ActivityListClient from "./ActivityListClient";
 
 const STAGE_NAMES = ["Profil", "KPP", "Dokumen", "Kanonik", "Selesai"];
 
@@ -74,7 +75,7 @@ export default async function AdminRingkasanPage() {
     .from(stageHistory)
     .leftJoin(users, eq(stageHistory.changedBy, users.id))
     .orderBy(desc(stageHistory.changedAt))
-    .limit(6);
+    .limit(100);
 
   const todayStr = new Date().toLocaleDateString("id-ID", {
     weekday: "long",
@@ -287,63 +288,7 @@ export default async function AdminRingkasanPage() {
 
         {/* Aktivitas Timeline */}
         <div>
-          <div className="card-sacred h-full flex flex-col overflow-hidden">
-            <div
-              className="px-5 py-4"
-              style={{ borderBottom: "1px solid #E8E0D0", background: "#FDFBF8" }}
-            >
-              <h3
-                className="font-bold text-[15px]"
-                style={{ fontFamily: "var(--font-cormorant)", color: "#2C1F14" }}
-              >
-                Aktivitas Terbaru
-              </h3>
-            </div>
-
-            <div className="p-5 flex-1 overflow-y-auto">
-              {recentHistory.length === 0 ? (
-                <p className="text-center text-[13px] py-8" style={{ color: "#9C8B7A" }}>
-                  Belum ada aktivitas.
-                </p>
-              ) : (
-                <div className="relative pl-5" style={{ borderLeft: "2px solid #E8E0D0" }}>
-                  {recentHistory.map((hist, i) => (
-                    <div key={i} className="relative mb-6 last:mb-0">
-                      {/* Gold dot */}
-                      <div
-                        className="absolute -left-[21px] top-1.5 w-3 h-3 rounded-full border-2"
-                        style={{
-                          background: "#B8960C",
-                          borderColor: "#FFFFFF",
-                          boxShadow: "0 0 0 2px #E8E0D0",
-                        }}
-                      />
-                      <p
-                        className="text-[11px] mb-1"
-                        style={{ color: "#9C8B7A" }}
-                      >
-                        {new Date(hist.createdAt || new Date()).toLocaleString("id-ID", {
-                          day: "numeric",
-                          month: "short",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </p>
-                      <p
-                        className="text-[13px] font-semibold mb-0.5"
-                        style={{ color: "#2C1F14" }}
-                      >
-                        {hist.userName}
-                      </p>
-                      <p className="text-[12px] leading-relaxed" style={{ color: "#6B5744" }}>
-                        {hist.note}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
+          <ActivityListClient history={recentHistory} />
         </div>
       </div>
     </div>

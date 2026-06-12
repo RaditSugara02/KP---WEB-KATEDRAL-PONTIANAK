@@ -217,6 +217,8 @@ export default function DetailClient({
   };
 
   const isCanceled = application.currentStage === 99 || application.currentStage === 98;
+  const allDocsReceived = docs.length > 0 && docs.every((d) => d.isReceived);
+  const isStage3PendingDocs = application.currentStage === 3 && !allDocsReceived;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -370,8 +372,14 @@ export default function DetailClient({
             </div>
           </div>
           
+          {isStage3PendingDocs && (
+            <div className="mb-3 px-3 py-2 bg-red-50 border border-red-200 rounded-md text-xs text-red-600 font-bold text-center">
+              ⚠ Validasi semua dokumen terlebih dahulu sebelum naik ke Tahap 4.
+            </div>
+          )}
+          
           <button 
-            disabled={loading || Number(application.currentStage ?? 0) >= 5 || isCanceled}
+            disabled={loading || Number(application.currentStage ?? 0) >= 5 || isCanceled || isStage3PendingDocs}
             onClick={() => setShowAdvanceModal(true)}
             className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#B8960C] text-white font-bold rounded-md hover:bg-[#9A7A00] transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed mb-3"
           >
