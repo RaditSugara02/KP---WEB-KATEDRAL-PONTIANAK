@@ -439,6 +439,14 @@ export default function DetailClient({
           <h3 className="text-xs font-bold text-[#6B6560] uppercase tracking-wider mb-3 flex items-center gap-2">
             <UserCheck size={14} /> Penugasan Romo
           </h3>
+          {application.priestId && (
+            <div className="mb-3 px-3 py-2 bg-[#FFF8E1] rounded-md border border-[#B8960C]/20">
+              <p className="text-[10px] font-bold text-[#A89880] uppercase tracking-wider mb-0.5">Ditugaskan</p>
+              <p className="font-bold text-[#3D2B1F] text-sm">
+                {priests.find((p) => p.id === application.priestId)?.name || "Romo Ditugaskan"}
+              </p>
+            </div>
+          )}
           {priests.length === 0 ? (
             <p className="text-xs text-[#A89880]">Belum ada imam terdaftar di sistem.</p>
           ) : (
