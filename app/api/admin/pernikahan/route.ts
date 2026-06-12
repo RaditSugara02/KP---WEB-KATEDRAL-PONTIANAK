@@ -17,6 +17,7 @@ import {
   sendCancellationEmail,
   sendCeremonyScheduleEmail,
   sendStage4AdminSopEmail,
+  sendRollbackStageEmail,
 } from "@/lib/email";
 
 const STAGE_NAMES = [
@@ -75,6 +76,13 @@ export async function POST(req: NextRequest) {
     if (action === "ADVANCE_STAGE") {
       const newStage = (app.currentStage || 1) + 1;
       if (newStage > 5) return NextResponse.json({ error: "Already at max stage" }, { status: 400 });
+
+      // Stage 5 Validation
+      if (newStage === 5) {
+        if (!app.priestId || !app.weddingDate) {
+          return NextResponse.json({ error: "missing_requirements_for_stage_5" }, { status: 400 });
+        }
+      }
 
       await db.update(marriageApplications)
         .set({ currentStage: newStage, updatedAt: now })
@@ -135,6 +143,56 @@ export async function POST(req: NextRequest) {
             regNum: coupleProfile.registrationNumber || "",
           }).catch(console.error);
         }
+      }
+
+      return NextResponse.json({ success: true, newStage });
+    }
+
+    if (action === "ROLLBACK_STAGE") {
+      const { note } = body;
+      const currentStage = app.currentStage || 1;
+      if (currentStage <= 1 || currentStage > 5) {
+        return NextResponse.json({ error: "Invalid stage for rollback" }, { status: 400 });
+      }
+
+      const newStage = currentStage - 1;
+      const rollbackNote = `Tahap dikembalikan dari Tahap ${currentStage} ke Tahap ${newStage}. Alasan: ${note}`;
+
+      await db.update(marriageApplications)
+        .set({ currentStage: newStage, updatedAt: now })
+        .where(eq(marriageApplications.id, applicationId));
+
+      // Log history
+      await db.insert(stageHistory).values({
+        id: nanoid(),
+        applicationId,
+        stageNumber: newStage,
+        note: rollbackNote,
+        changedBy: adminId,
+        changedAt: now
+      });
+
+      // Notify user (in-app)
+      if (coupleUserId) {
+        await db.insert(notifications).values({
+          id: nanoid(),
+          userId: coupleUserId,
+          message: `Pendaftaran Anda dikembalikan ke Tahap ${newStage} (${STAGE_NAMES[newStage - 1]}). Silakan periksa informasi dari Admin Sekretariat.`,
+          isRead: false,
+          createdAt: now
+        });
+      }
+
+      // Send email
+      if (coupleEmail && coupleProfile) {
+        sendRollbackStageEmail({
+          to: coupleEmail,
+          name: coupleName,
+          regNum: coupleProfile.registrationNumber || "",
+          newStage,
+          stageName: STAGE_NAMES[newStage - 1],
+          reason: note,
+        }).catch(console.error);
       }
 
       return NextResponse.json({ success: true, newStage });

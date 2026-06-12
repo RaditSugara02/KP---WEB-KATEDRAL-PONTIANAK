@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Check, X, Send, ArrowUpCircle, Trash2, UserCheck, CalendarDays, History, Calendar as CalendarIcon, AlertTriangle, Loader2 } from "lucide-react";
+import { Check, X, Send, ArrowUpCircle, ArrowDownCircle, Trash2, UserCheck, CalendarDays, History, Calendar as CalendarIcon, AlertTriangle, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { id as localeId } from "date-fns/locale";
@@ -68,9 +68,13 @@ export default function DetailClient({
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
 
-  // Advance Stage Modal State
   const [showAdvanceModal, setShowAdvanceModal] = useState(false);
   const [advanceLoading, setAdvanceLoading] = useState(false);
+
+  // Rollback Stage Modal State
+  const [showRollbackModal, setShowRollbackModal] = useState(false);
+  const [rollbackReason, setRollbackReason] = useState("");
+  const [rollbackLoading, setRollbackLoading] = useState(false);
 
   // Approve Reregistration Modal State  
   const [showApproveReregModal, setShowApproveReregModal] = useState(false);
@@ -138,6 +142,21 @@ export default function DetailClient({
     router.refresh();
     setAdvanceLoading(false);
     toast.success(`Berhasil dinaikkan ke Tahap ${Math.min(5, (application.currentStage as number) + 1)}!`);
+  };
+
+  const handleRollbackStage = async () => {
+    if (!rollbackReason.trim()) return;
+    setRollbackLoading(true);
+    await fetch("/api/admin/pernikahan", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "ROLLBACK_STAGE", applicationId: application.id, note: rollbackReason })
+    });
+    setShowRollbackModal(false);
+    setRollbackReason("");
+    router.refresh();
+    setRollbackLoading(false);
+    toast.success(`Berhasil dikembalikan ke Tahap ${(application.currentStage as number) - 1}.`);
   };
 
   const handleSendNote = async () => {
@@ -219,6 +238,7 @@ export default function DetailClient({
   const isCanceled = application.currentStage === 99 || application.currentStage === 98;
   const allDocsReceived = docs.length > 0 && docs.every((d) => d.isReceived);
   const isStage3PendingDocs = application.currentStage === 3 && !allDocsReceived;
+  const isMissingStage5Requirements = application.currentStage === 4 && (!application.priestId || !application.weddingDate);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -377,15 +397,32 @@ export default function DetailClient({
               ⚠ Validasi semua dokumen terlebih dahulu sebelum naik ke Tahap 4.
             </div>
           )}
+
+          {isMissingStage5Requirements && (
+            <div className="mb-3 px-3 py-2 bg-red-50 border border-red-200 rounded-md text-xs text-red-600 font-bold text-center">
+              ⚠ Penugasan Romo dan Tanggal Pemberkatan harus ditentukan terlebih dahulu sebelum masuk ke Tahap 5.
+            </div>
+          )}
           
           <button 
-            disabled={loading || Number(application.currentStage ?? 0) >= 5 || isCanceled || isStage3PendingDocs}
+            disabled={loading || Number(application.currentStage ?? 0) >= 5 || isCanceled || isStage3PendingDocs || isMissingStage5Requirements}
             onClick={() => setShowAdvanceModal(true)}
             className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#B8960C] text-white font-bold rounded-md hover:bg-[#9A7A00] transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed mb-3"
           >
             <ArrowUpCircle size={18} />
             Naikkan ke Tahap {Math.min(5, (application.currentStage as number) + 1)}
           </button>
+
+          {!isCanceled && (application.currentStage as number) > 1 && (application.currentStage as number) <= 5 && (
+            <button 
+              disabled={loading || isCanceled}
+              onClick={() => setShowRollbackModal(true)}
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white border border-[#DDD8D0] text-[#6B6560] font-bold rounded-md hover:bg-[#FAF7F2] transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed mb-3"
+            >
+              <ArrowDownCircle size={18} />
+              Kembalikan ke Tahap {(application.currentStage as number) - 1}
+            </button>
+          )}
 
           <button 
             disabled={loading || isCanceled}
@@ -643,6 +680,59 @@ export default function DetailClient({
                 >
                   {advanceLoading ? <Loader2 size={15} className="animate-spin" /> : <ArrowUpCircle size={15} />}
                   {advanceLoading ? "Memproses..." : "Ya, Naikkan Tahap"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Rollback Stage Modal */}
+      {showRollbackModal && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="bg-[#FAF7F2] px-6 py-4 border-b border-[#EDE8DF] flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-[#3D2B1F]/10 flex items-center justify-center">
+                  <ArrowDownCircle size={16} className="text-[#3D2B1F]" />
+                </div>
+                <h3 className="font-bold text-[#3D2B1F]">Konfirmasi Kembalikan Tahap</h3>
+              </div>
+              <button 
+                onClick={() => setShowRollbackModal(false)}
+                disabled={rollbackLoading}
+                className="text-[#9C8B7A] hover:text-[#3D2B1F] transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            <div className="p-6">
+              <p className="text-[#3D2B1F] text-sm mb-4">
+                Anda akan mengembalikan pendaftaran ini dari <strong>Tahap {application.currentStage}</strong> ke <strong>Tahap {(application.currentStage as number) - 1} ({STAGE_NAMES[(application.currentStage as number) - 2]})</strong>.
+              </p>
+              <label className="block mb-2 text-xs font-bold text-[#6B6560] uppercase tracking-wider">Alasan Pengembalian (Wajib)</label>
+              <textarea 
+                value={rollbackReason}
+                onChange={(e) => setRollbackReason(e.target.value)}
+                placeholder="Misal: Dokumen baptis belum lengkap..."
+                className="w-full h-24 p-3 border border-[#DDD8D0] rounded-md text-sm mb-6 focus:border-[#3D2B1F] focus:ring-1 focus:ring-[#3D2B1F] outline-none resize-none"
+                autoFocus
+              />
+              <div className="flex gap-3 justify-end">
+                <button 
+                  onClick={() => setShowRollbackModal(false)}
+                  disabled={rollbackLoading}
+                  className="px-4 py-2 bg-white border border-[#DDD8D0] text-[#6B6560] font-bold rounded-md hover:bg-[#FAF7F2] transition-colors"
+                >
+                  Batal
+                </button>
+                <button 
+                  onClick={handleRollbackStage}
+                  disabled={rollbackLoading || !rollbackReason.trim()}
+                  className="px-4 py-2 bg-[#3D2B1F] text-white font-bold rounded-md hover:bg-[#2C1F14] transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {rollbackLoading ? <Loader2 size={15} className="animate-spin" /> : <ArrowDownCircle size={15} />}
+                  {rollbackLoading ? "Memproses..." : "Ya, Kembalikan Tahap"}
                 </button>
               </div>
             </div>

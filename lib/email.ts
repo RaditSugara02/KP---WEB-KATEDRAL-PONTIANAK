@@ -127,6 +127,44 @@ export async function sendStage4AdminSopEmail({
   });
 }
 
+/** Kirim saat tahap dikembalikan (rollback) */
+export async function sendRollbackStageEmail({
+  to,
+  name,
+  regNum,
+  newStage,
+  stageName,
+  reason,
+}: {
+  to: string;
+  name: string;
+  regNum: string;
+  newStage: number;
+  stageName: string;
+  reason: string;
+}) {
+  if (!process.env.RESEND_API_KEY) return;
+  const body = `
+    <p>Yth. <strong>${name}</strong>,</p>
+    <p>Kami informasikan bahwa pendaftaran pernikahan Anda dengan nomor registrasi berikut telah <strong>dikembalikan ke tahap sebelumnya</strong>.</p>
+    <div class="reg-box">
+      <div class="label">No. Registrasi</div>
+      <div class="value">${regNum}</div>
+    </div>
+    <p>Status saat ini: <span class="stage-badge">Tahap ${newStage}: ${stageName}</span></p>
+    <p>Alasan pengembalian tahap:</p>
+    <p style="background:#FFF5F5;border-left:3px solid #C0392B;padding:12px 16px;border-radius:0 8px 8px 0;color:#C0392B;font-style:italic;">"${reason}"</p>
+    <p>Silakan periksa informasi lebih lanjut dari Admin Sekretariat melalui dasbor Anda.</p>
+    <a href="${process.env.NEXT_PUBLIC_APP_URL}/dasbor/beranda" class="cta">Lihat Dasbor Saya →</a>
+  `;
+  await resend.emails.send({
+    from: FROM,
+    to,
+    subject: `[Katedral] Pendaftaran Dikembalikan ke Tahap ${newStage} | ${regNum}`,
+    html: baseTemplate("Pemberitahuan Pengembalian Tahap", body),
+  });
+}
+
 /** Kirim saat pendaftaran dibatalkan */
 export async function sendCancellationEmail({
   to,
