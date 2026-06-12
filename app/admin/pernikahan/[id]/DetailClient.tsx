@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Check, X, Send, ArrowUpCircle, Trash2, UserCheck, CalendarDays, History, Calendar as CalendarIcon } from "lucide-react";
+import { Check, X, Send, ArrowUpCircle, Trash2, UserCheck, CalendarDays, History, Calendar as CalendarIcon, AlertTriangle, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { id as localeId } from "date-fns/locale";
@@ -21,6 +21,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
+const STAGE_NAMES = ["Pengisian Profil", "Kursus KPP", "Pemberkasan Dokumen", "Penyelidikan Kanonik", "Pemberkatan Nikah"];
 
 type PreviousApp = {
   regNum: string | null;
@@ -66,6 +68,14 @@ export default function DetailClient({
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
 
+  // Advance Stage Modal State
+  const [showAdvanceModal, setShowAdvanceModal] = useState(false);
+  const [advanceLoading, setAdvanceLoading] = useState(false);
+
+  // Approve Reregistration Modal State  
+  const [showApproveReregModal, setShowApproveReregModal] = useState(false);
+  const [approveReregLoading, setApproveReregLoading] = useState(false);
+
   // Download ZIP State
   const [loadingZip, setLoadingZip] = useState(false);
 
@@ -100,7 +110,7 @@ export default function DetailClient({
       saveAs(content, `Foto_Pernikahan_${coupleName}.zip`);
     } catch (error) {
       console.error("Gagal mendownload ZIP:", error);
-      alert("Terjadi kesalahan saat mengunduh foto ZIP. Mungkin masalah koneksi atau hak akses CORS.");
+      toast.error("Terjadi kesalahan saat mengunduh foto ZIP. Mungkin masalah koneksi atau hak akses CORS.");
     } finally {
       setLoadingZip(false);
     }
@@ -118,15 +128,16 @@ export default function DetailClient({
   };
 
   const handleAdvanceStage = async () => {
-    if (!confirm("Yakin ingin menaikkan tahap? Pasangan akan menerima notifikasi.")) return;
-    setLoading(true);
+    setAdvanceLoading(true);
     await fetch("/api/admin/pernikahan", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "ADVANCE_STAGE", applicationId: application.id })
     });
+    setShowAdvanceModal(false);
     router.refresh();
-    setLoading(false);
+    setAdvanceLoading(false);
+    toast.success(`Berhasil dinaikkan ke Tahap ${Math.min(5, (application.currentStage as number) + 1)}!`);
   };
 
   const handleSendNote = async () => {
@@ -159,15 +170,15 @@ export default function DetailClient({
   };
 
   const handleApproveReregistration = async () => {
-    if (!confirm("Terima pengajuan daftar ulang? Ini akan membuat formulir pendaftaran baru di Tahap 1.")) return;
-    setLoading(true);
+    setApproveReregLoading(true);
     await fetch("/api/admin/pernikahan", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "APPROVE_REREGISTRATION", applicationId: application.id })
     });
+    setShowApproveReregModal(false);
     router.refresh();
-    setLoading(false);
+    setApproveReregLoading(false);
     toast.success("Daftar ulang disetujui! Formulir baru telah dibuat.");
   };
 
@@ -335,7 +346,7 @@ export default function DetailClient({
             
             <button 
               disabled={loading}
-              onClick={handleApproveReregistration}
+              onClick={() => setShowApproveReregModal(true)}
               className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#B8960C] text-white font-bold rounded-md hover:bg-[#9A7A00] transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed mb-3"
             >
               <Check size={18} />
@@ -344,16 +355,24 @@ export default function DetailClient({
           </div>
         )}
         
-        {/* Naikkan Tahap */}
         <div className="bg-white rounded-xl border border-[#DDD8D0] shadow-sm overflow-hidden p-6 text-center">
           <h3 className="text-xs font-bold text-[#6B6560] uppercase tracking-wider mb-2">Manajemen Tahap</h3>
-          <p className="text-[#3D2B1F] text-sm mb-6">
-            Tahap saat ini: <strong>{application.currentStage === 99 ? <span className="text-red-600">DIBATALKAN</span> : application.currentStage === 98 ? <span className="text-[#B8960C]">MENUNGGU KONFIRMASI DAFTAR ULANG</span> : `Tahap ${application.currentStage}`}</strong>
-          </p>
+          <div className="text-[#3D2B1F] text-sm mb-6">
+            Tahap saat ini: 
+            <div className="mt-1 font-bold">
+              {application.currentStage === 99 ? (
+                <span className="text-red-600">DIBATALKAN</span>
+              ) : application.currentStage === 98 ? (
+                <span className="text-[#B8960C]">MENUNGGU KONFIRMASI DAFTAR ULANG</span>
+              ) : (
+                <span className="text-[#B8960C]">Tahap {application.currentStage} — {STAGE_NAMES[(application.currentStage as number) - 1]}</span>
+              )}
+            </div>
+          </div>
           
           <button 
             disabled={loading || Number(application.currentStage ?? 0) >= 5 || isCanceled}
-            onClick={handleAdvanceStage}
+            onClick={() => setShowAdvanceModal(true)}
             className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#B8960C] text-white font-bold rounded-md hover:bg-[#9A7A00] transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed mb-3"
           >
             <ArrowUpCircle size={18} />
@@ -526,11 +545,20 @@ export default function DetailClient({
       {showCancelModal && (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
-            <div className="bg-[#FDECEA] px-6 py-4 border-b border-[#C0392B]/20 flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-[#C0392B]/10 flex items-center justify-center">
-                <Trash2 size={16} className="text-[#C0392B]" />
+            <div className="bg-[#FDECEA] px-6 py-4 border-b border-[#C0392B]/20 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-[#C0392B]/10 flex items-center justify-center">
+                  <Trash2 size={16} className="text-[#C0392B]" />
+                </div>
+                <h3 className="font-bold text-[#C0392B]">Konfirmasi Pembatalan</h3>
               </div>
-              <h3 className="font-bold text-[#C0392B]">Konfirmasi Pembatalan</h3>
+              <button 
+                onClick={() => setShowCancelModal(false)}
+                disabled={loading}
+                className="text-[#9C8B7A] hover:text-[#3D2B1F] transition-colors"
+              >
+                <X size={18} />
+              </button>
             </div>
             <div className="p-6">
               <p className="text-[#3D2B1F] text-sm mb-4">
@@ -555,9 +583,106 @@ export default function DetailClient({
                 <button 
                   onClick={handleCancelApplication}
                   disabled={loading || !cancelReason.trim()}
-                  className="px-4 py-2 bg-[#C0392B] text-white font-bold rounded-md hover:bg-[#A93226] transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 bg-[#C0392B] text-white font-bold rounded-md hover:bg-[#A93226] transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                 >
+                  {loading ? <Loader2 size={15} className="animate-spin" /> : <Trash2 size={15} />}
                   {loading ? "Memproses..." : "Ya, Batalkan Pendaftaran"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Advance Stage Modal */}
+      {showAdvanceModal && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="bg-[#FFF8E1] px-6 py-4 border-b border-[#F0E6D2] flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-[#B8960C]/10 flex items-center justify-center">
+                  <ArrowUpCircle size={16} className="text-[#B8960C]" />
+                </div>
+                <h3 className="font-bold text-[#3D2B1F]">Konfirmasi Naikkan Tahap</h3>
+              </div>
+              <button 
+                onClick={() => setShowAdvanceModal(false)}
+                disabled={advanceLoading}
+                className="text-[#9C8B7A] hover:text-[#3D2B1F] transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            <div className="p-6">
+              <p className="text-[#3D2B1F] text-sm mb-2">
+                Yakin ingin menaikkan tahap dari <strong>Tahap {application.currentStage} ({STAGE_NAMES[(application.currentStage as number) - 1]})</strong> ke <strong>Tahap {Math.min(5, (application.currentStage as number) + 1)} ({STAGE_NAMES[Math.min(4, (application.currentStage as number))]})</strong>?
+              </p>
+              <p className="text-[#6B6560] text-sm mb-6">
+                Pasangan akan menerima notifikasi mengenai perubahan tahap ini di dasbor mereka.
+              </p>
+              <div className="flex gap-3 justify-end">
+                <button 
+                  onClick={() => setShowAdvanceModal(false)}
+                  disabled={advanceLoading}
+                  className="px-4 py-2 bg-white border border-[#DDD8D0] text-[#6B6560] font-bold rounded-md hover:bg-[#FAF7F2] transition-colors"
+                >
+                  Batal
+                </button>
+                <button 
+                  onClick={handleAdvanceStage}
+                  disabled={advanceLoading}
+                  className="px-4 py-2 bg-[#B8960C] text-white font-bold rounded-md hover:bg-[#9A7A00] transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {advanceLoading ? <Loader2 size={15} className="animate-spin" /> : <ArrowUpCircle size={15} />}
+                  {advanceLoading ? "Memproses..." : "Ya, Naikkan Tahap"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Approve Reregistration Modal */}
+      {showApproveReregModal && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="bg-[#FFF8E1] px-6 py-4 border-b border-[#F0E6D2] flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-[#B8960C]/10 flex items-center justify-center">
+                  <AlertTriangle size={16} className="text-[#B8960C]" />
+                </div>
+                <h3 className="font-bold text-[#3D2B1F]">Konfirmasi Daftar Ulang</h3>
+              </div>
+              <button 
+                onClick={() => setShowApproveReregModal(false)}
+                disabled={approveReregLoading}
+                className="text-[#9C8B7A] hover:text-[#3D2B1F] transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            <div className="p-6">
+              <p className="text-[#3D2B1F] text-sm mb-2">
+                Terima pengajuan daftar ulang untuk pasangan ini?
+              </p>
+              <p className="text-[#6B6560] text-sm mb-6">
+                Tindakan ini akan mengarsipkan pendaftaran saat ini dan membuat <strong>formulir pendaftaran baru di Tahap 1</strong>. Pasangan akan mendapat notifikasi untuk melengkapi dokumen dari awal.
+              </p>
+              <div className="flex gap-3 justify-end">
+                <button 
+                  onClick={() => setShowApproveReregModal(false)}
+                  disabled={approveReregLoading}
+                  className="px-4 py-2 bg-white border border-[#DDD8D0] text-[#6B6560] font-bold rounded-md hover:bg-[#FAF7F2] transition-colors"
+                >
+                  Batal
+                </button>
+                <button 
+                  onClick={handleApproveReregistration}
+                  disabled={approveReregLoading}
+                  className="px-4 py-2 bg-[#B8960C] text-white font-bold rounded-md hover:bg-[#9A7A00] transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {approveReregLoading ? <Loader2 size={15} className="animate-spin" /> : <Check size={15} />}
+                  {approveReregLoading ? "Memproses..." : "Ya, Terima & Buat Baru"}
                 </button>
               </div>
             </div>
