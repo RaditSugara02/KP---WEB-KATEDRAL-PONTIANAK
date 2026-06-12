@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { ChevronRight, X } from "lucide-react";
 
 type HistoryItem = {
@@ -13,6 +14,21 @@ type HistoryItem = {
 
 export default function ActivityListClient({ history }: { history: HistoryItem[] }) {
   const [showModal, setShowModal] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Prevent body scroll when modal is open
+  useEffect(() => {
+    if (showModal) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => { document.body.style.overflow = ""; };
+  }, [showModal]);
 
   const displayedHistory = history.slice(0, 6);
 
@@ -76,9 +92,9 @@ export default function ActivityListClient({ history }: { history: HistoryItem[]
         )}
       </div>
 
-      {/* Modal Lihat Semua Aktivitas */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+      {/* Modal Lihat Semua Aktivitas (menggunakan Portal agar tidak terpotong parent) */}
+      {showModal && mounted && createPortal(
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-200 flex flex-col max-h-[85vh]">
             <div className="bg-[#FDFBF8] px-6 py-4 flex items-center justify-between border-b border-[#E8E0D0]">
               <h3 className="font-bold text-[18px]" style={{ fontFamily: "var(--font-cormorant)", color: "#2C1F14" }}>
@@ -124,7 +140,8 @@ export default function ActivityListClient({ history }: { history: HistoryItem[]
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
