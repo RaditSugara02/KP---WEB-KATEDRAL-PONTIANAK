@@ -247,7 +247,7 @@ export default async function BerandaDasborPage() {
       )}
 
       {/* ── Jadwal & Romo Pemberkatan ── */}
-      {(!isCanceled && !isPendingDaftarUlang) && (application.weddingDate || priestName) && (
+      {(!isCanceled && !isPendingDaftarUlang && (application.currentStage ?? 1) >= 5) && (application.weddingDate || priestName) && (
         <div className="rounded-xl p-6 flex flex-col md:flex-row items-center gap-5"
           style={{ background: "#FDFBF8", border: "1px solid #E8D070", boxShadow: "0 4px 12px rgba(184,150,12,0.08)" }}>
           <div className="w-16 h-16 rounded-full flex items-center justify-center text-2xl flex-shrink-0"
