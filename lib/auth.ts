@@ -5,6 +5,12 @@ import * as schema from "./db/schema";
 import { sendMail, templateVerifikasi, templateResetSandi } from "./mailer";
 
 export const auth = betterAuth({
+  baseURL: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+  trustedOrigins: [
+    "https://katedralpontianak.my.id",
+    "https://www.katedralpontianak.my.id",
+    "http://localhost:3000",
+  ],
   database: drizzleAdapter(db, {
     provider: "pg",
     schema: {
