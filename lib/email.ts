@@ -31,13 +31,13 @@ function baseTemplate(title: string, body: string) {
   <div class="wrapper">
     <div class="header">
       <h1>✝ Katedral Santo Yosef</h1>
-      <p>Martapura, Kalimantan Selatan</p>
+      <p>Pontianak, Kalimantan Barat</p>
     </div>
     <div class="body">
       ${body}
     </div>
     <div class="footer">
-      <p>Email ini dikirim secara otomatis oleh Sistem Informasi Paroki Katedral Santo Yosef Martapura.</p>
+      <p>Email ini dikirim secara otomatis oleh Sistem Informasi Paroki Katedral Santo Yosef Pontianak.</p>
       <p>Jangan membalas email ini. Hubungi sekretariat untuk pertanyaan lebih lanjut.</p>
     </div>
   </div>
@@ -224,7 +224,7 @@ export async function sendCeremonyScheduleEmail({
       <div class="value">${regNum}</div>
     </div>
     <p style="text-align:center; font-size:18px; font-weight:700; color:#2D6A4F;">${dateStr}${timeStr}</p>
-    <p>Tempat: <strong>Katedral Santo Yosef Martapura</strong></p>
+    <p>Tempat: <strong>Katedral Santo Yosef Pontianak</strong></p>
     <p>Silakan hubungi sekretariat paroki jika ada pertanyaan mengenai persiapan teknis hari pemberkatan.</p>
     <a href="${process.env.NEXT_PUBLIC_APP_URL}/dasbor/beranda" class="cta">Lihat Dasbor Saya →</a>
   `;

@@ -22,31 +22,31 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://kp-web-katedral-pont
 export const metadata: Metadata = {
   metadataBase: new URL(APP_URL),
   title: {
-    default: "Katedral Santo Yosef Martapura — Sistem Informasi Paroki",
-    template: "%s | Katedral Santo Yosef Martapura",
+    default: "Katedral Santo Yosef Pontianak — Sistem Informasi Paroki",
+    template: "%s | Katedral Santo Yosef Pontianak",
   },
   description:
-    "Portal resmi Paroki Katedral Santo Yosef Martapura. Layanan informasi publik, jadwal misa, berita paroki, dan sistem pendaftaran pernikahan online.",
+    "Portal resmi Paroki Katedral Santo Yosef Pontianak. Layanan informasi publik, jadwal misa, berita paroki, dan sistem pendaftaran pernikahan online.",
   keywords: [
-    "Katedral Santo Yosef", "Martapura", "Kalimantan Selatan",
+    "Katedral Santo Yosef", "Pontianak", "Kalimantan Barat",
     "paroki", "gereja katolik", "pernikahan katolik",
     "jadwal misa", "pendaftaran pernikahan", "sakramen perkawinan"
   ],
-  authors: [{ name: "Paroki Katedral Santo Yosef Martapura" }],
-  creator: "Paroki Katedral Santo Yosef Martapura",
+  authors: [{ name: "Paroki Katedral Santo Yosef Pontianak" }],
+  creator: "Paroki Katedral Santo Yosef Pontianak",
   openGraph: {
     type: "website",
     locale: "id_ID",
     url: APP_URL,
-    siteName: "Katedral Santo Yosef Martapura",
-    title: "Katedral Santo Yosef Martapura — Sistem Informasi Paroki",
+    siteName: "Katedral Santo Yosef Pontianak",
+    title: "Katedral Santo Yosef Pontianak — Sistem Informasi Paroki",
     description:
-      "Portal resmi Paroki Katedral Santo Yosef Martapura. Informasi jadwal misa, berita paroki, dan pendaftaran pernikahan.",
+      "Portal resmi Paroki Katedral Santo Yosef Pontianak. Informasi jadwal misa, berita paroki, dan pendaftaran pernikahan.",
   },
   twitter: {
     card: "summary",
-    title: "Katedral Santo Yosef Martapura",
-    description: "Portal resmi Paroki Katedral Santo Yosef Martapura.",
+    title: "Katedral Santo Yosef Pontianak",
+    description: "Portal resmi Paroki Katedral Santo Yosef Pontianak.",
   },
   robots: {
     index: true,
