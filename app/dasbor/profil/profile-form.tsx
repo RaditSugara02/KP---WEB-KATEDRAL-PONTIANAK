@@ -35,8 +35,6 @@ export function ProfileForm() {
   const [brideMotherName, setBrideMotherName] = useState("");
 
   // === Informasi Perkawinan ===
-  const [postMarriageAddress, setPostMarriageAddress] = useState("");
-  const [ceremonyType, setCeremonyType] = useState("Misa");
   const [preferredWeddingDate, setPreferredWeddingDate] = useState("");
   const [preferredWeddingTime, setPreferredWeddingTime] = useState("");
 
@@ -60,7 +58,6 @@ export function ProfileForm() {
           groomPhone, groomBaptismChurch, groomFatherName, groomMotherName,
           brideName, brideBirthdate, brideReligion, brideOccupation,
           bridePhone, brideBaptismChurch, brideFatherName, brideMotherName,
-          postMarriageAddress, ceremonyType,
           preferredWeddingDate, preferredWeddingTime,
           couplePhoto,
         }),
@@ -212,38 +209,6 @@ export function ProfileForm() {
             <div>
               <label className={labelClass}>Preferensi Jam Pemberkatan <span className="text-[#9C8B7A] normal-case font-normal">(opsional)</span></label>
               <input type="time" value={preferredWeddingTime} onChange={e => setPreferredWeddingTime(e.target.value)} className={inputClass} />
-            </div>
-            <div className="md:col-span-2">
-              <label className={labelClass}>Alamat Sesudah Perkawinan <span className="text-red-400">*</span></label>
-              <textarea
-                required
-                value={postMarriageAddress}
-                onChange={e => setPostMarriageAddress(e.target.value)}
-                placeholder="Alamat lengkap tempat tinggal setelah menikah"
-                rows={3}
-                className="w-full px-4 py-3 rounded-md border border-[#DDD8D0] focus:border-[#B8960C] focus:ring-1 focus:ring-[#B8960C] outline-none text-[#3D2B1F] bg-white resize-none"
-              />
-            </div>
-            <div className="md:col-span-2">
-              <label className={labelClass}>Pilihan Misa <span className="text-red-400">*</span></label>
-              <div className="flex gap-6 mt-1">
-                <label className="flex items-center gap-3 cursor-pointer group">
-                  <input
-                    type="radio" name="ceremonyType" value="Misa" required
-                    checked={ceremonyType === "Misa"} onChange={e => setCeremonyType(e.target.value)}
-                    className="w-5 h-5 accent-[#B8960C]"
-                  />
-                  <span className="text-sm font-medium text-[#3D2B1F] group-hover:text-[#B8960C] transition-colors">Dengan Misa</span>
-                </label>
-                <label className="flex items-center gap-3 cursor-pointer group">
-                  <input
-                    type="radio" name="ceremonyType" value="Tanpa Misa"
-                    checked={ceremonyType === "Tanpa Misa"} onChange={e => setCeremonyType(e.target.value)}
-                    className="w-5 h-5 accent-[#B8960C]"
-                  />
-                  <span className="text-sm font-medium text-[#3D2B1F] group-hover:text-[#B8960C] transition-colors">Tanpa Misa</span>
-                </label>
-              </div>
             </div>
 
             {/* Pastor Pemberkat — Info Only */}

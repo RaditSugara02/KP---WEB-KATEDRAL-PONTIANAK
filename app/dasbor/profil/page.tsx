@@ -137,8 +137,6 @@ export default async function ProfilPage() {
           <h2 className="font-bold text-[13px] uppercase tracking-wider" style={{ color: "#2C1F14" }}>Informasi Perkawinan</h2>
         </div>
         <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-5">
-          <FieldIcon icon={Home} label="Alamat Sesudah Perkawinan" value={profile.postMarriageAddress} />
-          <Field label="Pilihan Misa" value={profile.ceremonyType} />
           {profile.preferredWeddingDate && (
             <Field label="Preferensi Tanggal Pemberkatan" value={formatDate(profile.preferredWeddingDate)} />
           )}

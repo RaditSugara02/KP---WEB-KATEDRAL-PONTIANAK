@@ -56,8 +56,6 @@ export async function POST(req: Request) {
       brideFatherName,
       brideMotherName,
       // Informasi Perkawinan
-      postMarriageAddress,
-      ceremonyType,
       preferredWeddingDate,
       preferredWeddingTime,
       // Foto
@@ -104,8 +102,6 @@ export async function POST(req: Request) {
         brideFatherName,
         brideMotherName,
         // Informasi Perkawinan
-        postMarriageAddress,
-        ceremonyType,
         preferredWeddingDate: preferredWeddingDate || null,
         preferredWeddingTime: preferredWeddingTime || null,
         // Foto

@@ -125,14 +125,6 @@ export default async function CetakPage() {
             Informasi Perkawinan
           </h2>
           <div className="grid grid-cols-2 gap-4 text-sm">
-            <div>
-              <p className="text-xs text-[#A89880] uppercase font-bold tracking-wider mb-1">Alamat Sesudah Perkawinan</p>
-              <p className="text-[#3D2B1F]">{profile.postMarriageAddress || "—"}</p>
-            </div>
-            <div>
-              <p className="text-xs text-[#A89880] uppercase font-bold tracking-wider mb-1">Pilihan Misa</p>
-              <p className="font-bold text-[#3D2B1F]">{profile.ceremonyType || "—"}</p>
-            </div>
             {profile.preferredWeddingDate && (
               <div>
                 <p className="text-xs text-[#A89880] uppercase font-bold tracking-wider mb-1">Preferensi Tanggal Pemberkatan</p>

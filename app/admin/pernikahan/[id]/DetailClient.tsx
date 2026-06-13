@@ -296,8 +296,6 @@ export default function DetailClient({
             <h3 className="font-bold text-[#3D2B1F] uppercase tracking-wide text-sm">Informasi Perkawinan</h3>
           </div>
           <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-            <div><span className="block text-xs text-[#A89880] uppercase">Alamat Sesudah Perkawinan</span> <span className="font-medium text-[#3D2B1F]">{application.postMarriageAddress || "—"}</span></div>
-            <div><span className="block text-xs text-[#A89880] uppercase">Pilihan Misa</span> <span className="font-medium text-[#3D2B1F]">{application.ceremonyType || "—"}</span></div>
             {application.preferredWeddingDate && (
               <div><span className="block text-xs text-[#A89880] uppercase">Preferensi Tanggal Pemberkatan</span> <span className="font-medium text-[#3D2B1F]">{new Date(application.preferredWeddingDate as string).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}</span></div>
             )}
