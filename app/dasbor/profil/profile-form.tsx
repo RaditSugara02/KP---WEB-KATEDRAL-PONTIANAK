@@ -37,6 +37,11 @@ export function ProfileForm() {
   // === Informasi Perkawinan ===
   const [preferredWeddingDate, setPreferredWeddingDate] = useState("");
   const [preferredWeddingTime, setPreferredWeddingTime] = useState("");
+  const [postMarriageAddress, setPostMarriageAddress] = useState("");
+  const [ceremonyType, setCeremonyType] = useState("");
+
+  // === Persetujuan ===
+  const [agreement, setAgreement] = useState(false);
 
   // === Foto Pasangan ===
   const [couplePhoto, setCouplePhoto] = useState("");
@@ -58,7 +63,7 @@ export function ProfileForm() {
           groomPhone, groomBaptismChurch, groomFatherName, groomMotherName,
           brideName, brideBirthdate, brideReligion, brideOccupation,
           bridePhone, brideBaptismChurch, brideFatherName, brideMotherName,
-          preferredWeddingDate, preferredWeddingTime,
+          preferredWeddingDate, preferredWeddingTime, postMarriageAddress, ceremonyType,
           couplePhoto,
         }),
       });
@@ -210,6 +215,18 @@ export function ProfileForm() {
               <label className={labelClass}>Preferensi Jam Pemberkatan <span className="text-[#9C8B7A] normal-case font-normal">(opsional)</span></label>
               <input type="time" value={preferredWeddingTime} onChange={e => setPreferredWeddingTime(e.target.value)} className={inputClass} />
             </div>
+            <div className="md:col-span-2">
+              <label className={labelClass}>Alamat Sesudah Perkawinan <span className="text-red-400">*</span></label>
+              <input type="text" required value={postMarriageAddress} onChange={e => setPostMarriageAddress(e.target.value)} className={inputClass} placeholder="contoh: Jl. Ahmad Yani No. 123, Pontianak" />
+            </div>
+            <div>
+              <label className={labelClass}>Misa / Tanpa Misa <span className="text-red-400">*</span></label>
+              <select required value={ceremonyType} onChange={e => setCeremonyType(e.target.value)} className={inputClass}>
+                <option value="">— Pilih Jenis Perayaan —</option>
+                <option value="Misa">Misa</option>
+                <option value="Tanpa Misa">Tanpa Misa</option>
+              </select>
+            </div>
 
             {/* Pastor Pemberkat — Info Only */}
             <div className="md:col-span-2">
@@ -239,6 +256,24 @@ export function ProfileForm() {
               helpText="Foto menampilkan kedua calon pengantin dalam satu gambar, wajah terlihat jelas, berpakaian rapi dan sopan. Format: JPG, JPEG, PNG, WEBP. Maksimal 5 MB."
             />
           </div>
+        </div>
+
+        {/* ═══════════════ PERSETUJUAN ═══════════════ */}
+        <div className="bg-[#FAF7F2] p-6 rounded-xl border border-[#EDE8DF]">
+          <label className="flex items-start gap-4 cursor-pointer">
+            <div className="pt-1">
+              <input
+                type="checkbox"
+                required
+                checked={agreement}
+                onChange={(e) => setAgreement(e.target.checked)}
+                className="w-5 h-5 rounded border-[#DDD8D0] text-[#B8960C] focus:ring-[#B8960C]"
+              />
+            </div>
+            <div className="text-sm text-[#3D2B1F] leading-relaxed">
+              Setelah membaca dan menyimak segala syarat dan ketentuan yang berlaku untuk menerima Sakramen Perkawinan di Gereja Katedral St. Yosef Pontianak, <strong>maka dengan ini saya menyatakan bahwa saya menyetujui dan mematuhi segala syarat dan ketentuan yang berlaku.</strong>
+            </div>
+          </label>
         </div>
 
         <div className="flex justify-end pt-4 border-t border-[#DDD8D0]">

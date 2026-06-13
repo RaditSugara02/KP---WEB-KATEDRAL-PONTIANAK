@@ -143,7 +143,9 @@ export default async function ProfilPage() {
           {profile.preferredWeddingTime && (
             <Field label="Preferensi Jam Pemberkatan" value={`${profile.preferredWeddingTime} WIB`} />
           )}
-          <div>
+          <Field label="Alamat Sesudah Perkawinan" value={profile.postMarriageAddress} />
+          <Field label="Jenis Perayaan" value={profile.ceremonyType} />
+          <div className="md:col-span-2 mt-2 pt-4 border-t border-[#EDE8DF]">
             <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: "#9C8B7A" }}>Pastor Pemberkat</p>
             <p className="text-[15px] font-semibold" style={{ color: priestName ? "#2C1F14" : "#9C8B7A", fontStyle: priestName ? "normal" : "italic" }}>
               {priestName || "Belum ditentukan oleh Admin Sekretariat"}

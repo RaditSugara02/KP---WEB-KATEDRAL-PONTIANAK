@@ -58,6 +58,8 @@ export async function POST(req: Request) {
       // Informasi Perkawinan
       preferredWeddingDate,
       preferredWeddingTime,
+      postMarriageAddress,
+      ceremonyType,
       // Foto
       couplePhoto,
     } = body;
@@ -104,6 +106,8 @@ export async function POST(req: Request) {
         // Informasi Perkawinan
         preferredWeddingDate: preferredWeddingDate || null,
         preferredWeddingTime: preferredWeddingTime || null,
+        postMarriageAddress: postMarriageAddress || null,
+        ceremonyType: ceremonyType || null,
         // Foto
         couplePhoto: couplePhoto || null,
       });
