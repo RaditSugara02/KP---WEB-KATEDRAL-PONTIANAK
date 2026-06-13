@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Check, X, Send, ArrowUpCircle, ArrowDownCircle, Trash2, UserCheck, CalendarDays, History, Calendar as CalendarIcon, AlertTriangle, Loader2 } from "lucide-react";
 import { format } from "date-fns";
@@ -80,6 +80,12 @@ export default function DetailClient({
   const [showApproveReregModal, setShowApproveReregModal] = useState(false);
   const [approveReregLoading, setApproveReregLoading] = useState(false);
 
+  // Local docs state for optimistic UI
+  const [localDocs, setLocalDocs] = useState(docs);
+  useEffect(() => {
+    setLocalDocs(docs);
+  }, [docs]);
+
   // Download ZIP State
   const [loadingZip, setLoadingZip] = useState(false);
 
@@ -121,14 +127,25 @@ export default function DetailClient({
   };
 
   const handleToggleDoc = async (docId: string, currentStatus: boolean) => {
-    setLoading(true);
-    await fetch("/api/admin/pernikahan", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "TOGGLE_DOC", applicationId: application.id, docId, isReceived: !currentStatus })
-    });
-    router.refresh();
-    setLoading(false);
+    const newStatus = !currentStatus;
+    
+    // Optimistic update
+    setLocalDocs(prev => prev.map(d => d.id === docId ? { ...d, isReceived: newStatus } : d));
+    
+    // Background API call
+    try {
+      await fetch("/api/admin/pernikahan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "TOGGLE_DOC", applicationId: application.id, docId, isReceived: newStatus })
+      });
+      router.refresh();
+    } catch (error) {
+      console.error("Gagal update dokumen:", error);
+      // Revert if failed
+      setLocalDocs(docs);
+      toast.error("Gagal menyimpan status dokumen");
+    }
   };
 
   const handleAdvanceStage = async () => {
@@ -236,7 +253,7 @@ export default function DetailClient({
   };
 
   const isCanceled = application.currentStage === 99 || application.currentStage === 98;
-  const allDocsReceived = docs.length > 0 && docs.every((d) => d.isReceived);
+  const allDocsReceived = localDocs.length > 0 && localDocs.every((d) => d.isReceived);
   const isStage3PendingDocs = application.currentStage === 3 && !allDocsReceived;
   const isMissingStage5Requirements = application.currentStage === 4 && (!application.priestId || !application.weddingDate);
 
@@ -321,17 +338,16 @@ export default function DetailClient({
           <div className="bg-[#FAF7F2] px-6 py-4 border-b border-[#EDE8DF] flex justify-between items-center">
             <h3 className="font-bold text-[#3D2B1F] uppercase tracking-wide text-sm">Dokumen Persyaratan</h3>
             <span className="text-xs font-bold text-[#2D6A4F] bg-[#D8F3DC] px-2 py-1 rounded">
-              {docs.filter(d => d.isReceived).length} / {docs.length} Diterima
+              {localDocs.filter(d => d.isReceived).length} / {localDocs.length} Diterima
             </span>
           </div>
           <div className="p-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {docs.map((doc) => (
+              {localDocs.map((doc) => (
                 <button 
                   key={doc.id}
-                  disabled={loading}
                   onClick={() => handleToggleDoc(doc.id, doc.isReceived ?? false)}
-                  className={`flex items-center justify-between p-3 rounded border transition-colors text-left disabled:opacity-50 ${
+                  className={`flex items-center justify-between p-3 rounded border transition-colors text-left ${
                     doc.isReceived 
                       ? "bg-[#D8F3DC]/30 border-[#2D6A4F]/30 hover:bg-[#D8F3DC]/50" 
                       : "bg-[#F5F0E8] border-[#DDD8D0] hover:bg-[#EDE8DF]"
