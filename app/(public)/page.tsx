@@ -133,7 +133,7 @@ export default async function LandingPage() {
 
           <ScrollReveal direction="up" delay={500} duration={1000}>
             <p className="font-light text-base sm:text-lg md:text-xl text-white/90 max-w-4xl mb-10 md:mb-12 leading-relaxed drop-shadow">
-              Dibangun pada tahun 1908, Katedral ini menjadi pusat kedudukan Uskup Keuskupan Agung Pontianak. Memadukan arsitektur bergaya Romawi, Timur Tengah, dengan sentuhan ornamen khas Dayak dan Tionghoa sebagai simbol keagungan iman dan inkulturasi budaya.
+              Dibangun pada tahun 1909, Katedral ini menjadi pusat kedudukan Uskup Keuskupan Agung Pontianak. Memadukan arsitektur bergaya Romawi, Timur Tengah, dengan sentuhan ornamen khas Dayak dan Tionghoa sebagai simbol keagungan iman dan inkulturasi budaya.
             </p>
           </ScrollReveal>
 
