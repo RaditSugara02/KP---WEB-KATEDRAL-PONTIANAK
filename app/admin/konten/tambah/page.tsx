@@ -524,23 +524,13 @@ export default function TambahKontenPage() {
 
             {/* Success Banner when 10 photos are reached */}
             {galleryImages.length === 10 && (
-              <div className="p-4 bg-green-50 border border-green-200 rounded-xl text-center space-y-3 shadow-sm">
-                <div>
-                  <p className="text-sm font-bold text-green-800">
-                    🎉 Album telah penuh (10/10 foto berhasil diunggah).
-                  </p>
-                  <p className="text-xs text-green-600 mt-1">
-                    Foto-foto Anda sudah otomatis ter-unggah. Klik tombol di bawah ini untuk menyimpan dan mempublikasikan album.
-                  </p>
-                </div>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#2D6A4F] hover:bg-[#1f4a37] text-white font-bold text-sm rounded-lg transition-colors shadow-sm disabled:opacity-60"
-                >
-                  {loading ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
-                  Simpan Konten Sekarang
-                </button>
+              <div className="p-4 bg-green-50 border border-green-200 rounded-xl text-center shadow-sm">
+                <p className="text-sm font-bold text-green-800">
+                  🎉 Album telah penuh (10/10 foto berhasil diunggah).
+                </p>
+                <p className="text-xs text-green-600 mt-1">
+                  Foto-foto sudah ter-unggah. Klik tombol <strong>Simpan &amp; Publikasikan</strong> di bawah untuk menyimpan album.
+                </p>
               </div>
             )}
 
