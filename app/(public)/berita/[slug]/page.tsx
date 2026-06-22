@@ -2,10 +2,11 @@ import { db } from "@/lib/db";
 import { contents } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import Link from "next/link";
-import { CalendarDays, Church, ArrowLeft, Share2 } from "lucide-react";
+import { CalendarDays, Church, ArrowLeft } from "lucide-react";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { NewsPhotoGallery } from "@/components/berita/NewsPhotoGallery";
+import { BeritaShareButton } from "@/components/berita/BeritaShareButton";
 
 export const dynamic = "force-dynamic";
 
@@ -96,7 +97,7 @@ export default async function BeritaDetailPage({ params }: { params: { slug: str
           </h1>
 
           <div
-            className="prose prose-stone max-w-none text-[#4A3728] prose-p:leading-relaxed prose-p:mb-5 prose-a:text-[#B8960C] prose-a:font-semibold prose-headings:font-bold prose-headings:text-[#3D2B1F] prose-strong:text-[#3D2B1F] prose-li:mb-1"
+            className="whitespace-pre-wrap prose prose-stone max-w-none text-[#4A3728] prose-p:leading-relaxed prose-p:mb-5 prose-a:text-[#B8960C] prose-a:font-semibold prose-headings:font-bold prose-headings:text-[#3D2B1F] prose-strong:text-[#3D2B1F] prose-li:mb-1"
             dangerouslySetInnerHTML={{ __html: html }}
           />
 
@@ -110,9 +111,7 @@ export default async function BeritaDetailPage({ params }: { params: { slug: str
             <div className="text-sm font-medium text-[#A89880]">
               Dipublikasikan oleh: <strong className="text-[#3D2B1F]">Sekretariat Paroki</strong>
             </div>
-            <button className="flex items-center gap-2 px-4 py-2 border border-[#DDD8D0] rounded-md text-sm font-bold text-[#6B6560] hover:bg-[#F5F0E8] hover:text-[#3D2B1F] transition-colors">
-              <Share2 size={16} /> Bagikan
-            </button>
+            <BeritaShareButton title={news.title} />
           </div>
 
         </div>
