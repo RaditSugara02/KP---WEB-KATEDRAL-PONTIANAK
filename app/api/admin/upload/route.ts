@@ -3,7 +3,6 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { createClient } from "@supabase/supabase-js";
 import { nanoid } from "nanoid";
-import sharp from "sharp";
 
 const BUCKET = "katedral-media";
 
@@ -49,35 +48,10 @@ export async function POST(req: NextRequest) {
     const rawBuffer = Buffer.from(await file.arrayBuffer());
     const ext = file.name.split(".").pop() || "jpg";
 
-    // ── Kompresi & konversi ke WebP via Sharp ──────────────────────────
-    let uploadBuffer: Buffer;
-    let uploadContentType: string;
-    let uploadExt: string;
-
-    // GIF: skip Sharp (animasi bisa rusak), upload langsung
-    if (file.type === "image/gif") {
-      uploadBuffer = rawBuffer;
-      uploadContentType = "image/gif";
-      uploadExt = "gif";
-    } else {
-      try {
-        uploadBuffer = await sharp(rawBuffer)
-          .resize(1920, 1920, {
-            fit: "inside",           // jaga aspek rasio, tidak pernah upscale
-            withoutEnlargement: true,
-          })
-          .webp({ quality: 82 })     // WebP quality 82 — optimal antara kualitas & ukuran
-          .toBuffer();
-        uploadContentType = "image/webp";
-        uploadExt = "webp";
-      } catch (sharpError) {
-        // ── FALLBACK: Sharp gagal → upload file asli tanpa kompresi ──
-        console.warn("[Upload] Sharp processing failed, uploading original:", sharpError);
-        uploadBuffer = rawBuffer;
-        uploadContentType = file.type;
-        uploadExt = ext;
-      }
-    }
+    // ── Langsung upload tanpa Sharp ──────────────────────────
+    const uploadBuffer = rawBuffer;
+    const uploadContentType = file.type;
+    const uploadExt = ext;
 
     const supabase = getSupabaseAdmin();
 
