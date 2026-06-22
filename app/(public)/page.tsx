@@ -107,14 +107,30 @@ export default async function LandingPage() {
       {/* ═══════════════════ HERO SECTION ═══════════════════ */}
       <section className="relative min-h-[100vh] w-full flex items-center justify-center overflow-hidden -mt-[72px]">
         <div className="absolute inset-0">
-          <Image
-            src="/bg-katedral.jpg"
-            alt="Eksterior Katedral Santo Yosef Pontianak"
-            fill
-            className="object-cover"
-            priority
-            quality={85}
-          />
+          <picture>
+            <source
+              media="(max-width: 768px)"
+              srcSet="/bg-katedral-mobile.webp"
+              type="image/webp"
+            />
+            <source
+              media="(max-width: 1024px)"
+              srcSet="/bg-katedral-tablet.webp"
+              type="image/webp"
+            />
+            <source
+              srcSet="/bg-katedral-desktop.webp"
+              type="image/webp"
+            />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/bg-katedral.jpg"
+              alt="Eksterior Katedral Santo Yosef Pontianak"
+              className="w-full h-full object-cover"
+              fetchPriority="high"
+              decoding="async"
+            />
+          </picture>
           {/* Elegant gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-b from-[#2C1F14]/70 via-[#2C1F14]/50 to-[#FAF7F2]" />
         </div>

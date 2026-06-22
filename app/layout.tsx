@@ -65,6 +65,29 @@ export default function RootLayout({
       lang="id"
       className={`${cormorant.variable} ${dmSans.variable} h-full antialiased`}
     >
+      <head>
+        <link
+          rel="preload"
+          href="/bg-katedral-mobile.webp"
+          as="image"
+          type="image/webp"
+          media="(max-width: 768px)"
+        />
+        <link
+          rel="preload"
+          href="/bg-katedral-tablet.webp"
+          as="image"
+          type="image/webp"
+          media="(min-width: 769px) and (max-width: 1024px)"
+        />
+        <link
+          rel="preload"
+          href="/bg-katedral-desktop.webp"
+          as="image"
+          type="image/webp"
+          media="(min-width: 1025px)"
+        />
+      </head>
       <body className="min-h-full flex flex-col">
         <TooltipProvider>{children}</TooltipProvider>
         <Toaster position="top-center" richColors />
