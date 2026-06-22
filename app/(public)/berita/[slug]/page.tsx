@@ -55,20 +55,14 @@ export default async function BeritaDetailPage({ params }: { params: { slug: str
       {/* Header Image */}
       <div className="w-full h-72 md:h-96 bg-[#2C1F14] relative">
         <div className="absolute inset-0 bg-gradient-to-t from-[#2C1F14] to-transparent z-10" />
-        {news.imageUrl ? (
-          <Image
-            src={news.imageUrl}
-            alt={news.title || "Header berita"}
-            fill
-            className="object-cover opacity-60"
-            priority
-            sizes="100vw"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center opacity-20">
-            <Church size={120} className="text-[#EDE8DF]" />
-          </div>
-        )}
+        <Image
+          src="/bg-katedral.jpg"
+          alt="Gereja Katedral Santo Yosef"
+          fill
+          className="object-cover opacity-60"
+          priority
+          sizes="100vw"
+        />
       </div>
 
 

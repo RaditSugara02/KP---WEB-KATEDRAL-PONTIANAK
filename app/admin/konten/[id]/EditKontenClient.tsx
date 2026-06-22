@@ -249,11 +249,17 @@ export default function EditKontenClient({ content }: { content: ContentItem }) 
         payload.category = `${payload.massDay}::${payload.massType}`;
       } else if (payload.type === "NEWS") {
         payload.category = "Berita Paroki";
+        if (!payload.imageUrl && galleryImages.length > 0) {
+          payload.imageUrl = galleryImages[0];
+        }
         if (galleryImages.length > 0) {
           payload.body = JSON.stringify({ html: form.body, images: galleryImages });
         }
       } else if (payload.type === "ANNOUNCEMENT") {
         payload.category = "Pengumuman";
+        if (!payload.imageUrl && galleryImages.length > 0) {
+          payload.imageUrl = galleryImages[0];
+        }
         if (galleryImages.length > 0) {
           payload.body = JSON.stringify({ html: form.body, images: galleryImages });
         }
@@ -399,8 +405,8 @@ export default function EditKontenClient({ content }: { content: ContentItem }) 
           label="Gambar Cover (Opsional)"
           value={form.imageUrl}
           onChange={(url) => setForm(prev => ({ ...prev, imageUrl: url }))}
-          aspectRatio={16/9}
-          helpText="Disarankan resolusi 1280x720 px (Rasio 16:9) agar gambar sampul tidak terpotong saat ditampilkan."
+          aspectRatio={4/3}
+          helpText="Disarankan resolusi 800x600 px (Rasio 4:3) agar gambar sampul pas saat ditampilkan."
         />
       )}
 
