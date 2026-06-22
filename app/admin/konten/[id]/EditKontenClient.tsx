@@ -15,7 +15,7 @@ const CONTENT_TYPES = [
   { value: "NEWS", label: "Berita / Artikel" },
   { value: "MASS_SCHEDULE", label: "Jadwal Misa" },
   { value: "ANNOUNCEMENT", label: "Pengumuman" },
-  { value: "GALLERY", label: "📷 Foto Galeri" },
+  { value: "GALLERY", label: "Foto Galeri" },
 ];
 
 type ContentItem = {

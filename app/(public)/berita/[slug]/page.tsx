@@ -2,7 +2,7 @@ import { db } from "@/lib/db";
 import { contents } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import Link from "next/link";
-import { CalendarDays, Church, ArrowLeft } from "lucide-react";
+import { CalendarDays, Church, ArrowLeft, CalendarClock, MapPin } from "lucide-react";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { NewsPhotoGallery } from "@/components/berita/NewsPhotoGallery";
@@ -89,6 +89,42 @@ export default async function BeritaDetailPage({ params }: { params: { slug: str
           <h1 className="text-3xl md:text-5xl font-bold text-[#3D2B1F] mb-8 leading-tight" style={{ fontFamily: "var(--font-cormorant)" }}>
             {news.title}
           </h1>
+
+          {/* Event Details for Announcements / Mass Schedule */}
+          {(news.eventDate || news.location) && (
+            <div className="mb-8 p-5 bg-[#F5F0E8] rounded-xl border border-[#EDE8DF] flex flex-col sm:flex-row flex-wrap gap-4 sm:gap-8">
+              {news.eventDate && (
+                <div className="flex items-center gap-2.5 text-sm text-[#4A3728]">
+                  <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm">
+                    <CalendarClock size={16} className="text-[#B8960C]" />
+                  </div>
+                  <div>
+                    <div className="text-[10px] font-bold text-[#A89880] uppercase tracking-wider mb-0.5">
+                      {news.type === "MASS_SCHEDULE" ? "Waktu Pelaksanaan" : "Tanggal Acara"}
+                    </div>
+                    <div className="font-semibold">
+                      {news.eventDate.includes("-") 
+                        ? new Date(news.eventDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
+                        : news.eventDate}
+                    </div>
+                  </div>
+                </div>
+              )}
+              {news.location && (
+                <div className="flex items-center gap-2.5 text-sm text-[#4A3728]">
+                  <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm">
+                    <MapPin size={16} className="text-[#B8960C]" />
+                  </div>
+                  <div>
+                    <div className="text-[10px] font-bold text-[#A89880] uppercase tracking-wider mb-0.5">
+                      Lokasi
+                    </div>
+                    <div className="font-semibold">{news.location}</div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           <div
             className="whitespace-pre-wrap prose prose-stone max-w-none text-[#4A3728] prose-p:leading-relaxed prose-p:mb-5 prose-a:text-[#B8960C] prose-a:font-semibold prose-headings:font-bold prose-headings:text-[#3D2B1F] prose-strong:text-[#3D2B1F] prose-li:mb-1"
