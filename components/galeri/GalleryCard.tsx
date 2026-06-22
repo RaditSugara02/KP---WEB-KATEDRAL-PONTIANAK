@@ -91,7 +91,8 @@ export function Lightbox({ images, initialIndex, title, onClose }: LightboxProps
 
   return createPortal(
     <div
-      className="fixed inset-0 h-screen w-screen z-[9999] flex bg-black/95 backdrop-blur-sm"
+      className="fixed inset-0 h-screen w-screen z-[9999] flex"
+      style={{ background: "rgba(28, 12, 0, 0.97)", backdropFilter: "blur(6px)" }}
       onClick={onClose}
     >
       {/* ── LEFT: Photo area ──────────────────────────────────────────── */}
@@ -104,7 +105,8 @@ export function Lightbox({ images, initialIndex, title, onClose }: LightboxProps
           <button
             onClick={(e) => { e.stopPropagation(); prev(); }}
             aria-label="Foto sebelumnya"
-            className="absolute left-4 z-20 w-12 h-12 rounded-full bg-white/10 hover:bg-white/25 border border-white/10 flex items-center justify-center text-white transition-all duration-200 hover:scale-105 active:scale-95"
+            className="absolute left-4 z-20 w-12 h-12 rounded-full flex items-center justify-center text-[#FAF7F2] transition-all duration-200 hover:scale-105 active:scale-95"
+            style={{ background: "rgba(184,150,12,0.15)", border: "1px solid rgba(184,150,12,0.3)" }}
           >
             <ChevronLeft size={24} />
           </button>
@@ -126,22 +128,25 @@ export function Lightbox({ images, initialIndex, title, onClose }: LightboxProps
           <button
             onClick={(e) => { e.stopPropagation(); next(); }}
             aria-label="Foto berikutnya"
-            className="absolute right-4 z-20 w-12 h-12 rounded-full bg-white/10 hover:bg-white/25 border border-white/10 flex items-center justify-center text-white transition-all duration-200 hover:scale-105 active:scale-95"
+            className="absolute right-4 z-20 w-12 h-12 rounded-full flex items-center justify-center text-[#FAF7F2] transition-all duration-200 hover:scale-105 active:scale-95"
+            style={{ background: "rgba(184,150,12,0.15)", border: "1px solid rgba(184,150,12,0.3)" }}
           >
             <ChevronRight size={24} />
           </button>
         )}
 
         {/* Mobile top bar */}
-        <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-4 py-3 md:hidden bg-gradient-to-b from-black/60 to-transparent">
-          <span className="text-white/70 text-sm font-medium">
+        <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-4 py-3 md:hidden"
+             style={{ background: "linear-gradient(to bottom, rgba(28,12,0,0.8), transparent)" }}>
+          <span className="text-[#E8DDD0] text-sm font-medium">
             {current + 1} / {images.length}
           </span>
           <div className="flex items-center gap-2">
             {canShare && (
               <button
                 onClick={(e) => { e.stopPropagation(); handleShare(); }}
-                className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors"
+                className="w-9 h-9 rounded-full flex items-center justify-center text-[#E8DDD0] transition-colors"
+                style={{ background: "rgba(184,150,12,0.15)" }}
               >
                 <Share2 size={16} />
               </button>
@@ -150,13 +155,15 @@ export function Lightbox({ images, initialIndex, title, onClose }: LightboxProps
               href={`/api/public/galeri/download?url=${encodeURIComponent(images[current])}&filename=${encodeURIComponent(filename)}`}
               download
               onClick={(e) => e.stopPropagation()}
-              className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors"
+              className="w-9 h-9 rounded-full flex items-center justify-center text-[#E8DDD0] transition-colors"
+              style={{ background: "rgba(184,150,12,0.15)" }}
             >
               <Download size={16} />
             </a>
             <button
               onClick={(e) => { e.stopPropagation(); onClose(); }}
-              className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors"
+              className="w-9 h-9 rounded-full flex items-center justify-center text-[#E8DDD0] transition-colors"
+              style={{ background: "rgba(184,150,12,0.15)" }}
             >
               <X size={18} />
             </button>
@@ -183,35 +190,43 @@ export function Lightbox({ images, initialIndex, title, onClose }: LightboxProps
 
       {/* ── RIGHT: Info panel (desktop only) ──────────────────────────── */}
       <div
-        className="hidden md:flex w-[300px] lg:w-[320px] flex-col bg-[#111] border-l border-white/10 shrink-0"
+        className="hidden md:flex w-[300px] lg:w-[320px] flex-col shrink-0"
+        style={{ background: "#1A0F05", borderLeft: "1px solid rgba(184,150,12,0.2)" }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-start justify-between gap-3 p-5 border-b border-white/10">
+        <div className="flex items-start justify-between gap-3 p-5"
+             style={{ borderBottom: "1px solid rgba(184,150,12,0.15)" }}>
           <div className="min-w-0">
             {title && (
-              <h3 className="text-white font-semibold text-base leading-snug line-clamp-2">
+              <h3 className="text-[#FAF7F2] font-semibold text-base leading-snug line-clamp-2"
+                style={{ fontFamily: "var(--font-cormorant)" }}>
                 {title}
               </h3>
             )}
-            <p className="text-white/40 text-xs mt-1.5 flex items-center gap-1.5">
+            <p className="text-[#A89880] text-xs mt-1.5 flex items-center gap-1.5">
               <Images size={12} />
               {current + 1} dari {images.length} foto
             </p>
           </div>
           <button
             onClick={onClose}
-            className="shrink-0 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white/60 hover:text-white transition-colors"
+            className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-[#A89880] hover:text-[#FAF7F2] transition-colors"
+            style={{ background: "rgba(184,150,12,0.1)", border: "1px solid rgba(184,150,12,0.2)" }}
           >
             <X size={16} />
           </button>
         </div>
 
         {/* Action buttons */}
-        <div className="p-4 border-b border-white/10 space-y-2">
+        <div className="p-4 space-y-2"
+             style={{ borderBottom: "1px solid rgba(184,150,12,0.15)" }}>
           <button
             onClick={handleCopyLink}
-            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-white/70 hover:text-white text-sm font-medium transition-colors"
+            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors text-[#E8DDD0] hover:text-[#FAF7F2]"
+            style={{ background: "rgba(184,150,12,0.08)" }}
+            onMouseEnter={e => (e.currentTarget.style.background = "rgba(184,150,12,0.18)")}
+            onMouseLeave={e => (e.currentTarget.style.background = "rgba(184,150,12,0.08)")}
           >
             {copied
               ? <Check size={15} className="text-green-400 shrink-0" />
@@ -223,7 +238,10 @@ export function Lightbox({ images, initialIndex, title, onClose }: LightboxProps
           {canShare && (
             <button
               onClick={handleShare}
-              className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-white/70 hover:text-white text-sm font-medium transition-colors"
+              className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors text-[#E8DDD0] hover:text-[#FAF7F2]"
+              style={{ background: "rgba(184,150,12,0.08)" }}
+              onMouseEnter={e => (e.currentTarget.style.background = "rgba(184,150,12,0.18)")}
+              onMouseLeave={e => (e.currentTarget.style.background = "rgba(184,150,12,0.08)")}
             >
               <Share2 size={15} className="shrink-0" />
               Bagikan
@@ -234,7 +252,10 @@ export function Lightbox({ images, initialIndex, title, onClose }: LightboxProps
             href={`/api/public/galeri/download?url=${encodeURIComponent(images[current])}&filename=${encodeURIComponent(filename)}`}
             download
             onClick={(e) => e.stopPropagation()}
-            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl bg-white/5 hover:bg-[#B8960C]/20 text-white/70 hover:text-[#B8960C] text-sm font-medium transition-colors"
+            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors text-[#E8DDD0]"
+            style={{ background: "rgba(184,150,12,0.08)" }}
+            onMouseEnter={e => { e.currentTarget.style.background = "rgba(184,150,12,0.25)"; e.currentTarget.style.color = "#B8960C"; }}
+            onMouseLeave={e => { e.currentTarget.style.background = "rgba(184,150,12,0.08)"; e.currentTarget.style.color = "#E8DDD0"; }}
           >
             <Download size={15} className="shrink-0" />
             Unduh Foto
@@ -244,7 +265,7 @@ export function Lightbox({ images, initialIndex, title, onClose }: LightboxProps
         {/* Thumbnail grid */}
         {images.length > 1 && (
           <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
-            <p className="text-white/30 text-[11px] uppercase tracking-wider font-semibold mb-3">
+            <p className="text-[#A89880] text-[11px] uppercase tracking-wider font-semibold mb-3">
               Semua Foto Album
             </p>
             <div className="grid grid-cols-3 gap-1.5">
@@ -281,7 +302,7 @@ export function Lightbox({ images, initialIndex, title, onClose }: LightboxProps
         }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(184,150,12,0.3); border-radius: 2px; }
       `}</style>
     </div>,
     document.body
