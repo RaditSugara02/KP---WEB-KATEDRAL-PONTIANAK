@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
+import NextImage from "next/image";
 import {
   X, ChevronLeft, ChevronRight, Download,
   Link2, Share2, Check, Images,
@@ -355,13 +356,15 @@ export function GalleryCard({ photo }: GalleryCardProps) {
           onClick={() => setLightboxOpen(true)}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <NextImage
             key={allImages[cardIndex]}
             src={allImages[cardIndex]}
             alt={photo.title || "Foto Galeri Katedral"}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            fill
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
             style={{ animation: "cardFadeIn 0.15s ease" }}
             loading="lazy"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             draggable={false}
           />
 

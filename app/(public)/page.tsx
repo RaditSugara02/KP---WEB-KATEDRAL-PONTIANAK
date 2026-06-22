@@ -2,6 +2,7 @@ import { db } from "@/lib/db";
 import { contents, coupleProfiles, marriageApplications } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight, Calendar, Newspaper, BookOpen, MapPin, CalendarDays, ArrowUpRight } from "lucide-react";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 
@@ -106,10 +107,13 @@ export default async function LandingPage() {
       {/* ═══════════════════ HERO SECTION ═══════════════════ */}
       <section className="relative min-h-[100vh] w-full flex items-center justify-center overflow-hidden -mt-[72px]">
         <div className="absolute inset-0">
-          <img
-            alt="Eksterior Katedral Santo Yosef Pontianak"
-            className="w-full h-full object-cover"
+          <Image
             src="/bg-katedral.jpg"
+            alt="Eksterior Katedral Santo Yosef Pontianak"
+            fill
+            className="object-cover"
+            priority
+            quality={85}
           />
           {/* Elegant gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-b from-[#2C1F14]/70 via-[#2C1F14]/50 to-[#FAF7F2]" />
@@ -315,10 +319,13 @@ export default async function LandingPage() {
                       <div className="bg-transparent flex flex-col h-full cursor-pointer">
                         <div className="h-64 relative rounded-xl overflow-hidden mb-6 bg-[#F5F0E8]">
                           {news.imageUrl ? (
-                            <img
+                            <Image
                               src={news.imageUrl}
-                              alt={news.title}
-                              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                              alt={news.title || "Foto berita"}
+                              fill
+                              className="object-cover transition-transform duration-700 group-hover:scale-105"
+                              loading="lazy"
+                              sizes="(max-width: 768px) 100vw, 33vw"
                             />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center bg-[#EDE8DF]">
@@ -453,6 +460,7 @@ export default async function LandingPage() {
                 alt="Pernikahan di Katedral"
                 className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuBR-_8bRb1Mt5tUrKEwh_3FL4PHLE7F_0e6zhDyYHxJyprN4Wz2jCXMt7O0baiJ3FPKXwZnUMLCGzF-ovWz9rcNFTX_vTtM9CeQtBMEg09IWSy-neg5Z9dZSSosjQ4jZwWT8SCvjTxzs33RQQm-Eh6UHoOMnIPEuAPeI1QPm222PbrchMIlEVQ2RsIlda3oVU5yP5j0WEfmetrtE8RPlVYaRjsKNBc_HQzM6kncfHqRqwI7FNV33bAlVcM8ASVrYbEh68Zj-QXJJjQ"
+                loading="lazy"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#2C1F14]/60 via-transparent to-transparent" />
             </div>
@@ -515,10 +523,12 @@ export default async function LandingPage() {
       {/* ═══════════════════ DONASI SECTION ═══════════════════ */}
       <section className="relative py-24 md:py-32 px-4 sm:px-6 lg:px-8 flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0">
-          <img
+          <Image
             alt="Katedral eksterior malam"
             className="w-full h-full object-cover"
             src="https://lh3.googleusercontent.com/aida-public/AB6AXuByCUW2E10TvEaMTGU4wkasrC8LVmZhelnxuPEMUdl08pq4p9RYfDdquxGzLFnLWiaQHNo-IcrgknBpDTYTDuzLIp3RfZJbggwnIL6FacWugqEsVg-gXLf6XnwpSp0lYb50WypbH5MkPis7yQKscH-yPoHvkMhDzAP2rq04Wc2crtq1ihyqJOadK-ah-vWGFApj6gNM-d9EC3gdm0IwMZahS8gZlBfT9MfNPegdiN9StyBplOvz3EL30E8-eIP1yJTy4D6Ct63eRSg"
+            fill
+            loading="lazy"
           />
           <div className="absolute inset-0 bg-[#2C1F14]/85" />
         </div>

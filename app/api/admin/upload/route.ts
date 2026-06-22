@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { createClient } from "@supabase/supabase-js";
 import { nanoid } from "nanoid";
+import sharp from "sharp";
 
 const BUCKET = "katedral-media";
 
@@ -37,17 +38,50 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Max 5MB
-    if (file.size > 5 * 1024 * 1024) {
+    // Max 10MB (kita kompres, jadi naikkan limit sedikit untuk kenyamanan upload)
+    if (file.size > 10 * 1024 * 1024) {
       return NextResponse.json(
-        { error: "Ukuran file maksimal 5MB." },
+        { error: "Ukuran file maksimal 10MB." },
         { status: 400 }
       );
     }
 
+    const rawBuffer = Buffer.from(await file.arrayBuffer());
+    const ext = file.name.split(".").pop() || "jpg";
+
+    // ── Kompresi & konversi ke WebP via Sharp ──────────────────────────
+    let uploadBuffer: Buffer;
+    let uploadContentType: string;
+    let uploadExt: string;
+
+    // GIF: skip Sharp (animasi bisa rusak), upload langsung
+    if (file.type === "image/gif") {
+      uploadBuffer = rawBuffer;
+      uploadContentType = "image/gif";
+      uploadExt = "gif";
+    } else {
+      try {
+        uploadBuffer = await sharp(rawBuffer)
+          .resize(1920, 1920, {
+            fit: "inside",           // jaga aspek rasio, tidak pernah upscale
+            withoutEnlargement: true,
+          })
+          .webp({ quality: 82 })     // WebP quality 82 — optimal antara kualitas & ukuran
+          .toBuffer();
+        uploadContentType = "image/webp";
+        uploadExt = "webp";
+      } catch (sharpError) {
+        // ── FALLBACK: Sharp gagal → upload file asli tanpa kompresi ──
+        console.warn("[Upload] Sharp processing failed, uploading original:", sharpError);
+        uploadBuffer = rawBuffer;
+        uploadContentType = file.type;
+        uploadExt = ext;
+      }
+    }
+
     const supabase = getSupabaseAdmin();
 
-    // Ensure bucket exists (create if needed)
+    // Ensure bucket exists
     const { data: buckets } = await supabase.storage.listBuckets();
     const bucketExists = buckets?.some((b) => b.name === BUCKET);
     if (!bucketExists) {
@@ -55,17 +89,13 @@ export async function POST(req: NextRequest) {
     }
 
     // Generate unique filename
-    const ext = file.name.split(".").pop() || "jpg";
-    const filename = `${nanoid()}.${ext}`;
+    const filename = `${nanoid()}.${uploadExt}`;
     const path = `uploads/${filename}`;
-
-    // Convert File to ArrayBuffer
-    const buffer = await file.arrayBuffer();
 
     const { error: uploadError } = await supabase.storage
       .from(BUCKET)
-      .upload(path, buffer, {
-        contentType: file.type,
+      .upload(path, uploadBuffer, {
+        contentType: uploadContentType,
         upsert: false,
       });
 
