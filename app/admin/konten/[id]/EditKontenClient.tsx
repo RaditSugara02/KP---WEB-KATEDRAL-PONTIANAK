@@ -1,10 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Loader2, Save, Plus, Trash2, Images, ArrowUp, ArrowDown } from "lucide-react";
+import { ArrowLeft, Loader2, Save, Plus, Trash2, Images, ArrowUp, ArrowDown, X } from "lucide-react";
 import ImageUpload from "@/components/admin/ImageUpload";
+import Cropper from "react-easy-crop";
+import type { Area } from "react-easy-crop";
+import getCroppedImg from "@/lib/cropImage";
 
 const CONTENT_TYPES = [
   { value: "NEWS", label: "Berita / Artikel" },
@@ -68,8 +71,20 @@ export default function EditKontenClient({ content }: { content: ContentItem }) 
   const initGallery = parseGalleryBody(content.body, content.imageUrl);
   const [galleryImages, setGalleryImages] = useState<string[]>(initGallery.images);
   const [galleryCaption, setGalleryCaption] = useState(initGallery.caption);
-  const [showAddPhoto, setShowAddPhoto] = useState(false);
-  const [tempPhotoUrl, setTempPhotoUrl] = useState("");
+
+  // Multi-upload & Cropping states
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploadingCount, setUploadingCount] = useState(0);
+  const [dragging, setDragging] = useState(false);
+
+  // Cropper states
+  const [cropperOpen, setCropperOpen] = useState(false);
+  const [cropTargetIdx, setCropTargetIdx] = useState<number | null>(null);
+  const [cropImageSrc, setCropImageSrc] = useState<string>("");
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
+  const [cropAspectRatio, setCropAspectRatio] = useState<number | undefined>(undefined);
 
   const removePhoto = (idx: number) => setGalleryImages(prev => prev.filter((_, i) => i !== idx));
   const moveUp = (idx: number) => {
@@ -82,13 +97,76 @@ export default function EditKontenClient({ content }: { content: ContentItem }) 
       const a = [...prev]; [a[idx], a[idx + 1]] = [a[idx + 1], a[idx]]; return a;
     });
   };
-  const addPhoto = () => {
-    if (tempPhotoUrl && galleryImages.length < 10) {
-      setGalleryImages(prev => [...prev, tempPhotoUrl]);
-      setTempPhotoUrl("");
-      setShowAddPhoto(false);
+
+  const uploadFile = async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append("file", file);
+    const res = await fetch("/api/admin/upload", {
+      method: "POST",
+      body: formData,
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Upload gagal");
+    return data.url;
+  };
+
+  const processFiles = async (files: FileList) => {
+    const fileArray = Array.from(files);
+    const validFiles = fileArray.filter(file => {
+      if (!file.type.startsWith("image/")) {
+        alert(`File ${file.name} bukan gambar.`);
+        return false;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        alert(`File ${file.name} terlalu besar (maksimal 5MB).`);
+        return false;
+      }
+      return true;
+    });
+
+    if (validFiles.length === 0) return;
+
+    const remainingSlots = 10 - galleryImages.length;
+    if (validFiles.length > remainingSlots) {
+      alert(`Maksimal 10 foto. Hanya ${remainingSlots} foto pertama yang akan diunggah.`);
+    }
+
+    const filesToUpload = validFiles.slice(0, remainingSlots);
+    setUploadingCount(prev => prev + filesToUpload.length);
+
+    for (const file of filesToUpload) {
+      try {
+        const url = await uploadFile(file);
+        setGalleryImages(prev => [...prev, url]);
+      } catch (err) {
+        alert(`Gagal mengunggah ${file.name}: ${err instanceof Error ? err.message : "Error"}`);
+      } finally {
+        setUploadingCount(prev => Math.max(0, prev - 1));
+      }
     }
   };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      processFiles(e.target.files);
+    }
+    e.target.value = "";
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragging(false);
+    if (e.dataTransfer.files) {
+      processFiles(e.dataTransfer.files);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragging(true);
+  };
+
+  const handleDragLeave = () => setDragging(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -257,7 +335,7 @@ export default function EditKontenClient({ content }: { content: ContentItem }) 
           </div>
 
           {/* Thumbnail grid with controls */}
-          {galleryImages.length > 0 && (
+          {(galleryImages.length > 0 || uploadingCount > 0) && (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
               {galleryImages.map((url, idx) => (
                 <div key={`${url}-${idx}`} className="relative group rounded-xl overflow-hidden border-2 border-[#DDD8D0] bg-[#FAF7F2] aspect-[4/3] shadow-sm">
@@ -294,15 +372,29 @@ export default function EditKontenClient({ content }: { content: ContentItem }) 
                         <ArrowDown size={12} />
                       </button>
                     </div>
-                    {/* Delete */}
-                    <button
-                      type="button"
-                      onClick={() => removePhoto(idx)}
-                      title="Hapus foto ini"
-                      className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-red-600 text-white text-[10px] font-bold hover:bg-red-700 transition-colors"
-                    >
-                      <Trash2 size={10} /> Hapus
-                    </button>
+                    <div className="flex gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setCropTargetIdx(idx);
+                          setCropImageSrc(url);
+                          setCropperOpen(true);
+                          setZoom(1);
+                          setCrop({ x: 0, y: 0 });
+                        }}
+                        className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-white text-[#3D2B1F] text-[10px] font-bold hover:bg-[#FDF3D0] transition-colors"
+                      >
+                        ✂️ Crop
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => removePhoto(idx)}
+                        title="Hapus foto ini"
+                        className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-red-600 text-white text-[10px] font-bold hover:bg-red-700 transition-colors"
+                      >
+                        <Trash2 size={10} /> Hapus
+                      </button>
+                    </div>
                   </div>
 
                   {/* Index number */}
@@ -311,57 +403,57 @@ export default function EditKontenClient({ content }: { content: ContentItem }) 
                   </span>
                 </div>
               ))}
+
+              {/* Uploading placeholders */}
+              {Array.from({ length: uploadingCount }).map((_, i) => (
+                <div key={i} className="relative rounded-xl overflow-hidden border-2 border-dashed border-[#B8960C]/40 bg-[#FFF8E1] aspect-[4/3] flex flex-col items-center justify-center gap-2">
+                  <Loader2 className="w-8 h-8 text-[#B8960C] animate-spin" />
+                  <span className="text-[11px] font-bold text-[#B8960C]">Mengunggah...</span>
+                </div>
+              ))}
             </div>
           )}
 
           {/* Hint text */}
           {galleryImages.length > 0 && (
             <p className="text-[11px] text-[#A89880]">
-              💡 Hover foto → klik ↑↓ untuk ubah urutan · Foto pertama (★ Utama) jadi thumbnail album
+              💡 Hover foto → klik ↑↓ untuk ubah urutan · Foto pertama jadi thumbnail album · Klik ✂️ Crop untuk edit foto.
             </p>
           )}
 
           {/* Add photo panel */}
           {galleryImages.length < 10 && (
-            <div>
-              {!showAddPhoto ? (
-                <button
-                  type="button"
-                  onClick={() => setShowAddPhoto(true)}
-                  className="flex items-center gap-2 px-4 py-2.5 border-2 border-dashed border-[#B8960C]/40 rounded-xl text-[#B8960C] text-sm font-semibold hover:border-[#B8960C] hover:bg-[#FFF8E1] transition-colors w-full justify-center"
-                >
-                  <Plus size={16} /> Tambah Foto Baru
-                </button>
-              ) : (
-                <div className="space-y-3 p-4 bg-white rounded-xl border-2 border-[#B8960C]/30">
-                  <p className="text-xs font-bold text-[#3D2B1F]">Upload foto baru ke album:</p>
-                  <ImageUpload
-                    label="Pilih Foto"
-                    value={tempPhotoUrl}
-                    onChange={setTempPhotoUrl}
-                    placeholder="https://example.com/foto.jpg"
-                    aspectRatio={4/3}
-                    helpText="Rasio 4:3 disarankan. Setelah upload berhasil, klik tombol Tambahkan."
-                  />
-                  <div className="flex gap-2 justify-end pt-1">
-                    <button
-                      type="button"
-                      onClick={() => { setShowAddPhoto(false); setTempPhotoUrl(""); }}
-                      className="px-4 py-2 text-xs font-bold text-[#6B6560] bg-[#F5F0E8] rounded-lg hover:bg-[#EDE8DF] transition-colors"
-                    >
-                      Batal
-                    </button>
-                    <button
-                      type="button"
-                      disabled={!tempPhotoUrl}
-                      onClick={addPhoto}
-                      className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-[#B8960C] rounded-lg hover:bg-[#9A7A00] transition-colors disabled:opacity-40"
-                    >
-                      <Plus size={12} /> Tambahkan ke Album
-                    </button>
-                  </div>
-                </div>
-              )}
+            <div
+              onDrop={handleDrop}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onClick={() => !loading && fileInputRef.current?.click()}
+              className={`relative flex flex-col items-center justify-center gap-3 p-8 border-2 border-dashed rounded-xl cursor-pointer transition-all ${
+                dragging
+                  ? "border-[#B8960C] bg-[#FFF8E1]"
+                  : "border-[#DDD8D0] bg-white hover:border-[#B8960C] hover:bg-[#FFF8E1]"
+              }`}
+            >
+              <div className="w-12 h-12 bg-[#FAF7F2] border border-[#DDD8D0] rounded-full flex items-center justify-center shadow-sm">
+                <Images size={22} className="text-[#B8960C]" />
+              </div>
+              <div className="text-center text-xs">
+                <p className="text-sm font-bold text-[#3D2B1F]">
+                  Klik untuk pilih foto
+                </p>
+                <p className="text-[#A89880] mt-1">
+                  atau seret & lepas file ke sini (Bisa pilih banyak sekaligus, maks 10)
+                </p>
+                <p className="text-[#A89880]">JPG, PNG, WebP, GIF · Maks. 5MB per file</p>
+              </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                className="hidden"
+                onChange={handleFileChange}
+              />
             </div>
           )}
 
@@ -401,6 +493,117 @@ export default function EditKontenClient({ content }: { content: ContentItem }) 
           Simpan Perubahan
         </button>
       </div>
+
+      {/* Crop Modal */}
+      {cropperOpen && cropImageSrc && cropTargetIdx !== null && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col">
+            <div className="px-6 py-4 border-b border-[#E8E0D0] flex justify-between items-center bg-[#FAF7F2]">
+              <h3 className="font-bold text-[#3D2B1F]">Sesuaikan Gambar</h3>
+              <button 
+                type="button"
+                onClick={() => setCropperOpen(false)}
+                className="text-[#9C8B7A] hover:text-[#C0392B] transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div className="relative w-full h-[50vh] bg-black">
+              <Cropper
+                image={cropImageSrc}
+                crop={crop}
+                zoom={zoom}
+                aspect={cropAspectRatio}
+                onCropChange={setCrop}
+                onCropComplete={(_c, px) => setCroppedAreaPixels(px)}
+                onZoomChange={setZoom}
+              />
+            </div>
+            
+            <div className="p-6 bg-white flex flex-col gap-4 border-t border-[#E8E0D0]">
+              <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
+                {/* Aspect Ratio Selector */}
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-[#6B6560]">Aspek Rasio:</span>
+                  <div className="flex gap-1">
+                    {[
+                      { label: "Bebas", value: undefined },
+                      { label: "4:3", value: 4/3 },
+                      { label: "16:9", value: 16/9 },
+                      { label: "1:1", value: 1 }
+                    ].map(opt => (
+                      <button
+                        key={opt.label}
+                        type="button"
+                        onClick={() => setCropAspectRatio(opt.value)}
+                        className={`px-2.5 py-1 text-xs font-semibold rounded border transition-colors ${
+                          cropAspectRatio === opt.value
+                            ? "bg-[#B8960C] text-white border-[#B8960C]"
+                            : "bg-[#F5F0E8] text-[#6B6560] border-transparent hover:border-[#DDD8D0]"
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Zoom Slider */}
+                <div className="w-full sm:w-1/3 flex items-center gap-3">
+                  <span className="text-xs font-bold text-[#6B6560]">Zoom</span>
+                  <input
+                    type="range"
+                    value={zoom}
+                    min={1}
+                    max={3}
+                    step={0.1}
+                    aria-labelledby="Zoom"
+                    onChange={(e) => setZoom(Number(e.target.value))}
+                    className="w-full accent-[#B8960C]"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 justify-end pt-2">
+                <button
+                  type="button"
+                  onClick={() => setCropperOpen(false)}
+                  className="px-4 py-2 text-sm font-bold text-[#6B6560] bg-[#F5F0E8] hover:bg-[#E8E0D0] rounded-lg transition-colors"
+                >
+                  Batal
+                </button>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (!cropImageSrc || !croppedAreaPixels || cropTargetIdx === null) return;
+                    setLoading(true);
+                    try {
+                      const croppedFile = await getCroppedImg(cropImageSrc, croppedAreaPixels, 0);
+                      if (!croppedFile) throw new Error("Gagal memproses gambar");
+                      const url = await uploadFile(croppedFile);
+                      setGalleryImages(prev => {
+                        const next = [...prev];
+                        next[cropTargetIdx] = url;
+                        return next;
+                      });
+                      setCropperOpen(false);
+                    } catch (e) {
+                      console.error(e);
+                      alert("Gagal memotong gambar.");
+                    } finally {
+                      setLoading(false);
+                    }
+                  }}
+                  className="px-6 py-2 text-sm font-bold text-white bg-[#2D6A4F] hover:bg-[#1f4a37] rounded-lg transition-colors flex items-center justify-center gap-2"
+                >
+                  Terapkan Crop
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </form>
   );
 }
