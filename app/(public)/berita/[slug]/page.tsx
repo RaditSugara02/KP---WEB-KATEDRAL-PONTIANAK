@@ -56,7 +56,7 @@ export default async function BeritaDetailPage({ params }: { params: { slug: str
       <div className="w-full h-72 md:h-96 bg-[#2C1F14] relative">
         <div className="absolute inset-0 bg-gradient-to-t from-[#2C1F14] to-transparent z-10" />
         <Image
-          src="/bg-katedral.jpg"
+          src="/bg-login.jpg"
           alt="Gereja Katedral Santo Yosef"
           fill
           className="object-cover opacity-60"
