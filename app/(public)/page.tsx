@@ -308,7 +308,7 @@ export default async function LandingPage() {
 
       {/* ═══════════════════ BERITA TERBARU ═══════════════════ */}
       <section className="py-16 md:py-24 px-4 sm:px-6 lg:px-8 bg-white relative">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-screen h-px bg-gradient-to-r from-transparent via-[#DDD8D0] to-transparent max-w-7xl" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-[#DDD8D0] to-transparent max-w-7xl" />
         <div className="max-w-7xl mx-auto">
           <ScrollReveal>
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 md:mb-16 gap-6">

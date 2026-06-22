@@ -120,6 +120,7 @@
     font-family: var(--font-dm-sans), system-ui, sans-serif;
     line-height: 1.6;
     min-height: 100dvh;
+    overflow-x: hidden;
   }
 
   /* ── Heading Typography ── */
