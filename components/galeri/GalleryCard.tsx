@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import {
   X, ChevronLeft, ChevronRight, Download,
   Link2, Share2, Check, Images,
@@ -88,9 +89,9 @@ export function Lightbox({ images, initialIndex, title, onClose }: LightboxProps
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-[200] flex bg-black/95 backdrop-blur-sm"
+      className="fixed inset-0 h-screen w-screen z-[9999] flex bg-black/95 backdrop-blur-sm"
       onClick={onClose}
     >
       {/* ── LEFT: Photo area ──────────────────────────────────────────── */}
@@ -282,7 +283,8 @@ export function Lightbox({ images, initialIndex, title, onClose }: LightboxProps
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
       `}</style>
-    </div>
+    </div>,
+    document.body
   );
 }
 
