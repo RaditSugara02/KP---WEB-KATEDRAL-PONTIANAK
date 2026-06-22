@@ -2,7 +2,7 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "./db";
 import * as schema from "./db/schema";
-import { sendMail, templateVerifikasi, templateResetSandi } from "./mailer";
+import { sendMail, templateVerifikasi, templateResetSandi, templateSelamatDatang } from "./mailer";
 
 export const auth = betterAuth({
   baseURL: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
@@ -21,6 +21,25 @@ export const auth = betterAuth({
       verification: schema.verifications,
     },
   }),
+  databaseHooks: {
+    user: {
+      create: {
+        after: async (user) => {
+          try {
+            const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+            const fixedUrl = appUrl.replace(/\/$/, "") + "/masuk";
+            await sendMail({
+              to: user.email as string,
+              subject: "Selamat Datang di Katedral Santo Yosef",
+              html: templateSelamatDatang(user.name as string, fixedUrl),
+            });
+          } catch (error) {
+            console.error("Gagal mengirim email selamat datang:", error);
+          }
+        },
+      },
+    },
+  },
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true, // User wajib verifikasi email sebelum bisa login
