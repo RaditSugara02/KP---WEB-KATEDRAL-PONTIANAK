@@ -53,6 +53,10 @@ export const metadata: Metadata = {
     follow: true,
     googleBot: { index: true, follow: true },
   },
+  icons: {
+    icon: "/logo-katedral.png",
+    apple: "/logo-katedral.png",
+  },
 };
 
 export default function RootLayout({
