@@ -3,6 +3,7 @@
 import { useRef, useState, useCallback } from "react";
 import { Upload, X, Image as ImageIcon, Loader2, Link, Check } from "lucide-react";
 import Cropper from "react-easy-crop";
+import type { Area } from "react-easy-crop";
 import getCroppedImg from "@/lib/cropImage";
 
 interface ImageUploadProps {
@@ -35,7 +36,7 @@ export default function ImageUpload({
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
-  const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
 
   const handleFile = async (file: File) => {
     setError("");
@@ -79,7 +80,7 @@ export default function ImageUpload({
       const imageDataUrl = await readFile(file);
       setImageSrc(imageDataUrl);
       setCropModalOpen(true);
-    } catch (e) {
+    } catch {
       setError("Gagal membaca file gambar.");
     }
   };
@@ -110,7 +111,7 @@ export default function ImageUpload({
     if (inputRef.current) inputRef.current.value = "";
   };
 
-  const onCropComplete = useCallback((croppedArea: any, croppedAreaPixels: any) => {
+  const onCropComplete = useCallback((_croppedArea: Area, croppedAreaPixels: Area) => {
     setCroppedAreaPixels(croppedAreaPixels);
   }, []);
 

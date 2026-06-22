@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 import { coupleProfiles, marriageApplications, requiredDocuments, stageHistory, contents, users } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
 import Link from "next/link";
-import { CheckCircle2, Circle, Clock, AlertCircle, FileText, ChevronRight, Printer, Church, Info } from "lucide-react";
+import { CheckCircle2, Circle, Clock, AlertCircle, FileText, ChevronRight, Church, Info } from "lucide-react";
 import DaftarUlangButton from "./DaftarUlangButton";
 
 const STAGE_NAMES = ["Pengisian Profil", "Kursus KPP", "Pemberkasan Dokumen", "Penyelidikan Kanonik", "Pemberkatan Nikah"];
@@ -119,11 +119,6 @@ export default async function BerandaDasborPage() {
           <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[12px] font-bold" style={{ background: "#FDF3D0", color: "#9A7A0A", border: "1px solid #E8D070" }}>
             No. Reg: {profile.registrationNumber}
           </span>
-          <Link href="/dasbor/cetak"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[12px] font-semibold border transition-colors hover:bg-[#F5F0E8]"
-            style={{ background: "#FFFFFF", borderColor: "#E8E0D0", color: "#6B5744" }}>
-            <Printer size={13} /> Cetak Bukti
-          </Link>
         </div>
       </div>
          {/* ── Progress Steps ── */}

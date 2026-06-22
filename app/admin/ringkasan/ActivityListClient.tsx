@@ -14,11 +14,6 @@ type HistoryItem = {
 
 export default function ActivityListClient({ history }: { history: HistoryItem[] }) {
   const [showModal, setShowModal] = useState(false);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   // Prevent body scroll when modal is open
   useEffect(() => {
@@ -93,7 +88,7 @@ export default function ActivityListClient({ history }: { history: HistoryItem[]
       </div>
 
       {/* Modal Lihat Semua Aktivitas (menggunakan Portal agar tidak terpotong parent) */}
-      {showModal && mounted && createPortal(
+      {showModal && createPortal(
         <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-200 flex flex-col max-h-[85vh]">
             <div className="bg-[#FDFBF8] px-6 py-4 flex items-center justify-between border-b border-[#E8E0D0]">

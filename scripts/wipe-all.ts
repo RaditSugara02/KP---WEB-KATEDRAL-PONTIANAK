@@ -1,8 +1,19 @@
 import { config } from "dotenv";
 config({ path: ".env.local" });
 
-const { db } = require("../lib/db/index");
-const { users, coupleProfiles, marriageApplications, requiredDocuments, stageHistory, notifications, sessions, accounts, verifications, contents } = require("../lib/db/schema");
+import { db } from "../lib/db/index";
+import {
+  accounts,
+  contents,
+  coupleProfiles,
+  marriageApplications,
+  notifications,
+  requiredDocuments,
+  sessions,
+  stageHistory,
+  users,
+  verifications,
+} from "../lib/db/schema";
 
 async function main() {
   console.log("Menghapus SELURUH data database...");

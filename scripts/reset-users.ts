@@ -1,9 +1,18 @@
 import { config } from "dotenv";
 config({ path: ".env.local" });
 
-const { db } = require("../lib/db/index");
-const { users, coupleProfiles, marriageApplications, requiredDocuments, stageHistory, notifications, sessions, accounts } = require("../lib/db/schema");
-const { ne } = require("drizzle-orm");
+import { ne } from "drizzle-orm";
+import { db } from "../lib/db/index";
+import {
+  accounts,
+  coupleProfiles,
+  marriageApplications,
+  notifications,
+  requiredDocuments,
+  sessions,
+  stageHistory,
+  users,
+} from "../lib/db/schema";
 
 async function main() {
   console.log("Menghapus semua data pendaftaran & profil...");

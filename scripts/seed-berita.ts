@@ -137,6 +137,20 @@ const PENGUMUMAN = [
   },
 ];
 
+type ContentInsert = {
+  id: string;
+  type: "NEWS";
+  category: "Berita Paroki" | "Pengumuman";
+  title: string;
+  slug: string;
+  body: string;
+  imageUrl: string | null;
+  isPublished: boolean;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
 async function seedBeritaPengumuman() {
   console.log("🔍 Mencari akun admin...");
   
@@ -156,7 +170,7 @@ async function seedBeritaPengumuman() {
 
   const adminId = adminData.id;
   const now = new Date();
-  const valuesToInsert: any[] = [];
+  const valuesToInsert: ContentInsert[] = [];
 
   // 10 Berita Paroki
   console.log("📝 Menyiapkan 10 Berita Paroki...");

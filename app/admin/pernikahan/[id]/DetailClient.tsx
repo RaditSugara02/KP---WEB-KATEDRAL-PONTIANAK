@@ -1,13 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Check, X, Send, ArrowUpCircle, ArrowDownCircle, Trash2, UserCheck, CalendarDays, History, Calendar as CalendarIcon, AlertTriangle, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { id as localeId } from "date-fns/locale";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
@@ -82,9 +81,6 @@ export default function DetailClient({
 
   // Local docs state for optimistic UI
   const [localDocs, setLocalDocs] = useState(docs);
-  useEffect(() => {
-    setLocalDocs(docs);
-  }, [docs]);
 
   // Download ZIP State
   const [loadingZip, setLoadingZip] = useState(false);

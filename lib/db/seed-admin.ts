@@ -6,11 +6,11 @@
 import { config } from "dotenv";
 config({ path: ".env.local" });
 
-const { db } = require("./index");
-const { auth } = require("../auth");
-const { users, accounts } = require("./schema");
-const { nanoid } = require("nanoid");
-const { eq } = require("drizzle-orm");
+import { eq } from "drizzle-orm";
+import { nanoid } from "nanoid";
+import { auth } from "../auth";
+import { db } from "./index";
+import { accounts, users } from "./schema";
 
 async function seedAdmin() {
   console.log("🌱 Membuat akun admin di database production...\n");

@@ -8,6 +8,10 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+type MarriageApplicationRow = {
+  id: string;
+};
+
 // Akun yang TIDAK akan dihapus (admin & romo)
 const PROTECTED_EMAILS = [
   "admin@katedral.id",
@@ -57,7 +61,7 @@ async function deleteNonAdminUsers() {
     .select("id")
     .in("userId", userIds);
   
-  const appIds = (apps || []).map((a: any) => a.id);
+  const appIds = ((apps || []) as MarriageApplicationRow[]).map((a) => a.id);
   
   if (appIds.length > 0) {
     const { error: e2 } = await supabase

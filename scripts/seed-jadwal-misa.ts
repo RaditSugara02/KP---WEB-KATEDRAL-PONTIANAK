@@ -1,10 +1,10 @@
 import { config } from "dotenv";
 config({ path: ".env.local" });
 
-const { db } = require("../lib/db/index");
-const { contents } = require("../lib/db/schema");
-const { nanoid } = require("nanoid");
-const { eq } = require("drizzle-orm");
+import { eq } from "drizzle-orm";
+import { nanoid } from "nanoid";
+import { db } from "../lib/db/index";
+import { contents } from "../lib/db/schema";
 
 // Jadwal default berdasarkan data yang diberikan:
 // Misa Harian: Senin-Jumat
@@ -115,7 +115,7 @@ async function seedJadwalMisa() {
     updatedAt: now,
   }));
 
-  await db.insert(contents).values(valuesToInsert);
+  await db.insert(contents).values(valuesToInsert as unknown as Array<typeof contents.$inferInsert>);
 
   console.log("✅ Jadwal misa default berhasil dibuat!\n");
   console.log("📋 Ringkasan:");

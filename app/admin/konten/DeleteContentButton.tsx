@@ -8,10 +8,7 @@ import { Trash2, Loader2, AlertTriangle, X } from "lucide-react";
 export function DeleteContentButton({ id }: { id: string }) {
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [mounted, setMounted] = useState(false);
   const router = useRouter();
-
-  useEffect(() => { setMounted(true); }, []);
 
   const closeModal = useCallback(() => {
     if (!loading) setShowModal(false);
@@ -45,7 +42,7 @@ export function DeleteContentButton({ id }: { id: string }) {
     setLoading(false);
   };
 
-  const modal = showModal && mounted ? createPortal(
+  const modal = showModal ? createPortal(
     <div
       className="fixed inset-0 flex items-center justify-center p-4"
       style={{ zIndex: 99999 }}
