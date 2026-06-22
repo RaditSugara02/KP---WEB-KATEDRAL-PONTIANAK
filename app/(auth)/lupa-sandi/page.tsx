@@ -51,39 +51,79 @@ export default function LupaSandiPage() {
 
   return (
     <div className="flex min-h-screen bg-[#FDFBF7]">
-      {/* Kiri: Gambar/Warna Solid (Desktop) */}
-      <div className="hidden lg:flex lg:w-1/2 bg-[#3D2B1F] items-center justify-center relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')]"></div>
-        <div className="text-center z-10 p-12">
-          <div className="mb-6 flex justify-center">
-            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#FDFBF7" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M18 20V10" />
-              <path d="M6 20V10" />
-              <path d="M12 20V4" />
-              <path d="M12 4l6 6" />
-              <path d="M12 4l-6 6" />
-              <path d="M4 20h16" />
-            </svg>
+      {/* ── LEFT PANEL: Brand/Visual ── */}
+      <div
+        className="hidden lg:flex lg:w-[45%] relative overflow-hidden flex-col items-center justify-center"
+      >
+        {/* Background Image */}
+        <div
+          className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 hover:scale-105"
+          style={{ backgroundImage: 'url("/bg-login.jpg")' }}
+        />
+        {/* Dark Overlay for text readability */}
+        <div className="absolute inset-0 bg-[#2C1F14]/70 mix-blend-multiply" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#2C1F14]/90 via-transparent to-transparent" />
+
+        <div className="relative z-10 flex flex-col items-center text-center px-12 max-w-md">
+          {/* Logo */}
+          <div className="mb-8 drop-shadow-xl">
+            <img 
+              src="/logo-katedral.png" 
+              alt="Logo Katedral Santo Yosef" 
+              className="w-28 h-auto object-contain"
+            />
           </div>
-          <h1 className="text-4xl font-bold text-[#FDFBF7] mb-4" style={{ fontFamily: "var(--font-cormorant)" }}>
-            Katedral Santo Yosef Pontianak
+
+          <h1
+            className="text-white mb-4 leading-tight drop-shadow-md"
+            style={{
+              fontFamily: "var(--font-cormorant)",
+              fontSize: "42px",
+              fontWeight: 700,
+            }}
+          >
+            Katedral Santo Yosef
           </h1>
-          <p className="text-[#DDD8D0] text-lg font-medium italic" style={{ fontFamily: "var(--font-cormorant)" }}>
-            Melayani Umat dengan Kasih dan Ketulusan
+
+          <p
+            className="text-[17px] italic leading-relaxed mb-8 drop-shadow-md"
+            style={{
+              fontFamily: "var(--font-cormorant)",
+              color: "rgba(253,247,242,0.9)",
+            }}
+          >
+            Sistem Informasi Pendaftaran<br />Sakramen Perkawinan
+          </p>
+
+          <div
+            className="w-12 h-px mb-8"
+            style={{ background: "#B8960C", opacity: 0.8 }}
+          />
+
+          <p
+            className="text-[13px] leading-relaxed font-semibold drop-shadow-md"
+            style={{ color: "rgba(253,247,242,0.7)", letterSpacing: "0.08em" }}
+          >
+            KEUSKUPAN AGUNG PONTIANAK
           </p>
         </div>
       </div>
 
-      {/* Kanan: Form Pemulihan */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 lg:p-24 relative">
-        <Link href="/masuk" className="absolute top-8 left-8 text-[#A89880] hover:text-[#6B6560] flex items-center gap-2 text-sm transition-colors">
+      {/* ── RIGHT PANEL: Form ── */}
+      <div className="w-full lg:w-[55%] flex items-center justify-center p-8 sm:p-12 relative">
+        <Link
+          href="/masuk"
+          className="absolute top-6 left-6 sm:top-8 sm:left-8 flex items-center gap-2 text-[13px] font-semibold transition-colors hover:text-[#B8960C]"
+          style={{ color: "#9C8B7A" }}
+        >
           <ArrowLeft size={16} /> Kembali ke Masuk
         </Link>
 
         <div className="w-full max-w-[400px]">
-          <div className="mb-10 text-center lg:text-left">
-            <div className="lg:hidden flex justify-center mb-6">
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#B8960C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          {/* Mobile Logo */}
+          <div className="flex items-center justify-center gap-2.5 mb-8 lg:hidden">
+            <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: "#B8960C" }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M18 20V10" />
                 <path d="M6 20V10" />
                 <path d="M12 20V4" />
@@ -92,11 +132,27 @@ export default function LupaSandiPage() {
                 <path d="M4 20h16" />
               </svg>
             </div>
-            
-            <h2 className="text-3xl font-bold text-[#3D2B1F] mb-3" style={{ fontFamily: "var(--font-cormorant)" }}>
+            <span
+              className="font-bold text-[18px]"
+              style={{ fontFamily: "var(--font-cormorant)", color: "#B8960C" }}
+            >
+              Katedral Santo Yosef
+            </span>
+          </div>
+          
+          <div className="mb-10 text-center lg:text-left">
+            <h2
+              className="mb-1"
+              style={{
+                fontFamily: "var(--font-cormorant)",
+                fontSize: "30px",
+                color: "#2C1F14",
+                fontWeight: 700,
+              }}
+            >
               Lupa Kata Sandi
             </h2>
-            <p className="text-sm text-[#6B6560]" style={{ fontFamily: "var(--font-dm-sans)" }}>
+            <p className="mb-8 text-[14px]" style={{ color: "#9C8B7A" }}>
               Masukkan alamat email yang terdaftar. Kami akan mengirimkan tautan untuk mengatur ulang kata sandi Anda.
             </p>
           </div>
@@ -118,15 +174,26 @@ export default function LupaSandiPage() {
               </button>
             </div>
           ) : (
-            <form onSubmit={handleReset} noValidate className="space-y-6">
+            <form onSubmit={handleReset} noValidate className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-[#6B6560] mb-1.5 uppercase tracking-wide">Alamat Email</label>
+                <label
+                  className="block text-[11px] font-bold uppercase tracking-wider mb-1.5"
+                  style={{ color: "#6B5744" }}
+                >
+                  Alamat Email
+                </label>
                 <input
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full h-11 px-3 rounded-md border border-[#DDD8D0] bg-white text-[#3D2B1F] focus:border-[#B8960C] focus:ring-1 focus:ring-[#B8960C] outline-none text-sm transition-shadow"
+                  className="w-full px-4 rounded-lg text-[14px] outline-none transition-all input-gold"
+                  style={{
+                    height: "44px",
+                    border: "1px solid #E8E0D0",
+                    background: "#FFFFFF",
+                    color: "#2C1F14",
+                  }}
                   placeholder="nama@email.com"
                 />
               </div>
@@ -134,7 +201,14 @@ export default function LupaSandiPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full h-11 bg-[#B8960C] hover:bg-[#A3850B] text-white font-bold rounded-md transition-colors flex items-center justify-center disabled:opacity-70"
+                className="w-full flex items-center justify-center rounded-lg font-bold text-white transition-all hover:opacity-90 disabled:opacity-60 active:scale-[0.98]"
+                style={{
+                  height: "46px",
+                  background: "#B8960C",
+                  fontFamily: "var(--font-dm-sans)",
+                  fontSize: "14px",
+                  marginTop: "16px",
+                }}
               >
                 {loading ? "Mengirim..." : "Kirim Tautan Pemulihan"}
               </button>
