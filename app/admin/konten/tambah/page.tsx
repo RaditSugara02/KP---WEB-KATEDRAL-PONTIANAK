@@ -3,11 +3,13 @@
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Loader2, Save, Plus, Trash2, Images, X, ArrowUp, ArrowDown } from "lucide-react";
+import { ArrowLeft, Loader2, Save, Plus, Trash2, Images, X, ArrowUp, ArrowDown, AlertTriangle } from "lucide-react";
 import ImageUpload from "@/components/admin/ImageUpload";
 import Cropper from "react-easy-crop";
 import type { Area } from "react-easy-crop";
 import getCroppedImg from "@/lib/cropImage";
+import { toast } from "sonner";
+import { createPortal } from "react-dom";
 
 const CONTENT_TYPES = [
   { value: "NEWS", label: "Berita / Artikel" },
@@ -51,6 +53,40 @@ export default function TambahKontenPage() {
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
   const [cropAspectRatio, setCropAspectRatio] = useState<number | undefined>(undefined);
+  const [originalAspect, setOriginalAspect] = useState<number | undefined>(undefined);
+
+  // Drag and drop sorting states
+  const [draggedIdx, setDraggedIdx] = useState<number | null>(null);
+  const [dragOverIdx, setDragOverIdx] = useState<number | null>(null);
+
+  // Max photos warning modal state
+  const [showMaxPhotosModal, setShowMaxPhotosModal] = useState(false);
+  const [maxPhotosModalMsg, setMaxPhotosModalMsg] = useState("");
+
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    setDraggedIdx(index);
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", index.toString());
+  };
+
+  const handleDragOverItem = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+  };
+
+  const handleDragEnd = (e: React.DragEvent, targetIdx: number) => {
+    e.preventDefault();
+    setDragOverIdx(null);
+    if (draggedIdx === null || draggedIdx === targetIdx) return;
+
+    setGalleryImages(prev => {
+      const next = [...prev];
+      const draggedItem = next[draggedIdx];
+      next.splice(draggedIdx, 1);
+      next.splice(targetIdx, 0, draggedItem);
+      return next;
+    });
+    setDraggedIdx(null);
+  };
 
   const moveUp = (idx: number) => {
     if (idx === 0) return;
@@ -79,11 +115,11 @@ export default function TambahKontenPage() {
     const fileArray = Array.from(files);
     const validFiles = fileArray.filter(file => {
       if (!file.type.startsWith("image/")) {
-        alert(`File ${file.name} bukan gambar.`);
+        toast.error(`File ${file.name} bukan gambar.`);
         return false;
       }
       if (file.size > 5 * 1024 * 1024) {
-        alert(`File ${file.name} terlalu besar (maksimal 5MB).`);
+        toast.error(`File ${file.name} terlalu besar (maksimal 5MB).`);
         return false;
       }
       return true;
@@ -92,8 +128,15 @@ export default function TambahKontenPage() {
     if (validFiles.length === 0) return;
 
     const remainingSlots = 10 - galleryImages.length;
+    if (remainingSlots <= 0) {
+      setMaxPhotosModalMsg("Maksimal 10 foto. Album Anda sudah penuh (10/10). Hapus beberapa foto terlebih dahulu jika ingin mengunggah foto baru.");
+      setShowMaxPhotosModal(true);
+      return;
+    }
+
     if (validFiles.length > remainingSlots) {
-      alert(`Maksimal 10 foto. Hanya ${remainingSlots} foto pertama yang akan diunggah.`);
+      setMaxPhotosModalMsg(`Maksimal 10 foto. Hanya ${remainingSlots} foto pertama yang akan diunggah.`);
+      setShowMaxPhotosModal(true);
     }
 
     const filesToUpload = validFiles.slice(0, remainingSlots);
@@ -104,7 +147,7 @@ export default function TambahKontenPage() {
         const url = await uploadFile(file);
         setGalleryImages(prev => [...prev, url]);
       } catch (err) {
-        alert(`Gagal mengunggah ${file.name}: ${err instanceof Error ? err.message : "Error"}`);
+        toast.error(`Gagal mengunggah ${file.name}: ${err instanceof Error ? err.message : "Error"}`);
       } finally {
         setUploadingCount(prev => Math.max(0, prev - 1));
       }
@@ -385,20 +428,36 @@ export default function TambahKontenPage() {
             {(galleryImages.length > 0 || uploadingCount > 0) && (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                 {galleryImages.map((url, idx) => (
-                  <div key={`${url}-${idx}`} className="relative group rounded-xl overflow-hidden border-2 border-[#DDD8D0] bg-[#FAF7F2] aspect-[4/3] shadow-sm">
+                  <div
+                    key={`${url}-${idx}`}
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, idx)}
+                    onDragOver={(e) => handleDragOverItem(e, idx)}
+                    onDragEnter={(e) => { e.preventDefault(); setDragOverIdx(idx); }}
+                    onDragLeave={() => setDragOverIdx(null)}
+                    onDrop={(e) => handleDragEnd(e, idx)}
+                    onDragEnd={() => { setDraggedIdx(null); setDragOverIdx(null); }}
+                    className={`relative group rounded-xl overflow-hidden border-2 bg-[#FAF7F2] aspect-[4/3] shadow-sm cursor-grab active:cursor-grabbing transition-all duration-200 ${
+                      draggedIdx === idx ? "opacity-40" : ""
+                    } ${
+                      dragOverIdx === idx ? "border-[#B8960C] scale-105 shadow-md z-10" : "border-[#DDD8D0]"
+                    }`}
+                  >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={url} alt={`foto ${idx + 1}`} className="w-full h-full object-cover" />
+                    <img src={url} alt={`foto ${idx + 1}`} className="w-full h-full object-cover pointer-events-none" />
                     {idx === 0 && (
                       <span className="absolute top-1.5 left-1.5 px-2 py-0.5 bg-[#B8960C] text-white text-[9px] font-bold rounded-full shadow">Utama</span>
                     )}
 
                     {/* Action overlay */}
-                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 p-2">
+                    <div className={`absolute inset-0 bg-black/50 opacity-0 transition-opacity flex flex-col items-center justify-center gap-2 p-2 ${
+                      draggedIdx === null ? "group-hover:opacity-100" : "pointer-events-none"
+                    }`}>
                       {/* Move up/down */}
                       <div className="flex gap-1">
                         <button
                           type="button"
-                          onClick={() => moveUp(idx)}
+                          onClick={(e) => { e.stopPropagation(); moveUp(idx); }}
                           disabled={idx === 0}
                           title="Pindah ke kiri"
                           className="w-7 h-7 rounded-md bg-white/90 text-[#3D2B1F] flex items-center justify-center hover:bg-[#B8960C] hover:text-white transition-colors disabled:opacity-30"
@@ -407,7 +466,7 @@ export default function TambahKontenPage() {
                         </button>
                         <button
                           type="button"
-                          onClick={() => moveDown(idx)}
+                          onClick={(e) => { e.stopPropagation(); moveDown(idx); }}
                           disabled={idx === galleryImages.length - 1}
                           title="Pindah ke kanan"
                           className="w-7 h-7 rounded-md bg-white/90 text-[#3D2B1F] flex items-center justify-center hover:bg-[#B8960C] hover:text-white transition-colors disabled:opacity-30"
@@ -418,7 +477,8 @@ export default function TambahKontenPage() {
                       <div className="flex gap-1.5">
                         <button
                           type="button"
-                          onClick={() => {
+                          onClick={(e) => {
+                            e.stopPropagation();
                             setCropTargetIdx(idx);
                             setCropImageSrc(url);
                             setCropperOpen(true);
@@ -431,7 +491,7 @@ export default function TambahKontenPage() {
                         </button>
                         <button
                           type="button"
-                          onClick={() => setGalleryImages(prev => prev.filter((_, i) => i !== idx))}
+                          onClick={(e) => { e.stopPropagation(); setGalleryImages(prev => prev.filter((_, i) => i !== idx)); }}
                           className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-red-600 text-white text-[10px] font-bold hover:bg-red-700 transition-colors"
                         >
                           <Trash2 size={10} /> Hapus
@@ -458,8 +518,30 @@ export default function TambahKontenPage() {
             {/* Hint text */}
             {galleryImages.length > 0 && (
               <p className="text-[11px] text-[#A89880]">
-                💡 Hover foto → klik ↑↓ untuk ubah urutan · Foto pertama jadi thumbnail album · Klik ✂️ Crop untuk edit foto.
+                💡 Seret (drag) foto untuk mengubah urutan · Foto pertama jadi thumbnail album · Klik ✂️ Crop untuk edit foto.
               </p>
+            )}
+
+            {/* Success Banner when 10 photos are reached */}
+            {galleryImages.length === 10 && (
+              <div className="p-4 bg-green-50 border border-green-200 rounded-xl text-center space-y-3 shadow-sm">
+                <div>
+                  <p className="text-sm font-bold text-green-800">
+                    🎉 Album telah penuh (10/10 foto berhasil diunggah).
+                  </p>
+                  <p className="text-xs text-green-600 mt-1">
+                    Foto-foto Anda sudah otomatis ter-unggah. Klik tombol di bawah ini untuk menyimpan dan mempublikasikan album.
+                  </p>
+                </div>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#2D6A4F] hover:bg-[#1f4a37] text-white font-bold text-sm rounded-lg transition-colors shadow-sm disabled:opacity-60"
+                >
+                  {loading ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+                  Simpan Konten Sekarang
+                </button>
+              </div>
             )}
 
             {/* Add photo button / upload form */}
@@ -521,6 +603,24 @@ export default function TambahKontenPage() {
           />
         )}
 
+        {/* Action Buttons */}
+        <div className="flex justify-end gap-4 pt-4 border-t border-[#EDE8DF]">
+          <Link
+            href="/admin/konten"
+            className="px-6 py-2.5 bg-white border border-[#DDD8D0] rounded-md text-sm font-bold text-[#6B6560] hover:bg-[#FAF7F2] transition-colors"
+          >
+            Batal
+          </Link>
+          <button
+            type="submit"
+            disabled={loading || (isGallery && galleryImages.length === 0)}
+            className="flex items-center gap-2 px-6 py-2.5 bg-[#B8960C] text-white font-bold text-sm rounded-md hover:bg-[#9A7A00] transition-colors shadow-sm disabled:opacity-60"
+          >
+            {loading ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+            Simpan & Publikasikan
+          </button>
+        </div>
+
       </form>
 
       {/* Crop Modal */}
@@ -530,6 +630,7 @@ export default function TambahKontenPage() {
             <div className="px-6 py-4 border-b border-[#E8E0D0] flex justify-between items-center bg-[#FAF7F2]">
               <h3 className="font-bold text-[#3D2B1F]">Sesuaikan Gambar</h3>
               <button 
+                type="button"
                 onClick={() => setCropperOpen(false)}
                 className="text-[#9C8B7A] hover:text-[#C0392B] transition-colors"
               >
@@ -546,6 +647,9 @@ export default function TambahKontenPage() {
                 onCropChange={setCrop}
                 onCropComplete={(_c, px) => setCroppedAreaPixels(px)}
                 onZoomChange={setZoom}
+                onMediaLoaded={(mediaSize) => {
+                  setOriginalAspect(mediaSize.naturalWidth / mediaSize.naturalHeight);
+                }}
               />
             </div>
             
@@ -556,15 +660,22 @@ export default function TambahKontenPage() {
                   <span className="text-xs font-bold text-[#6B6560]">Aspek Rasio:</span>
                   <div className="flex gap-1">
                     {[
-                      { label: "Bebas", value: undefined },
-                      { label: "4:3", value: 4/3 },
-                      { label: "16:9", value: 16/9 },
-                      { label: "1:1", value: 1 }
+                      { label: "Bebas", value: undefined, isFull: false },
+                      { label: "Penuh (Full)", value: originalAspect, isFull: true },
+                      { label: "4:3", value: 4/3, isFull: false },
+                      { label: "16:9", value: 16/9, isFull: false },
+                      { label: "1:1", value: 1, isFull: false }
                     ].map(opt => (
                       <button
                         key={opt.label}
                         type="button"
-                        onClick={() => setCropAspectRatio(opt.value)}
+                        onClick={() => {
+                          setCropAspectRatio(opt.value);
+                          if (opt.isFull) {
+                            setZoom(1);
+                            setCrop({ x: 0, y: 0 });
+                          }
+                        }}
                         className={`px-2.5 py-1 text-xs font-semibold rounded border transition-colors ${
                           cropAspectRatio === opt.value
                             ? "bg-[#B8960C] text-white border-[#B8960C]"
@@ -618,7 +729,7 @@ export default function TambahKontenPage() {
                       setCropperOpen(false);
                     } catch (e) {
                       console.error(e);
-                      alert("Gagal memotong gambar.");
+                      toast.error("Gagal memotong gambar.");
                     } finally {
                       setLoading(false);
                     }
@@ -631,6 +742,52 @@ export default function TambahKontenPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Max Photos Warning Modal */}
+      {showMaxPhotosModal && createPortal(
+        <div
+          className="fixed inset-0 flex items-center justify-center p-4"
+          style={{ zIndex: 99999 }}
+          onClick={() => setShowMaxPhotosModal(false)}
+        >
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" style={{ animation: "fadeIn 200ms ease-out" }} />
+          <div
+            className="relative bg-white rounded-2xl shadow-2xl"
+            style={{ width: "100%", maxWidth: 460, animation: "scaleIn 200ms ease-out" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setShowMaxPhotosModal(false)}
+              className="absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center text-[#9C8B7A] hover:bg-[#F5F0E8] hover:text-[#3D2B1F] transition-colors"
+            >
+              <X size={16} />
+            </button>
+            <div className="pt-8 pb-4 px-8 text-center">
+              <div className="w-16 h-16 rounded-full bg-amber-50 border-2 border-amber-100 flex items-center justify-center mx-auto mb-5">
+                <AlertTriangle size={28} className="text-amber-500" />
+              </div>
+              <h3
+                className="text-2xl font-bold text-[#3D2B1F] mb-3"
+                style={{ fontFamily: "var(--font-cormorant)" }}
+              >
+                Batas Foto Tercapai
+              </h3>
+              <p style={{ fontSize: 14, color: "#6B6560", lineHeight: 1.6 }}>
+                {maxPhotosModalMsg}
+              </p>
+            </div>
+            <div className="px-8 pb-8 pt-4">
+              <button
+                onClick={() => setShowMaxPhotosModal(false)}
+                className="w-full px-4 py-3 rounded-xl text-sm font-bold text-white bg-[#B8960C] hover:bg-[#9A7A00] transition-colors"
+              >
+                Mengerti
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
       )}
     </div>
   );
