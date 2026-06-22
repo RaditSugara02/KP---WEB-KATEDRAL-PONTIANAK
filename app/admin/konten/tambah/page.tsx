@@ -191,8 +191,16 @@ export default function TambahKontenPage() {
         payload.category = `${payload.massDay}::${payload.massType}`;
       } else if (payload.type === "NEWS") {
         payload.category = "Berita Paroki";
+        // If news has documentation photos, encode body as JSON
+        if (galleryImages.length > 0) {
+          payload.body = JSON.stringify({ html: form.body, images: galleryImages });
+        }
       } else if (payload.type === "ANNOUNCEMENT") {
         payload.category = "Pengumuman";
+        // If announcement has documentation photos, encode body as JSON
+        if (galleryImages.length > 0) {
+          payload.body = JSON.stringify({ html: form.body, images: galleryImages });
+        }
       } else if (payload.type === "GALLERY") {
         // Store multiple images in body as JSON; first image is primary imageUrl
         payload.imageUrl = galleryImages[0] || "";
@@ -222,6 +230,9 @@ export default function TambahKontenPage() {
 
   const isMassSchedule = form.type === "MASS_SCHEDULE";
   const isGallery = form.type === "GALLERY";
+  const isNews = form.type === "NEWS";
+  const isAnnouncement = form.type === "ANNOUNCEMENT";
+  const showPhotoUploader = isGallery || isNews || isAnnouncement;
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -414,14 +425,29 @@ export default function TambahKontenPage() {
           </div>
         )}
 
-        {/* URL Gambar (News) atau Upload Foto (Gallery) */}
-        {isGallery ? (
+        {/* URL Gambar Cover (News/Announcement only, not Gallery) */}
+        {!isGallery && !isMassSchedule && (
+          <ImageUpload
+            label="Gambar Cover (Opsional)"
+            value={form.imageUrl}
+            onChange={(url) => setForm(prev => ({ ...prev, imageUrl: url }))}
+            placeholder="https://example.com/gambar.jpg"
+            aspectRatio={16/9}
+            helpText="Disarankan resolusi 1280x720 px (Rasio 16:9) agar gambar sampul tidak terpotong saat ditampilkan."
+          />
+        )}
+
+        {/* Upload Foto — Gallery, News, dan Announcement */}
+        {showPhotoUploader && (
           <div className="p-5 bg-[#F5F0E8] rounded-lg border border-[#EDE8DF] space-y-4">
             <div className="flex items-center gap-2 mb-2">
               <Images size={16} className="text-[#B8960C]" />
               <h3 className="text-xs font-bold text-[#6B6560] uppercase tracking-wider">
-                Foto Album ({galleryImages.length}/10)
+                {isGallery ? "Foto Album" : "Dokumentasi Foto"} ({galleryImages.length}/10)
               </h3>
+              {!isGallery && (
+                <span className="text-[10px] text-[#A89880] font-normal ml-1">(Opsional)</span>
+              )}
             </div>
 
             {/* Thumbnail grid of added photos */}
@@ -445,7 +471,7 @@ export default function TambahKontenPage() {
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={url} alt={`foto ${idx + 1}`} className="w-full h-full object-cover pointer-events-none" />
-                    {idx === 0 && (
+                    {idx === 0 && isGallery && (
                       <span className="absolute top-1.5 left-1.5 px-2 py-0.5 bg-[#B8960C] text-white text-[9px] font-bold rounded-full shadow">Utama</span>
                     )}
 
@@ -518,7 +544,7 @@ export default function TambahKontenPage() {
             {/* Hint text */}
             {galleryImages.length > 0 && (
               <p className="text-[11px] text-[#A89880]">
-                💡 Seret (drag) foto untuk mengubah urutan · Foto pertama jadi thumbnail album · Klik ✂️ Crop untuk edit foto.
+                💡 Seret (drag) foto untuk mengubah urutan · Klik ✂️ Crop untuk edit foto.
               </p>
             )}
 
@@ -526,10 +552,10 @@ export default function TambahKontenPage() {
             {galleryImages.length === 10 && (
               <div className="p-4 bg-green-50 border border-green-200 rounded-xl text-center shadow-sm">
                 <p className="text-sm font-bold text-green-800">
-                  🎉 Album telah penuh (10/10 foto berhasil diunggah).
+                  🎉 {isGallery ? "Album" : "Dokumentasi foto"} telah penuh (10/10 foto).
                 </p>
                 <p className="text-xs text-green-600 mt-1">
-                  Foto-foto sudah ter-unggah. Klik tombol <strong>Simpan &amp; Publikasikan</strong> di bawah untuk menyimpan album.
+                  Klik tombol <strong>Simpan &amp; Publikasikan</strong> di bawah untuk menyimpan.
                 </p>
               </div>
             )}
@@ -570,27 +596,20 @@ export default function TambahKontenPage() {
               </div>
             )}
 
-            {/* Caption */}
-            <div className="pt-2 border-t border-[#DDD8D0]">
-              <label className="block text-xs font-bold text-[#6B6560] uppercase tracking-wider mb-2">Keterangan Album (Opsional)</label>
-              <input
-                type="text"
-                value={galleryCaption}
-                onChange={(e) => setGalleryCaption(e.target.value)}
-                placeholder="cth: Perayaan Natal 2024"
-                className="w-full h-11 px-4 border border-[#DDD8D0] rounded-md text-sm bg-white focus:border-[#B8960C] focus:ring-1 focus:ring-[#B8960C] outline-none"
-              />
-            </div>
+            {/* Caption — only for Gallery type */}
+            {isGallery && (
+              <div className="pt-2 border-t border-[#DDD8D0]">
+                <label className="block text-xs font-bold text-[#6B6560] uppercase tracking-wider mb-2">Keterangan Album (Opsional)</label>
+                <input
+                  type="text"
+                  value={galleryCaption}
+                  onChange={(e) => setGalleryCaption(e.target.value)}
+                  placeholder="cth: Perayaan Natal 2024"
+                  className="w-full h-11 px-4 border border-[#DDD8D0] rounded-md text-sm bg-white focus:border-[#B8960C] focus:ring-1 focus:ring-[#B8960C] outline-none"
+                />
+              </div>
+            )}
           </div>
-        ) : !isMassSchedule && (
-          <ImageUpload
-            label="Gambar Cover (Opsional)"
-            value={form.imageUrl}
-            onChange={(url) => setForm(prev => ({ ...prev, imageUrl: url }))}
-            placeholder="https://example.com/gambar.jpg"
-            aspectRatio={16/9}
-            helpText="Disarankan resolusi 1280x720 px (Rasio 16:9) agar gambar sampul tidak terpotong saat ditampilkan."
-          />
         )}
 
         {/* Action Buttons */}

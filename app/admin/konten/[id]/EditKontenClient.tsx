@@ -30,7 +30,7 @@ type ContentItem = {
   category: string | null;
 };
 
-// Parse body to extract gallery images & caption
+// Parse body to extract gallery images & caption (GALLERY type)
 function parseGalleryBody(body: string | null, imageUrl: string | null): { images: string[]; caption: string } {
   try {
     const parsed = JSON.parse(body ?? "{}");
@@ -47,6 +47,23 @@ function parseGalleryBody(body: string | null, imageUrl: string | null): { image
   }
 }
 
+// Parse body for NEWS/ANNOUNCEMENT: supports JSON { html, images } or legacy plain HTML
+function parseNewsBody(body: string | null): { html: string; images: string[] } {
+  if (!body) return { html: "", images: [] };
+  try {
+    const parsed = JSON.parse(body);
+    if (parsed && typeof parsed === "object" && "html" in parsed) {
+      return {
+        html: parsed.html || "",
+        images: Array.isArray(parsed.images) ? parsed.images.filter(Boolean) : [],
+      };
+    }
+    return { html: body, images: [] };
+  } catch {
+    return { html: body, images: [] };
+  }
+}
+
 export default function EditKontenClient({ content }: { content: ContentItem }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -55,11 +72,16 @@ export default function EditKontenClient({ content }: { content: ContentItem }) 
   const initMassDay = content.type === "MASS_SCHEDULE" && content.category ? content.category.split("::")[0] : "Minggu";
   const initMassType = content.type === "MASS_SCHEDULE" && content.category ? content.category.split("::")[1] || "Harian" : "Harian";
 
+  // Determine initial body text and images based on content type
+  const isNewsOrAnnouncement = content.type === "NEWS" || content.type === "ANNOUNCEMENT";
+  const initNewsBody = isNewsOrAnnouncement ? parseNewsBody(content.body) : { html: "", images: [] };
+  const initGallery = content.type === "GALLERY" ? parseGalleryBody(content.body, content.imageUrl) : { images: [], caption: "" };
+
   const [form, setForm] = useState({
     id: content.id,
     title: content.title || "",
     type: content.type || "NEWS",
-    body: content.body || "",
+    body: isNewsOrAnnouncement ? initNewsBody.html : (content.body || ""),
     eventDate: content.eventDate || "",
     eventEndDate: content.eventEndDate || "",
     location: content.location || "",
@@ -69,9 +91,10 @@ export default function EditKontenClient({ content }: { content: ContentItem }) 
     massType: initMassType,
   });
 
-  // ── Gallery multi-image state ──────────────────────────────────────────────
-  const initGallery = parseGalleryBody(content.body, content.imageUrl);
-  const [galleryImages, setGalleryImages] = useState<string[]>(initGallery.images);
+  // ── Gallery/Photo multi-image state ─────────────────────────────────────────
+  const [galleryImages, setGalleryImages] = useState<string[]>(
+    content.type === "GALLERY" ? initGallery.images : initNewsBody.images
+  );
   const [galleryCaption, setGalleryCaption] = useState(initGallery.caption);
 
   // Multi-upload & Cropping states
@@ -226,8 +249,14 @@ export default function EditKontenClient({ content }: { content: ContentItem }) 
         payload.category = `${payload.massDay}::${payload.massType}`;
       } else if (payload.type === "NEWS") {
         payload.category = "Berita Paroki";
+        if (galleryImages.length > 0) {
+          payload.body = JSON.stringify({ html: form.body, images: galleryImages });
+        }
       } else if (payload.type === "ANNOUNCEMENT") {
         payload.category = "Pengumuman";
+        if (galleryImages.length > 0) {
+          payload.body = JSON.stringify({ html: form.body, images: galleryImages });
+        }
       } else if (payload.type === "GALLERY") {
         payload.imageUrl = galleryImages[0] || "";
         payload.body = JSON.stringify({ images: galleryImages, caption: galleryCaption });
@@ -253,6 +282,9 @@ export default function EditKontenClient({ content }: { content: ContentItem }) 
 
   const isMassSchedule = form.type === "MASS_SCHEDULE";
   const isGallery = form.type === "GALLERY";
+  const isNews = form.type === "NEWS";
+  const isAnnouncement = form.type === "ANNOUNCEMENT";
+  const showPhotoUploader = isGallery || isNews || isAnnouncement;
 
   return (
     <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-[#DDD8D0] shadow-sm p-8 space-y-6">
@@ -361,18 +393,32 @@ export default function EditKontenClient({ content }: { content: ContentItem }) 
         </div>
       )}
 
-      {/* ── GALLERY EDITOR ─────────────────────────────────────────────────── */}
-      {isGallery ? (
+      {/* URL Gambar Cover (News/Announcement only, not Gallery) */}
+      {!isGallery && !isMassSchedule && (
+        <ImageUpload
+          label="Gambar Cover (Opsional)"
+          value={form.imageUrl}
+          onChange={(url) => setForm(prev => ({ ...prev, imageUrl: url }))}
+          aspectRatio={16/9}
+          helpText="Disarankan resolusi 1280x720 px (Rasio 16:9) agar gambar sampul tidak terpotong saat ditampilkan."
+        />
+      )}
+
+      {/* ── PHOTO UPLOADER — Gallery, News, Announcement ───────────────────── */}
+      {showPhotoUploader && (
         <div className="p-5 bg-[#F5F0E8] rounded-lg border border-[#EDE8DF] space-y-4">
           {/* Header */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Images size={16} className="text-[#B8960C]" />
               <h3 className="text-xs font-bold text-[#6B6560] uppercase tracking-wider">
-                Foto Album ({galleryImages.length}/10)
+                {isGallery ? "Foto Album" : "Dokumentasi Foto"} ({galleryImages.length}/10)
               </h3>
+              {!isGallery && (
+                <span className="text-[10px] text-[#A89880] font-normal ml-1">(Opsional)</span>
+              )}
             </div>
-            {galleryImages.length === 0 && (
+            {isGallery && galleryImages.length === 0 && (
               <span className="text-xs text-red-500 font-semibold">Minimal 1 foto diperlukan</span>
             )}
           </div>
@@ -399,8 +445,8 @@ export default function EditKontenClient({ content }: { content: ContentItem }) 
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={url} alt={`foto ${idx + 1}`} className="w-full h-full object-cover pointer-events-none" />
 
-                  {/* Primary badge */}
-                  {idx === 0 && (
+                  {/* Primary badge — only for Gallery */}
+                  {idx === 0 && isGallery && (
                     <span className="absolute top-1.5 left-1.5 px-2 py-0.5 bg-[#B8960C] text-white text-[9px] font-bold rounded-full shadow">
                       ★ Utama
                     </span>
@@ -477,7 +523,7 @@ export default function EditKontenClient({ content }: { content: ContentItem }) 
           {/* Hint text */}
           {galleryImages.length > 0 && (
             <p className="text-[11px] text-[#A89880]">
-              💡 Seret (drag) foto untuk mengubah urutan · Foto pertama jadi thumbnail album · Klik ✂️ Crop untuk edit foto.
+              💡 Seret (drag) foto untuk mengubah urutan · Klik ✂️ Crop untuk edit foto.
             </p>
           )}
 
@@ -485,10 +531,10 @@ export default function EditKontenClient({ content }: { content: ContentItem }) 
           {galleryImages.length === 10 && (
             <div className="p-4 bg-green-50 border border-green-200 rounded-xl text-center shadow-sm">
               <p className="text-sm font-bold text-green-800">
-                🎉 Album telah penuh (10/10 foto berhasil diunggah).
+                🎉 {isGallery ? "Album" : "Dokumentasi foto"} telah penuh (10/10 foto).
               </p>
               <p className="text-xs text-green-600 mt-1">
-                Foto-foto sudah ter-unggah. Klik tombol <strong>Simpan Perubahan</strong> di bawah untuk menyimpan album.
+                Klik tombol <strong>Simpan Perubahan</strong> di bawah untuk menyimpan.
               </p>
             </div>
           )}
@@ -529,28 +575,22 @@ export default function EditKontenClient({ content }: { content: ContentItem }) 
             </div>
           )}
 
-          {/* Caption */}
-          <div className="pt-2 border-t border-[#DDD8D0]">
-            <label className="block text-xs font-bold text-[#6B6560] uppercase tracking-wider mb-2">
-              Keterangan Album <span className="font-normal text-[#A89880]">(Opsional)</span>
-            </label>
-            <input
-              type="text"
-              value={galleryCaption}
-              onChange={(e) => setGalleryCaption(e.target.value)}
-              placeholder="cth: Perayaan Natal 2024 di Katedral Santo Yosef"
-              className="w-full h-11 px-4 border border-[#DDD8D0] rounded-md text-sm bg-white focus:border-[#B8960C] focus:ring-1 focus:ring-[#B8960C] outline-none"
-            />
-          </div>
+          {/* Caption — only for Gallery type */}
+          {isGallery && (
+            <div className="pt-2 border-t border-[#DDD8D0]">
+              <label className="block text-xs font-bold text-[#6B6560] uppercase tracking-wider mb-2">
+                Keterangan Album <span className="font-normal text-[#A89880]">(Opsional)</span>
+              </label>
+              <input
+                type="text"
+                value={galleryCaption}
+                onChange={(e) => setGalleryCaption(e.target.value)}
+                placeholder="cth: Perayaan Natal 2024 di Katedral Santo Yosef"
+                className="w-full h-11 px-4 border border-[#DDD8D0] rounded-md text-sm bg-white focus:border-[#B8960C] focus:ring-1 focus:ring-[#B8960C] outline-none"
+              />
+            </div>
+          )}
         </div>
-      ) : !isMassSchedule && (
-        <ImageUpload
-          label="Gambar Cover (Opsional)"
-          value={form.imageUrl}
-          onChange={(url) => setForm(prev => ({ ...prev, imageUrl: url }))}
-          aspectRatio={16/9}
-          helpText="Disarankan resolusi 1280x720 px (Rasio 16:9) agar gambar sampul tidak terpotong saat ditampilkan."
-        />
       )}
 
       {/* Action Buttons */}

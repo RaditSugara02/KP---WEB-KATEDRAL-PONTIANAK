@@ -4,10 +4,34 @@ import { eq } from "drizzle-orm";
 import Link from "next/link";
 import { CalendarDays, Church, ArrowLeft, Share2 } from "lucide-react";
 import { notFound } from "next/navigation";
-
 import Image from "next/image";
+import { NewsPhotoGallery } from "@/components/berita/NewsPhotoGallery";
 
 export const dynamic = "force-dynamic";
+
+/**
+ * Parse body field: supports both legacy plain HTML and new JSON format.
+ * New format: { html: "<p>...</p>", images: ["url1", "url2"] }
+ * Legacy:     "<p>plain html content</p>"
+ */
+function parseNewsBody(body: string | null): { html: string; images: string[] } {
+  if (!body) return { html: "", images: [] };
+
+  try {
+    const parsed = JSON.parse(body);
+    if (parsed && typeof parsed === "object" && "html" in parsed) {
+      return {
+        html: parsed.html || "",
+        images: Array.isArray(parsed.images) ? parsed.images.filter(Boolean) : [],
+      };
+    }
+    // JSON but not our format — treat as plain text
+    return { html: body, images: [] };
+  } catch {
+    // Not JSON — legacy plain HTML
+    return { html: body, images: [] };
+  }
+}
 
 export default async function BeritaDetailPage({ params }: { params: { slug: string } }) {
   const { slug } = await params;
@@ -22,6 +46,7 @@ export default async function BeritaDetailPage({ params }: { params: { slug: str
   }
 
   const news = newsRecord[0];
+  const { html, images } = parseNewsBody(news.body);
 
   return (
     <div className="min-h-screen bg-[#FAF7F2]">
@@ -58,7 +83,7 @@ export default async function BeritaDetailPage({ params }: { params: { slug: str
 
           <div className="flex items-center gap-3 mb-6">
             <span className="px-3 py-1 bg-[#FFF8E1] text-[#B8960C] text-[10px] font-bold uppercase rounded-full tracking-widest">
-              Pengumuman
+              {news.category || "Pengumuman"}
             </span>
             <div className="flex items-center gap-1.5 text-xs text-[#A89880] font-medium border-l border-[#DDD8D0] pl-3">
               <CalendarDays size={14} />
@@ -72,8 +97,13 @@ export default async function BeritaDetailPage({ params }: { params: { slug: str
 
           <div
             className="prose prose-stone max-w-none text-[#4A3728] prose-p:leading-relaxed prose-p:mb-5 prose-a:text-[#B8960C] prose-a:font-semibold prose-headings:font-bold prose-headings:text-[#3D2B1F] prose-strong:text-[#3D2B1F] prose-li:mb-1"
-            dangerouslySetInnerHTML={{ __html: news.body || "" }}
+            dangerouslySetInnerHTML={{ __html: html }}
           />
+
+          {/* Dokumentasi Foto */}
+          {images.length > 0 && (
+            <NewsPhotoGallery images={images} title={news.title || undefined} />
+          )}
 
           {/* Share & Footer */}
           <div className="mt-12 pt-8 border-t border-[#EDE8DF] flex justify-between items-center">
