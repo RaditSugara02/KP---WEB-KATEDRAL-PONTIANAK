@@ -26,9 +26,11 @@ function SafeImage({ src, alt, className }: { src: string; alt: string; classNam
       alt={alt}
       className={className}
       onError={() => setError(true)}
+      loading="lazy"
     />
   );
 }
+
 
 /** Strip HTML tags and decode common entities for plain-text card preview */
 function stripHtml(html: string | null): string {

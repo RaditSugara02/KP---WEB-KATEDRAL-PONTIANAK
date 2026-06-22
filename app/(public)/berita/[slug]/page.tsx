@@ -5,6 +5,8 @@ import Link from "next/link";
 import { CalendarDays, Church, ArrowLeft, Share2 } from "lucide-react";
 import { notFound } from "next/navigation";
 
+import Image from "next/image";
+
 export const dynamic = "force-dynamic";
 
 export default async function BeritaDetailPage({ params }: { params: { slug: string } }) {
@@ -28,13 +30,21 @@ export default async function BeritaDetailPage({ params }: { params: { slug: str
       <div className="w-full h-72 md:h-96 bg-[#2C1F14] relative">
         <div className="absolute inset-0 bg-gradient-to-t from-[#2C1F14] to-transparent z-10" />
         {news.imageUrl ? (
-          <img src={news.imageUrl} alt={news.title} className="w-full h-full object-cover opacity-60" />
+          <Image
+            src={news.imageUrl}
+            alt={news.title || "Header berita"}
+            fill
+            className="object-cover opacity-60"
+            priority
+            sizes="100vw"
+          />
         ) : (
           <div className="w-full h-full flex items-center justify-center opacity-20">
             <Church size={120} className="text-[#EDE8DF]" />
           </div>
         )}
       </div>
+
 
       {/* Content Area */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 -mt-32 relative z-20 pb-20">
