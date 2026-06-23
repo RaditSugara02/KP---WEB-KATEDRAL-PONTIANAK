@@ -142,7 +142,7 @@ export function WeddingAnnouncementsClient({ weddings }: WeddingAnnouncementsCli
                 </div>
               </div>
             );
-          })
+          })}
         </div>
       ) : (
         <div className="flex flex-col items-center justify-center py-20 text-center bg-white rounded-2xl border border-[#EDE8DF] shadow-sm">
