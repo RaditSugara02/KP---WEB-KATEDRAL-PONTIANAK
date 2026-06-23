@@ -58,15 +58,15 @@ export function WeddingAnnouncementsClient({ weddings }: WeddingAnnouncementsCli
 
   return (
     <div className="flex flex-col space-y-6">
-      <div className="relative mb-2">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#9C8B7A] h-5 w-5" />
+      <div className="relative mb-8 group">
         <input
           type="text"
-          placeholder="Cari nama mempelai (termasuk yang sudah lewat)..."
-          className="w-full pl-12 pr-4 py-3.5 rounded-lg border border-[#EDE8DF] bg-[#FAF7F2]/50 focus:bg-white focus:border-[#B8960C] focus:ring-1 focus:ring-[#B8960C] outline-none transition-all shadow-sm font-sans placeholder:font-light text-[#3D2B1F]"
+          placeholder="Cari nama mempelai..."
+          className="w-full pl-0 pr-8 py-2 bg-transparent border-0 border-b border-[#EDE8DF] focus:border-[#B8960C] focus:ring-0 outline-none transition-colors text-[#3D2B1F] placeholder:text-[#9C8B7A] placeholder:font-light font-sans text-lg"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
+        <Search className="absolute right-0 top-1/2 -translate-y-1/2 text-[#9C8B7A] h-5 w-5 group-focus-within:text-[#B8960C] transition-colors" />
       </div>
 
       <ul className="flex flex-col space-y-6 min-h-[300px]">
