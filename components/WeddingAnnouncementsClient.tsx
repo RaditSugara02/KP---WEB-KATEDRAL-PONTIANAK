@@ -17,7 +17,7 @@ interface WeddingAnnouncementsClientProps {
 
 export function WeddingAnnouncementsClient({ weddings }: WeddingAnnouncementsClientProps) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [visibleCount, setVisibleCount] = useState(5);
+  const [visibleCount, setVisibleCount] = useState(3);
 
   const displayWeddings = useMemo(() => {
     const sortedWeddings = [...weddings].sort((a, b) => {
@@ -131,11 +131,11 @@ export function WeddingAnnouncementsClient({ weddings }: WeddingAnnouncementsCli
         />
       </div>
 
-      {/* List View */}
-      <div className="flex flex-col flex-grow">
+      {/* List View with Scroll */}
+      <div className="flex flex-col flex-grow min-h-0">
         {visibleWeddings.length > 0 ? (
           <>
-            <ul className="space-y-6">
+            <div className="overflow-y-auto pr-2 pb-4 space-y-6" style={{ scrollbarWidth: "thin", scrollbarColor: "#B8960C transparent" }}>
               {visibleWeddings.map((item, i) => {
                 let dateStr = "Belum ditentukan";
                 if (item.weddingDate) {
@@ -187,16 +187,16 @@ export function WeddingAnnouncementsClient({ weddings }: WeddingAnnouncementsCli
                   </li>
                 );
               })}
-            </ul>
+            </div>
 
             {/* Load More Button */}
             {hasMore && (
-              <div className="mt-8 flex justify-center">
+              <div className="mt-6 flex justify-center flex-shrink-0 pt-2 border-t border-[#EDE8DF]">
                 <button 
                   onClick={handleLoadMore}
-                  className="flex items-center gap-2 text-sm font-semibold text-[#B8960C] bg-white border border-[#B8960C] px-6 py-2.5 rounded-full hover:bg-[#FAF7F2] transition-colors"
+                  className="flex items-center gap-2 text-sm font-semibold text-[#B8960C] hover:text-[#9A7A00] transition-colors"
                 >
-                  Muat Lebih Banyak <ChevronDown className="h-4 w-4" />
+                  Tampilkan Lebih Banyak <ChevronDown className="h-4 w-4" />
                 </button>
               </div>
             )}

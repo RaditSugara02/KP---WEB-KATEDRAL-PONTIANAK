@@ -495,16 +495,11 @@ export default async function LandingPage() {
             <p className="text-[#6B6560] text-base md:text-lg font-light leading-relaxed mb-4">
               Pemberitahuan kepada umat mengenai rencana sakramen perkawinan dari calon mempelai. 
             </p>
-            <p className="italic text-[#B8960C] mb-4 text-base flex-shrink-0" style={{ fontFamily: "var(--font-cormorant)" }}>
-              * Jika umat mengetahui adanya halangan perkawinan ini, wajib memberitahu pastor paroki.
-            </p>
-            <div className="mb-8 flex-shrink-0">
-              <Link href="/kontak" className="inline-flex items-center text-sm font-bold bg-[#B8960C] text-white px-5 py-2.5 rounded-full hover:bg-[#9A7A00] transition-colors shadow-sm">
-                Lapor Halangan
-              </Link>
-            </div>
+            <Link href="/kontak" className="italic text-[#B8960C] hover:text-[#9A7A00] hover:underline mb-8 text-base flex-shrink-0 transition-colors inline-block" style={{ fontFamily: "var(--font-cormorant)" }}>
+              * Jika umat mengetahui adanya halangan perkawinan ini, wajib memberitahu pastor paroki (Lapor Halangan).
+            </Link>
             
-            <div className="flex-grow flex flex-col">
+            <div className="flex-grow flex flex-col overflow-hidden min-h-0">
               <WeddingAnnouncementsClient weddings={allStage5Weddings} />
             </div>
             
