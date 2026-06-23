@@ -467,38 +467,42 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      {/* ═══════════════════ PENGUMUMAN PERKAWINAN (NEW ELEGANT DESIGN) ═══════════════════ */}
-      <section className="relative py-20 md:py-32 px-4 sm:px-6 lg:px-8 bg-[#FAF7F2] overflow-hidden">
-        {/* Subtle background decoration */}
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#B8960C]/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-[#3D2B1F]/5 rounded-full blur-3xl translate-y-1/3 -translate-x-1/4 pointer-events-none" />
-
-        <div className="max-w-7xl mx-auto relative z-10">
-          <ScrollReveal>
-            <div className="text-center max-w-3xl mx-auto mb-16">
-              <span className="font-sans text-xs tracking-[0.25em] text-[#B8960C] uppercase font-bold mb-4 block">
-                Sakramen Perkawinan
-              </span>
-              <h2 className="text-4xl md:text-5xl lg:text-6xl text-[#3D2B1F] mb-6 font-bold" style={{ fontFamily: "var(--font-cormorant)" }}>
-                Pengumuman Perkawinan
-              </h2>
-              <p className="text-[#6B6560] text-base md:text-lg font-light leading-relaxed mb-4">
-                Pemberitahuan kepada umat mengenai rencana sakramen perkawinan dari calon mempelai.
-              </p>
-              <p className="italic text-[#B8960C] text-sm md:text-base bg-[#FFF8E1] py-2 px-4 rounded-full inline-block" style={{ fontFamily: "var(--font-cormorant)" }}>
-                * Jika umat mengetahui adanya halangan perkawinan ini, wajib memberitahu pastor paroki.
-              </p>
+      {/* ═══════════════════ PENGUMUMAN PERKAWINAN ═══════════════════ */}
+      <section className="py-16 md:py-24 px-4 sm:px-6 lg:px-8 bg-white">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-16 items-start">
+          {/* Image Column */}
+          <ScrollReveal direction="right" duration={1000} className="w-full order-2 lg:order-1 sticky top-24">
+            <div className="relative h-[400px] md:h-[500px] lg:h-[700px] w-full rounded-2xl overflow-hidden shadow-elegant group">
+              <img
+                alt="Pernikahan di Katedral"
+                className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBR-_8bRb1Mt5tUrKEwh_3FL4PHLE7F_0e6zhDyYHxJyprN4Wz2jCXMt7O0baiJ3FPKXwZnUMLCGzF-ovWz9rcNFTX_vTtM9CeQtBMEg09IWSy-neg5Z9dZSSosjQ4jZwWT8SCvjTxzs33RQQm-Eh6UHoOMnIPEuAPeI1QPm222PbrchMIlEVQ2RsIlda3oVU5yP5j0WEfmetrtE8RPlVYaRjsKNBc_HQzM6kncfHqRqwI7FNV33bAlVcM8ASVrYbEh68Zj-QXJJjQ"
+                loading="lazy"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#2C1F14]/60 via-transparent to-transparent" />
             </div>
           </ScrollReveal>
-
-          <ScrollReveal delay={200}>
+          
+          {/* Text Column */}
+          <ScrollReveal direction="left" duration={1000} className="flex flex-col order-1 lg:order-2">
+            <span className="font-sans text-xs tracking-[0.25em] text-[#B8960C] uppercase font-bold mb-4">
+              Sakramen Perkawinan
+            </span>
+            <h2 className="text-4xl md:text-5xl lg:text-6xl text-[#3D2B1F] mb-4 md:mb-6 font-bold" style={{ fontFamily: "var(--font-cormorant)" }}>
+              Pengumuman Perkawinan
+            </h2>
+            <p className="text-[#6B6560] text-base md:text-lg font-light leading-relaxed mb-4">
+              Pemberitahuan kepada umat mengenai rencana sakramen perkawinan dari calon mempelai. 
+            </p>
+            <p className="italic text-[#B8960C] mb-10 text-base" style={{ fontFamily: "var(--font-cormorant)" }}>
+              * Jika umat mengetahui adanya halangan perkawinan ini, wajib memberitahu pastor paroki.
+            </p>
+            
             <WeddingAnnouncementsClient weddings={allStage5Weddings} />
-          </ScrollReveal>
-
-          <ScrollReveal delay={400}>
-            <div className="mt-16 text-center">
-              <Link href="/daftar" className="inline-flex items-center bg-white border border-[#EDE8DF] text-[#3D2B1F] px-8 py-3.5 rounded-sm font-sans text-sm tracking-wide font-semibold hover:border-[#B8960C] hover:text-[#B8960C] transition-all duration-300 shadow-sm hover:shadow-md">
-                Informasi Pendaftaran Perkawinan <ArrowRight className="h-4 w-4 ml-2" />
+            
+            <div className="mt-10">
+              <Link href="/daftar" className="inline-flex items-center text-[#B8960C] font-bold tracking-wider uppercase text-sm hover:underline gap-2">
+                Informasi Pendaftaran Perkawinan <ArrowUpRight className="h-4 w-4" />
               </Link>
             </div>
           </ScrollReveal>
