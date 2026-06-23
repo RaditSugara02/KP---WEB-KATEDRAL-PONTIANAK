@@ -152,36 +152,36 @@ export function WeddingAnnouncementsClient({ weddings }: WeddingAnnouncementsCli
                 const timeStr = item.preferredWeddingTime || "10:00 WIB";
 
                 return (
-                  <li key={i} className="border border-[#EDE8DF] bg-white p-5 rounded-2xl shadow-sm hover:shadow-md transition-shadow relative group">
-                    <div className="flex justify-between items-start mb-2">
+                  <li key={i} className="border-b border-[#EDE8DF] pb-5 last:border-0 last:pb-0 relative group">
+                    <div className="flex justify-between items-start mb-1">
                       <div className="flex gap-2 items-center flex-wrap">
                         {getAnnouncementBadge(item.weddingDate)}
                       </div>
                       <button 
                         onClick={() => handleShare(item.groomName, item.brideName)}
-                        className="text-[#9C8B7A] hover:text-[#B8960C] transition-colors p-2 -m-2 rounded-full hover:bg-[#FAF7F2]"
+                        className="text-[#9C8B7A] hover:text-[#B8960C] transition-colors p-1.5 -m-1.5 rounded-full hover:bg-[#FAF7F2]"
                         title="Bagikan Pengumuman"
                       >
                         <Share2 className="h-4 w-4" />
                       </button>
                     </div>
 
-                    <h3 className="text-xl md:text-2xl text-[#3D2B1F] font-bold mt-3 mb-4" style={{ fontFamily: "var(--font-cormorant)" }}>
+                    <h3 className="text-xl md:text-2xl text-[#3D2B1F] font-bold mt-2 mb-3" style={{ fontFamily: "var(--font-cormorant)" }}>
                       {item.groomName || "N/A"} &amp; {item.brideName || "N/A"}
                     </h3>
                     
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-[#6B6560]">
+                    <div className="flex flex-col sm:flex-row gap-3 sm:gap-6 text-sm text-[#6B6560]">
                       <div className="flex items-center">
-                        <CalendarDays className="h-4 w-4 mr-2.5 text-[#B8960C]" />
+                        <CalendarDays className="h-4 w-4 mr-2 text-[#B8960C]" />
                         <span>{dateStr}</span>
                       </div>
                       <div className="flex items-center">
-                        <Clock className="h-4 w-4 mr-2.5 text-[#B8960C]" />
+                        <Clock className="h-4 w-4 mr-2 text-[#B8960C]" />
                         <span>{timeStr}</span>
                       </div>
-                      <div className="flex items-start sm:col-span-2">
-                        <MapPin className="h-4 w-4 mr-2.5 text-[#B8960C] shrink-0 mt-0.5" />
-                        <span>Gereja Katedral Santo Yosef Pontianak</span>
+                      <div className="flex items-start">
+                        <MapPin className="h-4 w-4 mr-2 text-[#B8960C] shrink-0 mt-0.5" />
+                        <span>Katedral Santo Yosef</span>
                       </div>
                     </div>
                   </li>
