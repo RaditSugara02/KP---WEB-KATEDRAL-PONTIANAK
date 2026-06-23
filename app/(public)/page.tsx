@@ -469,9 +469,9 @@ export default async function LandingPage() {
 
       {/* ═══════════════════ PENGUMUMAN PERKAWINAN ═══════════════════ */}
       <section className="py-16 md:py-24 px-4 sm:px-6 lg:px-8 bg-white">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-16 items-start">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-16 items-stretch">
           {/* Image Column */}
-          <ScrollReveal direction="right" duration={1000} className="w-full order-2 lg:order-1 sticky top-24">
+          <ScrollReveal direction="right" duration={1000} className="w-full order-2 lg:order-1 sticky top-24 h-fit">
             <div className="relative h-[400px] md:h-[500px] lg:h-[700px] w-full rounded-2xl overflow-hidden shadow-elegant group">
               <img
                 alt="Pernikahan di Katedral"
@@ -484,7 +484,7 @@ export default async function LandingPage() {
           </ScrollReveal>
           
           {/* Text Column */}
-          <ScrollReveal direction="left" duration={1000} className="flex flex-col order-1 lg:order-2">
+          <ScrollReveal direction="left" duration={1000} className="flex flex-col h-full order-1 lg:order-2">
             <span className="font-sans text-xs tracking-[0.25em] text-[#B8960C] uppercase font-bold mb-4">
               Sakramen Perkawinan
             </span>
@@ -494,13 +494,15 @@ export default async function LandingPage() {
             <p className="text-[#6B6560] text-base md:text-lg font-light leading-relaxed mb-4">
               Pemberitahuan kepada umat mengenai rencana sakramen perkawinan dari calon mempelai. 
             </p>
-            <p className="italic text-[#B8960C] mb-10 text-base" style={{ fontFamily: "var(--font-cormorant)" }}>
+            <p className="italic text-[#B8960C] mb-10 text-base flex-shrink-0" style={{ fontFamily: "var(--font-cormorant)" }}>
               * Jika umat mengetahui adanya halangan perkawinan ini, wajib memberitahu pastor paroki.
             </p>
             
-            <WeddingAnnouncementsClient weddings={allStage5Weddings} />
+            <div className="flex-grow flex flex-col">
+              <WeddingAnnouncementsClient weddings={allStage5Weddings} />
+            </div>
             
-            <div className="mt-10">
+            <div className="mt-10 flex-shrink-0">
               <Link href="/daftar" className="inline-flex items-center text-[#B8960C] font-bold tracking-wider uppercase text-sm hover:underline gap-2">
                 Informasi Pendaftaran Perkawinan <ArrowUpRight className="h-4 w-4" />
               </Link>
