@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, Calendar, Newspaper, BookOpen, MapPin, CalendarDays, ArrowUpRight } from "lucide-react";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
+import { WeddingAnnouncementsClient } from "@/components/WeddingAnnouncementsClient";
 
 export const dynamic = "force-dynamic";
 
@@ -25,15 +26,14 @@ export default async function LandingPage() {
     .from(contents)
     .where(eq(contents.type, "MASS_SCHEDULE"));
 
-  const upcomingWeddings = await db.select({
+  const allStage5Weddings = await db.select({
     groomName: coupleProfiles.groomName,
     brideName: coupleProfiles.brideName,
     weddingDate: marriageApplications.weddingDate,
   })
     .from(marriageApplications)
     .innerJoin(coupleProfiles, eq(marriageApplications.coupleProfileId, coupleProfiles.id))
-    .where(eq(marriageApplications.currentStage, 5))
-    .limit(3);
+    .where(eq(marriageApplications.currentStage, 5));
 
   const HARI_ORDER = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat"];
   const weekdays = HARI_ORDER;
@@ -497,35 +497,7 @@ export default async function LandingPage() {
               * Jika umat mengetahui adanya halangan perkawinan ini, wajib memberitahu pastor paroki.
             </p>
             
-            <ul className="flex flex-col space-y-6">
-              {upcomingWeddings.length > 0 ? (
-                upcomingWeddings.map((item, i) => {
-                  let dateStr = "Pengumuman";
-                  if (item.weddingDate) {
-                    const d = new Date(item.weddingDate);
-                    if (!isNaN(d.getTime())) {
-                      dateStr = d.toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
-                    }
-                  }
-                  
-                  return (
-                    <li key={i} className="pb-6 border-b border-[#EDE8DF] flex flex-col md:flex-row md:items-center justify-between gap-2 group">
-                      <div className="flex items-center gap-4 shrink-0">
-                        <span className="w-8 h-8 shrink-0 rounded-full bg-[#F5F0E8] text-[#B8960C] flex items-center justify-center font-bold text-sm" style={{ fontFamily: "var(--font-cormorant)" }}>{i + 1}</span>
-                        <span className="text-[#6B6560] text-sm uppercase tracking-wider font-bold shrink-0">{dateStr}</span>
-                      </div>
-                      <span className="font-bold text-[#3D2B1F] text-xl md:text-right group-hover:text-[#B8960C] transition-colors" style={{ fontFamily: "var(--font-cormorant)" }}>
-                        {item.groomName || "N/A"} & {item.brideName || "N/A"}
-                      </span>
-                    </li>
-                  );
-                })
-              ) : (
-                <li className="pb-6 border-b border-[#EDE8DF] flex flex-col justify-center gap-2 group">
-                  <span className="font-bold text-[#3D2B1F] text-lg text-center opacity-60 italic" style={{ fontFamily: "var(--font-cormorant)" }}>Belum ada pengumuman perkawinan dalam waktu dekat.</span>
-                </li>
-              )}
-            </ul>
+            <WeddingAnnouncementsClient weddings={allStage5Weddings} />
             
             <div className="mt-10">
               <Link href="/daftar" className="inline-flex items-center text-[#B8960C] font-bold tracking-wider uppercase text-sm hover:underline gap-2">
